@@ -1,0 +1,13 @@
+*.iml
+.gradle/
+.idea/
+.kotlin/
+build/
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+**/build/
+# The official wrapper JAR can be downloaded with scripts/bootstrap-gradle-wrapper.ps1.
+# Keep locally generated/oversized wrapper artifacts out of the repository.
+gradle/wrapper/gradle-wrapper.jar
