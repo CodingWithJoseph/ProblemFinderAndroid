@@ -1,0 +1,37 @@
+package com.example.problemfinder.core.mvi
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+
+/**
+ * Owns only reusable stream plumbing. Feature-specific reduction and side effects stay in each feature.
+ */
+abstract class MviViewModel<Intent, State, Effect>(initialState: State) :
+    ViewModel(),
+    MviStore<Intent, State, Effect> {
+
+    private val mutableState = MutableStateFlow(initialState)
+    private val effectChannel = Channel<Effect>(capacity = Channel.BUFFERED)
+
+    final override val state: StateFlow<State> = mutableState.asStateFlow()
+    final override val effects: Flow<Effect> = effectChannel.receiveAsFlow()
+
+    protected fun reduce(transform: State.() -> State) {
+        mutableState.update(transform)
+    }
+
+    protected fun sendEffect(effect: Effect) {
+        viewModelScope.launch {
+            effectChannel.send(effect)
+        }
+    }
+}
+
