@@ -1,18 +1,25 @@
 [versions]
-agp = "9.2.0"
-kotlin = "2.4.10"
+agp = "9.3.3"
+kotlin = "2.4.20"
 ksp = "2.3.10"
-hilt = "2.57.1"
+hilt = "2.60.1"
+supabase = "3.8.0"
+ktor = "3.5.1"
 androidx-hilt = "1.4.0"
-androidx-core = "1.18.0"
+androidx-core = "1.19.1"
 androidx-activity = "1.13.0"
 androidx-lifecycle = "2.11.0"
-androidx-navigation = "2.10.0"
-compose-bom = "2026.08.00"
+androidx-navigation = "2.10.2"
+compose-bom = "2026.09.00"
 coroutines = "1.11.0"
 junit4 = "4.13.2"
+ui-tooling-preview = "1.12.1"
+ui-tooling = "1.12.1"
 
 [libraries]
+supabase-auth = { module = "io.github.jan-tennert.supabase:auth-kt" }
+supabase-bom = { module = "io.github.jan-tennert.supabase:bom", version.ref = "supabase" }
+ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
@@ -32,6 +39,8 @@ hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.re
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 junit4 = { module = "junit:junit", version.ref = "junit4" }
+androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview", version.ref = "ui-tooling-preview" }
+androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "ui-tooling" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -1,5 +1,5 @@
 param(
-    [string]$GradleVersion = "9.4.1"
+    [string]$GradleVersion = "9.5.0"
 )
 
 $ErrorActionPreference = "Stop"

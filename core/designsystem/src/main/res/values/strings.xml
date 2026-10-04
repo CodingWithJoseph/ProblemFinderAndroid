@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="logo_immensity">Immensity Logo</string>
+    <string name="wordmark_immensity">immensity</string>
+    <string name="icon_forward_arrow">icon forward arrow</string>
+    <string name="icon_airplane">icon airplane</string>
+</resources>
