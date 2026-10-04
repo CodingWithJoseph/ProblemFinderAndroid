@@ -7,7 +7,7 @@ This repository is an intentionally incomplete Android foundation. It sets up mo
 - Android Studio with JDK 17 or newer
 - Android SDK Platform 37
 - Android SDK Build Tools 36.0.0+
-- Gradle 9.4.1 (the wrapper metadata is pinned; if `gradle/wrapper/gradle-wrapper.jar` is absent, run `powershell -ExecutionPolicy Bypass -File scripts/bootstrap-gradle-wrapper.ps1` or `gradle wrapper` once)
+- Gradle 9.5.0 (the wrapper metadata is pinned; if `gradle/wrapper/gradle-wrapper.jar` is absent, run `powershell -ExecutionPolicy Bypass -File scripts/bootstrap-gradle-wrapper.ps1` or `gradle wrapper` once)
 
 ## Modules
 
@@ -17,12 +17,6 @@ core:model                  Shared, dependency-free domain models
 core:common                 Cross-cutting contracts such as dispatcher policy
 core:mvi                    Reusable MVI contracts and lifecycle plumbing
 core:designsystem           Compose theme and reusable UI primitives
-data:problems-api           Repository abstraction
-data:problems-impl          Data implementation seam and Hilt binding
-domain:problems-api         Use-case abstractions consumed by features
-domain:problems-impl        Use-case implementation seam and Hilt binding
-feature:problemfinder-api   Public route/navigation contract
-feature:problemfinder-impl  MVI contract, ViewModel, and Compose entry point
 ```
 
 Dependency direction is inward toward contracts:

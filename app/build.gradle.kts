@@ -57,16 +57,17 @@ android {
 
 dependencies {
     implementation(project(":core:designsystem"))
-    implementation(project(":data:problems-impl"))
-    implementation(project(":domain:problems-impl"))
-    implementation(project(":feature:problemfinder-api"))
-    implementation(project(":feature:problemfinder-impl"))
+    implementation(project(":data:authentication:auth-impl"))
+    implementation(project(":domain:authentication:auth-impl"))
+    implementation(project(":feature:authentication:auth-impl"))
+    implementation(project(":feature:problems:problems-impl"))
 
-
+    implementation(libs.hilt.android)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation.compose)
-    implementation(libs.hilt.android)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+
     implementation(platform(libs.supabase.bom))
     implementation(libs.supabase.auth)
     implementation(libs.ktor.client.android)
@@ -78,5 +79,10 @@ dependencies {
 
     ksp(libs.hilt.compiler)
     testImplementation(libs.junit4)
+
+    implementation(project(":domain:authentication:auth-api"))
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
+    implementation(libs.coroutines.core)
 }
 

@@ -13,6 +13,8 @@ androidx-navigation = "2.10.2"
 compose-bom = "2026.09.00"
 coroutines = "1.11.0"
 junit4 = "4.13.2"
+ui-tooling-preview = "1.12.1"
+ui-tooling = "1.12.1"
 
 [libraries]
 supabase-auth = { module = "io.github.jan-tennert.supabase:auth-kt" }
@@ -37,6 +39,8 @@ hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.re
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 junit4 = { module = "junit:junit", version.ref = "junit4" }
+androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview", version.ref = "ui-tooling-preview" }
+androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "ui-tooling" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

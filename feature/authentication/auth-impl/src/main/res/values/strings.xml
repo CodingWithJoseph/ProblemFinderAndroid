@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="auth_sign_in">Sign in</string>
+    <string name="auth_sign_up">Sign up</string>
+    <string name="auth_create_account">Create account</string>
+    <string name="auth_forgot_password">Forgot password</string>
+    <string name="auth_reset_password">Reset password</string>
+    <string name="auth_submit">Submit</string>
+    <string name="auth_first_name_label">First name</string>
+    <string name="auth_last_name_label">Last name</string>
+    <string name="auth_email_label">Email</string>
+    <string name="auth_password_label">Password</string>
+    <string name="auth_new_password_label">New Password</string>
+    <string name="auth_confirm_password_label">Confirm password</string>
+    <string name="auth_existing_account_sign_in">Already have an account? Sign in</string>
+    <string name="auth_new_user_create_account">New to Immensity? <b>Create an account</b></string>
+    <string name="auth_error_email_password_required">Enter your email and password.</string>
+    <string name="auth_error_all_fields_required">Complete all fields.</string>
+    <string name="auth_error_email_required">Enter your email.</string>
+    <string name="auth_error_new_password_required">Enter and confirm your new password.</string>
+    <string name="auth_error_invalid_credentials">Email or password is incorrect.</string>
+    <string name="auth_error_invalid_email">Enter a valid email address.</string>
+    <string name="auth_error_invalid_password">Choose a stronger password and try again.</string>
+    <string name="auth_error_password_mismatch">Passwords do not match.</string>
+    <string name="auth_error_network">Check your connection and try again.</string>
+    <string name="auth_error_sign_in_unknown">Could not sign in. Please try again.</string>
+    <string name="auth_error_sign_up_unknown">Could not create your account. Please try again.</string>
+    <string name="auth_error_reset_email_unknown">Could not send a password reset email. Please try again.</string>
+    <string name="auth_error_reset_password_unknown">Could not reset your password. Please try again.</string>
+    <string name="auth_signup_confirmation_inline">Check your email for a confirmation link. Then sign in.</string>
+    <string name="auth_reset_email_inline">If an account exists for this email, check your inbox for a reset link.</string>
+    <string name="auth_check_email_title">Check your email</string>
+    <string name="auth_signup_email_sent_message">If this email can be registered, you will receive a confirmation link. Open it, then sign in.</string>
+    <string name="auth_reset_email_sent_message">If an account exists for this email, you will receive a password reset link.</string>
+    <string name="auth_back_to_sign_in">Back to sign in</string>
+    <string name="auth_error_email_not_confirmed">Confirm your email before signing in.</string>
+    <string name="auth_error_account_unavailable">This account cannot sign in. Contact support if you need help.</string>
+    <string name="auth_error_account_already_exists">Could not create this account. Try signing in instead.</string>
+    <string name="auth_error_reauthentication_required">Please sign in again to continue.</string>
+    <string name="auth_error_invalid_input">Check the information you entered and try again.</string>
+    <string name="auth_error_same_password">Choose a password you have not used for this account.</string>
+    <string name="auth_error_rate_limited">Too many attempts. Wait a moment and try again.</string>
+    <string name="auth_error_email_rate_limited">Too many emails requested. Wait a moment and try again.</string>
+    <string name="auth_error_session_expired">Your session expired. Please sign in again.</string>
+    <string name="auth_error_auth_unavailable">Authentication is temporarily unavailable. Try again later.</string>
+    <string name="auth_error_reset_link_expired">This reset link expired. Request a new one.</string>
+    <string name="auth_sign_in_greeting">Welcome Back</string>
+    <string name="auth_sign_in_headline">Find the problem\nworth solving.</string>
+    <string name="auth_sign_in_description">Sign in to continue exploring evidence-backed opportunities.</string>
+
+    <string name="auth_secure_your_account">Secure your account</string>
+    <string name="auth_fresh_start">A fresh start.</string>
+    <string name="auth_update_password">Update password</string>
+    <string name="auth_choose_new_password">Choose a new password for your Immensity account.</string>
+
+    <string name="auth_account_recovery">Account recovery</string>
+    <string name="auth_help_get_back_in">We\'ll help you \nget back in.</string>
+    <string name="auth_enter_your_email_description">Enter your email and we\'ll send a link to reset your password</string>
+    <string name="auth_remember_sign_in">Remember your password? Sign in.</string>
+    <string name="auth_send_reset_email">Send reset email</string>
+
+
+    <string name="auth_one_more_step">One more step</string>
+    <string name="auth_check_your_inbox">Check your inbox.</string>
+    <string name="auth_link_arrival_time">This link may take a minute to arrive. Check your spam folder too.</string>
+    <string name="auth_signup_eyebrow">Start exploring</string>
+    <string name="auth_signup_headline">Good ideas begin with real problems.</string>
+    <string name="auth_signup_title">Create your account</string>
+    <string name="auth_signup_description">Join the search for opportunities backed by real signals.</string>
+
+    <string name="auth_first_name_hint">First name</string>
+    <string name="auth_last_name_hint">Last name</string>
+    <string name="auth_email_hint">you@example.com</string>
+    <string name="auth_signup_password_hint">Create a password</string>
+
+    <string name="auth_existing_account_prompt">Already have an account?</string>
+    <string name="auth_signup_continue">Continue</string>
+    <string name="auth_signup_profile_eyebrow">One more step</string>
+    <string name="auth_signup_profile_headline">Make it yours.</string>
+    <string name="auth_signup_profile_title">What should we call you?</string>
+    <string name="auth_signup_profile_description">Add your name to finish creating your Immensity account.</string>
+    <string name="auth_signup_back_to_details">Back to account details</string>
+</resources>
