@@ -56,12 +56,22 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:mvi"))
     implementation(project(":core:designsystem"))
     implementation(project(":data:authentication:auth-impl"))
     implementation(project(":domain:authentication:auth-impl"))
+    implementation(project(":domain:authentication:auth-api"))
     implementation(project(":feature:authentication:auth-impl"))
-    implementation(project(":feature:problems:problems-impl"))
-
+    implementation(project(":feature:authentication:auth-api"))
+    implementation(project(":feature:browse:browse-api"))
+    implementation(project(":feature:builds:builds-api"))
+    implementation(project(":feature:projects:projects-api"))
+    implementation(project(":feature:search:search-api"))
+    implementation(project(":feature:browse:browse-impl"))
+    implementation(project(":feature:builds:builds-impl"))
+    implementation(project(":feature:projects:projects-impl"))
+    implementation(project(":feature:search:search-impl"))
+    implementation(project(":feature:settings:settings-impl"))
     implementation(libs.hilt.android)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
@@ -80,7 +90,6 @@ dependencies {
     ksp(libs.hilt.compiler)
     testImplementation(libs.junit4)
 
-    implementation(project(":domain:authentication:auth-api"))
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.coroutines.core)
