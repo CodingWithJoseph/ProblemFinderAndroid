@@ -2,5 +2,16 @@
     <string name="app_name">Immensity</string>
     <string name="auth_link_open_failed">This authentication link could not be opened. Request a new one.</string>
 
+    <string name="top_app_bar_nav_icon">Icon Account</string>
+    <string name="menu_item_settings">Settings</string>
+    <string name="menu_item_sign_out">Sign Out</string>
+
+    <string name="tab_label_browse">Browse</string>
+    <string name="tab_label_search">Search</string>
+    <string name="tab_label_projects">Projects</string>
+    <string name="tab_label_builds">Build</string>
+
+    <string name="sign_out_failed">Couldn’t sign out. Please try again.</string>
+    <string name="retry_label">Retry</string>
 </resources>
 

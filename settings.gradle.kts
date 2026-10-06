@@ -36,5 +36,17 @@ include(":domain:authentication:auth-impl")
 include(":feature:authentication:auth-api")
 include(":feature:authentication:auth-impl")
 
-include(":feature:problems:problems-api")
-include(":feature:problems:problems-impl")
+include(":feature:browse:browse-api")
+include(":feature:browse:browse-impl")
+
+include(":feature:search:search-api")
+include(":feature:search:search-impl")
+
+include(":feature:builds:builds-api")
+include(":feature:builds:builds-impl")
+
+include(":feature:projects:projects-api")
+include(":feature:projects:projects-impl")
+
+include(":feature:settings:settings-api")
+include(":feature:settings:settings-impl")
