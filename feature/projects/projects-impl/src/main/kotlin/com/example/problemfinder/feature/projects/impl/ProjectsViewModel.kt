@@ -6,7 +6,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProjectsViewModel @Inject constructor(): BaseMVIViewModel<ProjectsIntent, ProjectsState, ProjectsEffect>(ProjectsState()){
-    override fun onIntent(intent: ProjectsIntent) {
-        TODO("Not yet implemented")
-    }
+    override fun onIntent(intent: ProjectsIntent) {}
+    override fun onError(error: Throwable) {}
 }

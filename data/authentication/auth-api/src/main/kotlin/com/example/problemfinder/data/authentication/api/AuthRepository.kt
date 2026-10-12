@@ -1,6 +1,6 @@
 package com.example.problemfinder.data.authentication.api
 
-import com.example.problemfinder.core.model.AuthUser
+import com.example.problemfinder.core.model.auth.AuthUser
 
 interface AuthRepository {
     suspend fun signIn(email: String, password: String): AuthUser

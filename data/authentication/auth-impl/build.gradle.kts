@@ -20,6 +20,7 @@ android {
 
 dependencies {
     api(project(":data:authentication:auth-api"))
+
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 

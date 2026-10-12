@@ -7,4 +7,5 @@ import javax.inject.Inject
 @HiltViewModel
 class BuildsViewModel @Inject constructor(): BaseMVIViewModel<BuildsIntent, BuildsState, BuildsEffect>(BuildsState()){
     override fun onIntent(intent: BuildsIntent) {}
+    override fun onError(error: Throwable) {}
 }

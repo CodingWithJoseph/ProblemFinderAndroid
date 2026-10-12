@@ -1,7 +1,7 @@
 package com.example.problemfinder.feature.authentication.impl
 
 import androidx.annotation.StringRes
-import com.example.problemfinder.core.model.AuthFailure
+import com.example.problemfinder.core.model.auth.AuthFailure
 
 sealed interface AuthUIError {
     data class Service(val failure: AuthFailure): AuthUIError

@@ -1,18 +1,29 @@
 package com.example.problemfinder.app.navigation
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -25,6 +36,7 @@ import com.example.problemfinder.app.ApplicationEffect
 import com.example.problemfinder.app.ApplicationIntent
 import com.example.problemfinder.app.ApplicationViewModel
 import com.example.problemfinder.app.R
+import com.example.problemfinder.core.mvi.RequestState
 import com.example.problemfinder.feature.authentication.api.AuthDestinations
 import com.example.problemfinder.feature.authentication.impl.authentication
 import com.example.problemfinder.feature.browse.api.BrowseDestination
@@ -39,9 +51,9 @@ import com.example.problemfinder.feature.settings.api.SettingsDestination
 import com.example.problemfinder.feature.settings.impl.settings
 import io.github.jan.supabase.auth.status.SessionStatus
 
-private const val STARTUP_ROUTE = "startup"
+internal const val STARTUP_ROUTE = "startup"
 
-private val signedInRoutes = setOf(
+internal val signedInRoutes = setOf(
     BrowseDestination.ROUTE,
     SearchDestination.ROUTE,
     ProjectsDestination.ROUTE,
@@ -54,13 +66,34 @@ enum class LinkDestination {
     HOME
 }
 
-fun NavGraphBuilder.startup() {
+fun NavGraphBuilder.startup(
+    accountRequest: RequestState<String?, Unit>,
+    onRetry: () -> Unit,
+) {
     composable(STARTUP_ROUTE) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
+        BoxWithConstraints(Modifier.fillMaxSize()) {
+            val viewportHeight = maxHeight
+            Column(
+                modifier = Modifier.fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .heightIn(min = viewportHeight)
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                if (accountRequest is RequestState.Error) {
+                    Text(
+                        stringResource(R.string.session_restore_failed),
+                        textAlign = TextAlign.Center,
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    TextButton(onClick = onRetry) {
+                        Text(stringResource(R.string.retry_label))
+                    }
+                } else {
+                    CircularProgressIndicator()
+                }
+            }
         }
     }
 }
@@ -84,6 +117,8 @@ fun AppNavigation(
     val retryLabel = stringResource(R.string.retry_label)
 
     fun navigateToRoot(route: String) {
+        if (navController.currentDestination?.route == route) return
+
         navController.navigate(route) {
             popUpTo(navController.graph.id) {
                 inclusive = false
@@ -100,8 +135,9 @@ fun AppNavigation(
         snackbarHost = snackbarHostState,
         showAppChrome = showChromeApp,
         selectedTab = selectedTab,
-        onTabSelected = {
-            navController.navigate(it.route) {
+        onTabSelected = { tab ->
+            navController.navigate(tab.route) {
+                popUpTo(BrowseDestination.ROUTE)
                 launchSingleTop = true
             }
         },
@@ -121,7 +157,11 @@ fun AppNavigation(
                 startDestination = STARTUP_ROUTE,
                 modifier = Modifier.padding(padding)
             ) {
-                startup()
+                startup(
+                    accountRequest = state.accountRequest,
+                    onRetry = { viewmodel.onIntent(ApplicationIntent.RetryAccountRead) },
+                )
+
                 authentication(
                     onSignedIn = {
                         navigateToRoot(BrowseDestination.ROUTE)
@@ -171,36 +211,18 @@ fun AppNavigation(
         }
     )
 
-    LaunchedEffect(sessionStatus, linkDestination, currentRoute, viewmodel) {
+    LaunchedEffect(sessionStatus, state.accountRequest, linkDestination, currentRoute) {
+        val nextRoute = resolveRootRoute(
+            sessionStatus = sessionStatus,
+            accountRequest = state.accountRequest,
+            linkDestination = linkDestination,
+            currentRoute = currentRoute,
+        )
 
-        val nextRoute = when {
-            linkDestination == LinkDestination.RESET_PASSWORD -> AuthDestinations.RESET_PASSWORD
-            linkDestination == LinkDestination.HOME -> BrowseDestination.ROUTE
+        if (nextRoute != null) navigateToRoot(nextRoute)
 
-            currentRoute == STARTUP_ROUTE -> when (sessionStatus) {
-                is SessionStatus.Authenticated -> BrowseDestination.ROUTE
-                is SessionStatus.NotAuthenticated -> AuthDestinations.SIGN_IN
-                is SessionStatus.RefreshFailure -> AuthDestinations.SIGN_IN
-                SessionStatus.Initializing -> null
-            }
-
-            (sessionStatus is SessionStatus.NotAuthenticated || sessionStatus is SessionStatus.RefreshFailure) &&
-                (
-                    currentRoute in signedInRoutes || currentRoute == AuthDestinations.RESET_PASSWORD
-                    ) -> AuthDestinations.SIGN_IN
-
-            else -> null
-        }
-
-        if (nextRoute != null && nextRoute != currentRoute) {
-            navigateToRoot(nextRoute)
-        }
-
-        if (linkDestination != null) {
-            onLinkDestinationConsumed()
-        }
+        if (linkDestination != null) onLinkDestinationConsumed()
     }
-
 
     LaunchedEffect(viewmodel) {
         viewmodel.effects.collect {
