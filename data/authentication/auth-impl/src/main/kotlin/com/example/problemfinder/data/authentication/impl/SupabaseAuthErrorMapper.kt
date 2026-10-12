@@ -1,6 +1,6 @@
 package com.example.problemfinder.data.authentication.impl
 
-import com.example.problemfinder.core.model.AuthFailure
+import com.example.problemfinder.core.model.auth.AuthFailure
 import io.github.jan.supabase.auth.exception.AuthErrorCode
 import io.github.jan.supabase.auth.exception.AuthRestException
 import kotlinx.io.IOException

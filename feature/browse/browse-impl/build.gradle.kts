@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -25,7 +26,9 @@ android {
 
 dependencies {
     api(project(":feature:browse:browse-api"))
+    api(project(":domain:browse:browse-api"))
     implementation(project(":core:designsystem"))
+    implementation(project(":core:model"))
     implementation(project(":core:mvi"))
 
     implementation(libs.androidx.lifecycle.runtime.compose)
@@ -42,4 +45,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
 
     ksp(libs.hilt.compiler)
+
+    testImplementation(libs.junit4)
+    testImplementation(libs.coroutines.test)
 }

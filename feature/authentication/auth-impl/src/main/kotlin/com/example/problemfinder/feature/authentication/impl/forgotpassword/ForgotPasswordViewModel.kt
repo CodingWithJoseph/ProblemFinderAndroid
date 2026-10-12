@@ -1,20 +1,19 @@
 package com.example.problemfinder.feature.authentication.impl.forgotpassword
 
-import androidx.lifecycle.viewModelScope
-import com.example.problemfinder.core.model.AuthFailure
-import com.example.problemfinder.core.model.AuthOperationException
+import com.example.problemfinder.core.model.auth.AuthFailure
+import com.example.problemfinder.core.model.auth.AuthOperationException
 import com.example.problemfinder.core.mvi.BaseMVIViewModel
-import com.example.problemfinder.domain.authentication.api.AuthUseCases
+import com.example.problemfinder.domain.authentication.api.ForgotPasswordUseCase
 import com.example.problemfinder.feature.authentication.impl.AuthUIError
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class ForgotPasswordViewModel @Inject constructor(
-    private val authUseCases: AuthUseCases
-) : BaseMVIViewModel<ForgotPasswordIntent, ForgotPasswordState, ForgotPasswordEffect>(ForgotPasswordState()) {
+    private val forgotPasswordUseCase: ForgotPasswordUseCase
+) : BaseMVIViewModel<ForgotPasswordIntent, ForgotPasswordState, ForgotPasswordEffect>(
+    ForgotPasswordState()
+) {
     override fun onIntent(intent: ForgotPasswordIntent) {
         when (intent) {
             is ForgotPasswordIntent.EmailChanged -> reduce {
@@ -26,31 +25,38 @@ class ForgotPasswordViewModel @Inject constructor(
         }
     }
 
-    private fun submit() {
-        if (state.value.isLoading) return
+    private fun submit() = safeLaunch {
+        if (state.value.isLoading) return@safeLaunch
 
         val email = state.value.email.trim()
 
         if (email.isBlank()) {
             reduce { copy(error = AuthUIError.Validation.EMAIL_REQUIRED) }
-            return
+            return@safeLaunch
         }
 
         reduce { copy(isLoading = true, error = null) }
 
-        viewModelScope.launch {
-            try {
-                authUseCases.forgotPassword(email = email)
-                sendEffect(ForgotPasswordEffect.EmailSent)
-            } catch (cancelled: CancellationException) {
-                throw cancelled
-            } catch (exception: AuthOperationException) {
-                reduce { copy(error = AuthUIError.Service(exception.failure)) }
-            } catch (_: Exception) {
-                reduce { copy(error = AuthUIError.Service(AuthFailure.UNKNOWN)) }
-            } finally {
-                reduce { copy(isLoading = false) }
-            }
+        try {
+            forgotPasswordUseCase(ForgotPasswordUseCase.Params(email))
+            sendEffect(ForgotPasswordEffect.EmailSent)
+        } finally {
+            reduce { copy(isLoading = false) }
         }
+    }
+
+    override fun onError(error: Throwable) {
+        when (error) {
+            is AuthOperationException -> handleAuthException(error)
+            else -> handleUnknownException()
+        }
+    }
+
+    private fun handleAuthException(e: AuthOperationException) = reduce {
+        copy(error = AuthUIError.Service(e.failure))
+    }
+
+    private fun handleUnknownException() = reduce {
+        copy(error = AuthUIError.Service(AuthFailure.UNKNOWN))
     }
 }

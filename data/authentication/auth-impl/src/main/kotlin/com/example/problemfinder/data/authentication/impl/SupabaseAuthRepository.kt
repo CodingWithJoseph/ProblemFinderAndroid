@@ -1,6 +1,6 @@
 package com.example.problemfinder.data.authentication.impl
-import com.example.problemfinder.core.model.AuthOperationException
-import com.example.problemfinder.core.model.AuthUser
+import com.example.problemfinder.core.model.auth.AuthOperationException
+import com.example.problemfinder.core.model.auth.AuthUser
 import com.example.problemfinder.data.authentication.api.AuthRepository
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth

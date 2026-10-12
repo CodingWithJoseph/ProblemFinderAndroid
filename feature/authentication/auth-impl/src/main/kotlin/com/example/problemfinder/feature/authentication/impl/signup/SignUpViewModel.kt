@@ -1,19 +1,16 @@
 package com.example.problemfinder.feature.authentication.impl.signup
 
-import androidx.lifecycle.viewModelScope
-import com.example.problemfinder.core.model.AuthFailure
-import com.example.problemfinder.core.model.AuthOperationException
+import com.example.problemfinder.core.model.auth.AuthFailure
+import com.example.problemfinder.core.model.auth.AuthOperationException
 import com.example.problemfinder.core.mvi.BaseMVIViewModel
-import com.example.problemfinder.domain.authentication.api.AuthUseCases
+import com.example.problemfinder.domain.authentication.api.SignUpUseCase
 import com.example.problemfinder.feature.authentication.impl.AuthUIError
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class SignUpViewModel @Inject constructor(
-    private val authUseCases: AuthUseCases
+    private val signUpUseCase: SignUpUseCase
 ) : BaseMVIViewModel<SignUpIntent, SignUpState, SignUpEffect>(SignUpState()) {
     override fun onIntent(intent: SignUpIntent) {
         when (intent) {
@@ -61,8 +58,8 @@ class SignUpViewModel @Inject constructor(
         }
     }
 
-    private fun submit() {
-        if (state.value.isLoading || state.value.step != SignUpStep.PROFILE) return
+    private fun submit() = safeLaunch {
+        if (state.value.isLoading || state.value.step != SignUpStep.PROFILE) return@safeLaunch
 
         val firstname = state.value.firstname.trim()
         val lastname = state.value.lastname.trim()
@@ -71,32 +68,41 @@ class SignUpViewModel @Inject constructor(
 
         if (firstname.isBlank() || lastname.isBlank()) {
             reduce { copy(error = AuthUIError.Validation.ALL_FIELDS_REQUIRED) }
-            return
+            return@safeLaunch
         }
 
         reduce { copy(isLoading = true, error = null) }
 
-        viewModelScope.launch {
-            try {
-                authUseCases.createAccount(
+        try {
+            signUpUseCase(
+                SignUpUseCase.Params(
                     firstname = firstname,
                     lastname = lastname,
                     email = email,
                     password = password
                 )
+            )
 
-                reduce { copy(password = "") }
-                sendEffect(SignUpEffect.EmailSent)
-            } catch (cancelled: CancellationException) {
-                throw cancelled
-            } catch (exception: AuthOperationException) {
-                reduce { copy(error = AuthUIError.Service(exception.failure)) }
-            } catch (_: Exception) {
-                reduce { copy(error = AuthUIError.Service(AuthFailure.UNKNOWN)) }
-            } finally {
-                reduce { copy(isLoading = false) }
-            }
+            reduce { copy(password = "") }
+            sendEffect(SignUpEffect.EmailSent)
+        } finally {
+            reduce { copy(isLoading = false) }
         }
+    }
+
+    override fun onError(error: Throwable) {
+        when (error) {
+            is AuthOperationException -> handleAuthException(error)
+            else -> handleUnknownException()
+        }
+    }
+
+    private fun handleAuthException(e: AuthOperationException) = reduce {
+        copy(error = AuthUIError.Service(e.failure))
+    }
+
+    private fun handleUnknownException() = reduce {
+        copy(error = AuthUIError.Service(AuthFailure.UNKNOWN))
     }
 
     private companion object {

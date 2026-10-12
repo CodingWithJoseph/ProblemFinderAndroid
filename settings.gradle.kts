@@ -29,13 +29,15 @@ include(":core:mvi")
 
 include(":data:authentication:auth-api")
 include(":data:authentication:auth-impl")
-
 include(":domain:authentication:auth-api")
 include(":domain:authentication:auth-impl")
-
 include(":feature:authentication:auth-api")
 include(":feature:authentication:auth-impl")
 
+include(":data:browse:browse-api")
+include(":data:browse:browse-impl")
+include(":domain:browse:browse-api")
+include(":domain:browse:browse-impl")
 include(":feature:browse:browse-api")
 include(":feature:browse:browse-impl")
 

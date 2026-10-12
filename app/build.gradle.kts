@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.room) apply false
 }
 
 val localProperties = Properties().apply {
@@ -58,19 +60,29 @@ android {
 dependencies {
     implementation(project(":core:mvi"))
     implementation(project(":core:designsystem"))
+
     implementation(project(":data:authentication:auth-impl"))
     implementation(project(":domain:authentication:auth-impl"))
     implementation(project(":domain:authentication:auth-api"))
     implementation(project(":feature:authentication:auth-impl"))
     implementation(project(":feature:authentication:auth-api"))
+
     implementation(project(":feature:browse:browse-api"))
-    implementation(project(":feature:builds:builds-api"))
-    implementation(project(":feature:projects:projects-api"))
-    implementation(project(":feature:search:search-api"))
     implementation(project(":feature:browse:browse-impl"))
+    implementation(project(":domain:browse:browse-impl"))
+    implementation(project(":domain:browse:browse-api"))
+    implementation(project(":data:browse:browse-impl"))
+    implementation(project(":data:browse:browse-api"))
+
+    implementation(project(":feature:builds:builds-api"))
     implementation(project(":feature:builds:builds-impl"))
+
+    implementation(project(":feature:projects:projects-api"))
     implementation(project(":feature:projects:projects-impl"))
+
+    implementation(project(":feature:search:search-api"))
     implementation(project(":feature:search:search-impl"))
+
     implementation(project(":feature:settings:settings-impl"))
     implementation(libs.hilt.android)
     implementation(libs.androidx.core.ktx)
@@ -89,6 +101,7 @@ dependencies {
 
     ksp(libs.hilt.compiler)
     testImplementation(libs.junit4)
+    testImplementation(libs.coroutines.test)
 
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)

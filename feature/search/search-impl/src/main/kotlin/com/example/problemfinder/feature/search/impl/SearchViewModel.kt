@@ -6,7 +6,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(): BaseMVIViewModel<SearchIntent, SearchState, SearchEffect>(SearchState()){
-    override fun onIntent(intent: SearchIntent) {
-        TODO("Not yet implemented")
-    }
+    override fun onIntent(intent: SearchIntent) {}
+    override fun onError(error: Throwable) {}
 }
