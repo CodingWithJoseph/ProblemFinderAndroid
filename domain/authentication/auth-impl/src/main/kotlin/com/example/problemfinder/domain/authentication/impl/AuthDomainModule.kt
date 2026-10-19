@@ -11,6 +11,10 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 
 
+/**
+ * Binds feature-facing use-case contracts to repository delegates. Form validation stays in the
+ * feature ViewModels; these implementations forward parameters and propagate repository failures.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class AuthDomainModule {

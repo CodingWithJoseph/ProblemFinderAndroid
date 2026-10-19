@@ -6,6 +6,7 @@ import java.time.format.FormatStyle
 import java.util.Locale
 import kotlin.time.Instant
 
+/** Formats the instant in the supplied local zone; its displayed calendar date may differ from UTC. */
 internal fun Instant.toOpportunityDateLabel(locale: Locale, zone: ZoneId): String {
     val javaInstant = java.time.Instant.ofEpochSecond(
         epochSeconds,
@@ -16,6 +17,7 @@ internal fun Instant.toOpportunityDateLabel(locale: Locale, zone: ZoneId): Strin
         .format(javaInstant.atZone(zone))
 }
 
+/** Uses the localized medium date up to its first comma; locales without commas keep the full label. */
 internal fun Instant.toOpportunityDateLabelCompact(locale: Locale, zone: ZoneId): String {
     val javaInstant = java.time.Instant.ofEpochSecond(
         epochSeconds,

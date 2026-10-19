@@ -4,6 +4,10 @@ import androidx.room3.Entity
 import androidx.room3.ForeignKey
 import androidx.room3.Index
 
+/**
+ * A card's position within its owning collection. category identifies the collection, not necessarily
+ * the card's classification; the same card can belong to several collections through separate rows.
+ */
 @Entity(
     tableName = "discovery_collection_items",
     primaryKeys = ["userId", "category", "clusterId"],

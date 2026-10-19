@@ -17,12 +17,17 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.distinctUntilChanged
 import javax.inject.Inject
 
+/**
+ * Stores query membership/order separately from shared opportunity content. A query is identified
+ * by account, category, and sort; refreshing one query leaves other queries' memberships intact.
+ */
 class BrowseLocalDataSource @Inject constructor(
     private val database: OpportunitiesDatabase,
     private val dao: BrowseDao,
     private val opportunityDao: OpportunityDao
 ) {
 
+    /** Replaces all loaded membership for this query, including pages appended to its old first page. */
     suspend fun replaceFirstPage(
         userId: String,
         category: OpportunityCategoryFilter,
@@ -31,6 +36,7 @@ class BrowseLocalDataSource @Inject constructor(
     ) {
         val categoryKey = category.name
         val sortKey = sortType.name
+        // Keep the first occurrence and its server order when a page repeats an opportunity ID.
         val clusters = page.clusters.distinctBy { it.id }
 
         val clusterEntities = clusters.map {
@@ -55,6 +61,7 @@ class BrowseLocalDataSource @Inject constructor(
             )
         }
 
+        // Content, order, and cursor become visible together, or roll back together on failure.
         database.withWriteTransaction {
             dao.upsertQuery(query)
             opportunityDao.upsertOpportunities(clusterEntities)
@@ -63,6 +70,7 @@ class BrowseLocalDataSource @Inject constructor(
         }
     }
 
+    /** Reconstructs the query snapshot; a saved empty query still has hasSynced=true. */
     fun observeBrowse(
         userId: String,
         category: OpportunityCategoryFilter,
@@ -83,6 +91,10 @@ class BrowseLocalDataSource @Inject constructor(
             .distinctUntilChanged()
 
 
+    /**
+     * Applies a page only if [expectedCursor] still matches the stored query. Returns false for a
+     * stale response without changing content; duplicate cards update content but keep their position.
+     */
     suspend fun appendPage(
         userId: String,
         category: OpportunityCategoryFilter,
@@ -98,6 +110,7 @@ class BrowseLocalDataSource @Inject constructor(
         return database.withWriteTransaction {
             val query = dao.getQuery(userId, categoryKey, sortKey)
 
+            // Recheck inside the write transaction, even when the repository already checked.
             if (
                 query == null ||
                 !query.hasSynced ||
@@ -132,6 +145,7 @@ class BrowseLocalDataSource @Inject constructor(
                     )
                 }
 
+            // Even an empty or duplicate-only page must advance the cursor to avoid refetching it.
             opportunityDao.upsertOpportunities(clusterEntities)
             dao.insertQueryItems(newItems)
             dao.upsertQuery(query.copy(nextCursor = page.nextCursor))
@@ -140,6 +154,7 @@ class BrowseLocalDataSource @Inject constructor(
         }
     }
 
+    /** Reads pagination metadata for exactly one account/filter/sort combination. */
     suspend fun getQuery(
         userId: String,
         category: OpportunityCategoryFilter,

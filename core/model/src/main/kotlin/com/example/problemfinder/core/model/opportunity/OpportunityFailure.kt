@@ -1,5 +1,6 @@
 package com.example.problemfinder.core.model.opportunity
 
+/** Stable failure categories shared by repositories and UI without exposing HTTP/Room types. */
 enum class OpportunityFailure {
     NETWORK,
     SESSION_UNAVAILABLE,

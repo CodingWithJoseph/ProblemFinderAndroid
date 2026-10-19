@@ -145,10 +145,12 @@ private val DarkFeaturePalette = OpportunityPalette(
     removeContent = Color(0xFFFFAC83),
 )
 
+/** Shared neutral card/action colors chosen from the current system theme. */
 @Composable
 fun opportunityPalette(): OpportunityPalette =
     if (isSystemInDarkTheme()) DarkOpportunityPalette else LightOpportunityPalette
 
+/** Featured-card treatment uses the same color roles as regular cards with stronger emphasis. */
 @Composable
 fun featurePalette(): OpportunityPalette =
     if (isSystemInDarkTheme()) DarkFeaturePalette else LightFeaturePalette

@@ -57,6 +57,7 @@ private fun BuildsScreenStandardPreview() = ImmensityTheme {
 }
 
 
+/** Placeholder tab content; the title does not represent an implemented builds workflow. */
 @Composable
 fun BuildsScreen(
     modifier: Modifier = Modifier,

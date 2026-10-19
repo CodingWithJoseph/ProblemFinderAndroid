@@ -3,6 +3,7 @@ package com.example.problemfinder.feature.authentication.impl.signup
 import com.example.problemfinder.feature.authentication.impl.AuthUIError
 
 
+/** Steps share one navigation destination; switching steps preserves the ViewModel's form fields. */
 enum class SignUpStep { CREDENTIALS, PROFILE }
 
 data class SignUpState(

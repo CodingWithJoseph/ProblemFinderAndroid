@@ -13,6 +13,10 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import javax.inject.Inject
 
+/**
+ * Coordinates the account's cached dashboard, explicit refreshes, and per-opportunity watch actions.
+ * Cache observation owns the cards and sync metadata; operation completion only changes request state.
+ */
 @HiltViewModel
 class DiscoveryViewModel @Inject constructor(
     private val observeDiscoveryUseCase: ObserveDiscoveryUseCase,
@@ -26,6 +30,7 @@ class DiscoveryViewModel @Inject constructor(
     private var watchVersion = 0L
     private var observationJob: Job? = null
     private var refreshJob: Job? = null
+    // A late result from cancelled work must not finish a newer account's refresh.
     private var refreshVersion: Long = 0L
 
     override fun onIntent(intent: DiscoveryIntent) {
@@ -47,6 +52,7 @@ class DiscoveryViewModel @Inject constructor(
         }
     }
 
+    /** Starts on entry and retries a failed observer; repeated entry reuses an active subscription. */
     private fun startObserving() {
         if (observationJob?.isActive == true) return
 
@@ -60,6 +66,7 @@ class DiscoveryViewModel @Inject constructor(
             observeDiscoveryUseCase(Unit).collect { snapshot ->
 
                 if (state.value.userId != snapshot.userId) {
+                    // Invalidate old work before replacing state, including when the user signs out.
                     cancelWatchActions()
                     cancelRefresh()
                     needsInitialRefresh = true
@@ -89,6 +96,7 @@ class DiscoveryViewModel @Inject constructor(
                 }
 
                 if (snapshot.cacheReady && snapshot.userId != null && needsInitialRefresh){
+                    // Let the screen display the first cache read before refreshing it once.
                     needsInitialRefresh = false
                     reloadDashboard()
                 }
@@ -96,6 +104,7 @@ class DiscoveryViewModel @Inject constructor(
         }
     }
 
+    /** Keeps cached cards visible; an observation error must be repaired before syncing again. */
     private fun reloadDashboard() {
         val current = state.value
 
@@ -145,6 +154,7 @@ class DiscoveryViewModel @Inject constructor(
         }
     }
 
+    /** Shares pending state across featured/collection copies; watch values come from cache updates. */
     private fun watchCluster(clusterId: Int) {
         val current = state.value
         val userId = current.userId ?: return
@@ -152,6 +162,7 @@ class DiscoveryViewModel @Inject constructor(
         val cluster = current.featuredCluster?.takeIf { it.id == clusterId }
             ?: current.collections.asSequence().flatMap { it.clusters }.firstOrNull { it.id == clusterId } ?: return
         val version = watchVersion
+        // Disable every visible copy immediately so duplicate taps cannot start competing actions.
         reduce { copy(pendingClusterIds = pendingClusterIds + clusterId) }
         val job = safeLaunch {
             try {
@@ -174,6 +185,7 @@ class DiscoveryViewModel @Inject constructor(
     }
 
     private fun cancelWatchActions() {
+        // Version checks also suppress stale error effects and finally blocks after an account switch.
         watchVersion += 1
         watchJobs.values.toList().forEach { it.cancel() }
         watchJobs.clear()
@@ -185,6 +197,7 @@ class DiscoveryViewModel @Inject constructor(
         refreshJob = null
     }
 
+    /** BaseMVIViewModel routes observation exceptions here; cached content remains available. */
     override fun onError(error: Throwable) {
         cancelRefresh()
 

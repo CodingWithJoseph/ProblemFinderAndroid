@@ -10,6 +10,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
 import javax.inject.Singleton
 
+/** App bindings for the Android HTTP engine and service origin used by all opportunity endpoints. */
 @Module
 @InstallIn(SingletonComponent::class)
 object OpportunitiesNetworkModule {

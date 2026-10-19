@@ -12,6 +12,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+/** Binds public repository contracts to shared implementations without exposing them to features. */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class OpportunitiesDataModule {

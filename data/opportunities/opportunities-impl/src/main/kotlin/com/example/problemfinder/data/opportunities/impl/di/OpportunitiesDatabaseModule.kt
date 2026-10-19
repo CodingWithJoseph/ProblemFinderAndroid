@@ -14,6 +14,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+/** Gives all opportunity data sources the same persistent database and its three DAO views. */
 @Module
 @InstallIn(SingletonComponent::class)
 object OpportunitiesDatabaseModule {

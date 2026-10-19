@@ -57,6 +57,7 @@ private fun SearchScreenStandardPreview() = ImmensityTheme {
 }
 
 
+/** Placeholder tab content; the title does not represent an implemented search workflow. */
 @Composable
 fun SearchScreen(
     modifier: Modifier = Modifier,

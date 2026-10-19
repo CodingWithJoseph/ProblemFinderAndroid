@@ -21,6 +21,10 @@ import com.example.problemfinder.core.model.opportunity.Opportunity
 import com.example.problemfinder.feature.opportunities.impl.R
 import com.example.problemfinder.core.designsystem.R as DesignR
 
+/**
+ * Uses the observed watch value to choose add/remove; pending disables only this card's action.
+ * The button supplies one accessible label/state, so its decorative icon/spinner stays unlabelled.
+ */
 @Composable
 internal fun AddRemoveButton(
     cluster: Opportunity,

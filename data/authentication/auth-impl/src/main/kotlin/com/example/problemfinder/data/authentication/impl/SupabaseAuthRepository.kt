@@ -10,6 +10,7 @@ import kotlinx.serialization.json.put
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 
+/** Normalizes service errors while preserving structured coroutine cancellation. */
 private suspend fun <T> authCall(block: suspend () -> T): T =
     try {
         block()
@@ -19,6 +20,7 @@ private suspend fun <T> authCall(block: suspend () -> T): T =
         throw AuthOperationException(SupabaseAuthErrorMapper.map(error), error)
     }
 
+/** Implements auth commands through the SDK; the SDK owns session persistence and status updates. */
 class SupabaseAuthRepository @Inject constructor(
     private val client: SupabaseClient
 ): AuthRepository {
@@ -29,6 +31,7 @@ class SupabaseAuthRepository @Inject constructor(
             this.password = password
         }
 
+        // A successful SDK call must also produce the user required by the app's sign-in contract.
         val user = checkNotNull(client.auth.currentUserOrNull()){
             "Sign-in completed without an active user"
         }
@@ -40,6 +43,7 @@ class SupabaseAuthRepository @Inject constructor(
         client.auth.signUpWith(Email){
             this.email = email
             this.password = password
+            // Profile names are Supabase user metadata, separate from the login credentials.
             data = buildJsonObject {
                 put("first_name", firstname)
                 put("last_name", lastname)
@@ -49,6 +53,7 @@ class SupabaseAuthRepository @Inject constructor(
     }
 
     override suspend fun forgotPassword(email: String) = authCall {
+        // MainActivity handles this URI and opens the form after the SDK restores the link's session.
         client.auth.resetPasswordForEmail(
             email=email,
             redirectUrl = "com.codingwithjoseph.immensity://auth/reset-password"

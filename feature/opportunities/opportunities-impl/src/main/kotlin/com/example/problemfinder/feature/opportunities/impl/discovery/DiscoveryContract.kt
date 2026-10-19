@@ -6,6 +6,11 @@ import com.example.problemfinder.core.model.discovery.DiscoveryCollection
 import com.example.problemfinder.core.mvi.RequestState
 import com.example.problemfinder.feature.opportunities.impl.util.OpportunityUiError
 
+/**
+ * Dashboard content and request status for the current account.
+ * [cacheReady] marks a completed local read; [hasSynced] distinguishes confirmed empty results
+ * from a cache that has never synced. Refresh errors can coexist with visible cached cards.
+ */
 data class DiscoveryState(
     val userId: String? = null,
     val featuredCluster: Opportunity? = null,
@@ -16,6 +21,7 @@ data class DiscoveryState(
     val refreshRequestState: RequestState<Unit, OpportunityUiError> = RequestState.Idle,
     val pendingClusterIds: Set<Int> = emptySet(),
 ) {
+    /** Empty collection headers alone do not count as opportunity content. */
     val hasContent: Boolean
         get() = featuredCluster != null ||
             collections.any { it.clusters.isNotEmpty() }
@@ -49,6 +55,7 @@ data class DiscoveryState(
             )
 }
 
+/** Screen events reduced by [DiscoveryViewModel], including entry and category-level navigation. */
 sealed interface DiscoveryIntent {
     data object Entered : DiscoveryIntent
     data object Reload : DiscoveryIntent
@@ -58,6 +65,7 @@ sealed interface DiscoveryIntent {
     data class SeeAll(val clusterCategory: OpportunityCategory): DiscoveryIntent
 }
 
+/** One-shot navigation/messages consumed by the host instead of retained in [DiscoveryState]. */
 sealed interface DiscoveryEffect {
     data class NavigateToCluster(val clusterId: Int): DiscoveryEffect
     data class NavigateToBrowse(val clusterCategory: OpportunityCategory): DiscoveryEffect

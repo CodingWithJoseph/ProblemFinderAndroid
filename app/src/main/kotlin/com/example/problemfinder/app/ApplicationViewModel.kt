@@ -9,6 +9,7 @@ import kotlinx.coroutines.Job
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 
+/** Observes account identity for root navigation and runs sign-out requests for the app shell. */
 @HiltViewModel
 class ApplicationViewModel @Inject constructor(
     private val signOutUseCase: SignOutUseCase,
@@ -29,7 +30,9 @@ class ApplicationViewModel @Inject constructor(
         }
     }
 
+    /** Restarts identity observation; failures become retryable startup state, not sign-out effects. */
     private fun observeAccount() {
+        // Cancellation stops the old collector; the version also rejects any late result from it.
         accountVersion += 1
         val version = accountVersion
         accountJob?.cancel()
@@ -52,6 +55,8 @@ class ApplicationViewModel @Inject constructor(
         }
     }
 
+    // The session provider owns the eventual account change. Do not clear identity optimistically:
+    // a failed sign-out must leave the current account available and offer a retry.
     private fun signOut() = safeLaunch {
         if (state.value.isSigningOut) return@safeLaunch
         try {

@@ -15,6 +15,7 @@ import com.example.problemfinder.data.opportunities.impl.model.entity.DiscoveryC
 import kotlin.time.Instant
 
 
+/** Normalizes text and parses time; Opportunity's constructor rejects invalid card content. */
 fun OpportunityDto.toModel(): Opportunity = Opportunity(
     id = id,
     name = name.trim(),
@@ -26,11 +27,13 @@ fun OpportunityDto.toModel(): Opportunity = Opportunity(
     date = date?.let { Instant.parse(it) },
 )
 
+/** Preserves server ordering and the opaque cursor while validating every card. */
 fun BrowsePageDto.toModel(): BrowsePage = BrowsePage(
     clusters = clusters.map { it.toModel() },
     nextCursor = nextCursor
 )
 
+/** Adds cache ownership and stores the full timestamp as ISO text without truncating precision. */
 fun Opportunity.toEntity(userId: String): OpportunityEntity = OpportunityEntity(
     userId = userId,
     clusterId = id,
@@ -43,6 +46,7 @@ fun Opportunity.toEntity(userId: String): OpportunityEntity = OpportunityEntity(
     dateIso = date?.toString()
 )
 
+/** Reconstructs and validates a cached card using the same category/time rules as network content. */
 fun OpportunityEntity.toModel(): Opportunity =
     Opportunity(
         id = clusterId,
@@ -56,6 +60,7 @@ fun OpportunityEntity.toModel(): Opportunity =
     )
 
 
+/** Keeps collection membership category independent from the categories of its cards. */
 fun DiscoveryCollectionDto.toModel(): DiscoveryCollection = DiscoveryCollection(
     category = this.category.toOpportunityCategory(),
     clusters = this.clusters.map {
@@ -63,6 +68,7 @@ fun DiscoveryCollectionDto.toModel(): DiscoveryCollection = DiscoveryCollection(
     }
 )
 
+/** Maps a whole dashboard before local persistence; any invalid nested card fails the conversion. */
 fun DiscoveryDashboardDto.toModel(): DiscoveryDashboard = DiscoveryDashboard(
     featuredCluster = this.featured?.toModel(),
     collections = collections.map {
@@ -70,11 +76,16 @@ fun DiscoveryDashboardDto.toModel(): DiscoveryDashboard = DiscoveryDashboard(
     }
 )
 
+/**
+ * Reassembles the flattened Room join, preserving the DAO's collection and card order. An empty
+ * row list completes the cache read (cacheReady), but only stored metadata can claim a prior sync.
+ */
 fun List<DiscoveryCacheRow>.toDiscoverySnapshot(userId: String): DiscoverySnapshot {
     val firstRow = firstOrNull()
     val collections = groupBy {
         it.collection?.category
     }.mapNotNull { (category, rows) ->
+        // No header means no collection; a header with null card data is a real empty collection.
         if (category == null) return@mapNotNull null
 
         DiscoveryCollection(

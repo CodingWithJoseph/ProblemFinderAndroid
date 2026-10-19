@@ -71,6 +71,7 @@ private fun ResetPasswordScreenStandardPreview() = ImmensityTheme {
 }
 
 
+/** Renders the recovery password form; the app handles the incoming link and the ViewModel submits changes. */
 @Composable
 fun ResetPasswordScreen(
     modifier: Modifier = Modifier,

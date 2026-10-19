@@ -16,6 +16,8 @@ val localProperties = Properties().apply {
         ?.use { load(it) }
 }
 
+// Local developer configuration takes precedence over environment values (for example in CI).
+// These values enter BuildConfig and are bundled in the app; use the publishable Supabase key.
 fun setting(name: String): String =
     localProperties.getProperty(name)
         ?: System.getenv(name)
@@ -57,6 +59,8 @@ android {
     }
 }
 
+// The app is the composition root: including implementation modules makes their Hilt bindings
+// available while feature code can continue depending on API contracts.
 dependencies {
     implementation(project(":feature:opportunity-details:opportunity-details-impl"))
     implementation(project(":core:mvi"))

@@ -8,6 +8,10 @@ import com.example.problemfinder.feature.authentication.impl.AuthUIError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
+/**
+ * Requests a recovery email after checking for nonblank input. The EmailSent effect opens the
+ * confirmation screen; it does not assert that the email was delivered or that an account exists.
+ */
 @HiltViewModel
 class ForgotPasswordViewModel @Inject constructor(
     private val forgotPasswordUseCase: ForgotPasswordUseCase
@@ -25,6 +29,7 @@ class ForgotPasswordViewModel @Inject constructor(
         }
     }
 
+    /** Captures the form for one request; safeLaunch routes non-cancellation failures to onError. */
     private fun submit() = safeLaunch {
         if (state.value.isLoading) return@safeLaunch
 
@@ -41,6 +46,7 @@ class ForgotPasswordViewModel @Inject constructor(
             forgotPasswordUseCase(ForgotPasswordUseCase.Params(email))
             sendEffect(ForgotPasswordEffect.EmailSent)
         } finally {
+            // Always release the loading state, including when the request fails or is cancelled.
             reduce { copy(isLoading = false) }
         }
     }

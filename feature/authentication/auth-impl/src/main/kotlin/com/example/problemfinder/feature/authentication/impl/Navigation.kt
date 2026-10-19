@@ -19,6 +19,10 @@ import com.example.problemfinder.feature.authentication.impl.signup.SignUpEffect
 import com.example.problemfinder.feature.authentication.impl.signup.SignUpScreen
 import com.example.problemfinder.feature.authentication.impl.signup.SignUpViewModel
 
+/**
+ * Wires each destination's ViewModel to its screen and translates effects into app-owned navigation.
+ * The app chooses back-stack behavior; this graph does not hold a NavController or parse auth links.
+ */
 fun NavGraphBuilder.authentication(
     onSignedIn: () -> Unit,
     onOpenSignIn: () -> Unit,
@@ -29,6 +33,7 @@ fun NavGraphBuilder.authentication(
     onResetPasswordEmailSent: () -> Unit
 ) {
     composable(route = AuthDestinations.SIGN_IN) {
+        // Each back-stack entry owns its ViewModel. State renders the form; effects request navigation.
         val viewModel = hiltViewModel<SignInViewModel>()
         val state = viewModel.state.collectAsStateWithLifecycle().value
 

@@ -32,6 +32,10 @@ import java.io.IOException
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 
+/**
+ * Coordinates authenticated page requests with Room, the observable source of Browse content.
+ * Network work is serialized with Discovery refreshes and watch mutations through [sync].
+ */
 class BrowseRepositoryImpl @Inject constructor(
     private val sessions: AuthSessionProvider,
     private val remote: BrowseRemoteDataSource,
@@ -45,6 +49,7 @@ class BrowseRepositoryImpl @Inject constructor(
         category: OpportunityCategoryFilter,
         sortType: SortType,
     ): Flow<BrowseSnapshot> =
+        // Cancel the old account's database subscription before observing the new account's rows.
         sessions.observeUserId().flatMapLatest { userId ->
             if (userId == null) {
                 flowOf(BrowseSnapshot())
@@ -52,6 +57,7 @@ class BrowseRepositoryImpl @Inject constructor(
                 local.observeBrowse(userId, category, sortType)
                     .map { it.copy(userId = userId) }
                     .onStart {
+                        // An unfinished cache read is different from a completed read with no data.
                         emit(BrowseSnapshot(userId = userId, cacheReady = false))
                     }
             }
@@ -66,6 +72,7 @@ class BrowseRepositoryImpl @Inject constructor(
         sync.mutex.withLock {
             ensureSameAccount(session.userId, sessions)
             val page = fetchPage(session, category, sortType, cursor = null)
+            // The account can change while the request is in flight; discard that response locally.
             ensureSameAccount(session.userId, sessions)
             local.replaceFirstPage(session.userId, category, sortType, page)
         }
@@ -79,12 +86,14 @@ class BrowseRepositoryImpl @Inject constructor(
         val query = local.getQuery(session.userId, category, sortType)
             ?: return@opportunityCall
         if (!query.hasSynced) return@opportunityCall
+        // Capture before waiting: concurrent callers for this cursor should request it only once.
         val expectedCursor = query.nextCursor ?: return@opportunityCall
 
         sync.mutex.withLock {
             ensureSameAccount(session.userId, sessions)
             val current = local.getQuery(session.userId, category, sortType)
 
+            // A refresh or earlier page request may already have replaced/advanced this cursor.
             if (current?.hasSynced != true ||
                 current.nextCursor != expectedCursor
             ) {
@@ -93,6 +102,7 @@ class BrowseRepositoryImpl @Inject constructor(
 
             val page = fetchPage(session, category, sortType, expectedCursor)
 
+            // Accept null as end-of-list, but reject a cursor that would repeat the same request.
             if (page.nextCursor == expectedCursor) {
                 throw OpportunityOperationException(
                     OpportunityFailure.INVALID_RESPONSE,
@@ -111,6 +121,7 @@ class BrowseRepositoryImpl @Inject constructor(
         }
     }
 
+    /** Validates decoded DTOs before any cache write and classifies invalid model content. */
     private suspend fun fetchPage(
         session: AuthSession,
         category: OpportunityCategoryFilter,

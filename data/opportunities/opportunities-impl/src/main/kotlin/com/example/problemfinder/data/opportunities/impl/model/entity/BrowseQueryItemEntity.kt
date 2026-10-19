@@ -4,6 +4,10 @@ import androidx.room3.Entity
 import androidx.room3.ForeignKey
 import androidx.room3.Index
 
+/**
+ * A query's reference to shared card content. The key prevents duplicate cards within a query;
+ * the unique position index preserves an unambiguous order across appended pages.
+ */
 @Entity(
     tableName = "browse_query_items",
     primaryKeys = ["userId", "category", "sort", "clusterId"],

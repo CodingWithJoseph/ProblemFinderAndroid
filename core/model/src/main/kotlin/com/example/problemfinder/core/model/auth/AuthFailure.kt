@@ -1,5 +1,6 @@
 package com.example.problemfinder.core.model.auth
 
+/** App-owned auth error vocabulary, mapped from SDK failures and then to localized UI messages. */
 enum class AuthFailure {
     INVALID_CREDENTIALS,
     EMAIL_NOT_CONFIRMED,

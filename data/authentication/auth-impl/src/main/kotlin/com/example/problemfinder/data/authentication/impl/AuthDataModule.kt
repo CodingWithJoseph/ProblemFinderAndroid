@@ -8,6 +8,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+/** Supplies shared Supabase adapters to callers that depend only on the authentication APIs. */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class AuthDataModule {

@@ -93,6 +93,7 @@ private fun SignInScreenStandardPreview() = ImmensityTheme {
 }
 
 
+/** Renders the supplied form state and emits intents; responsive layouts share the same fields and actions. */
 @Composable
 fun SignInScreen(
     modifier: Modifier = Modifier,

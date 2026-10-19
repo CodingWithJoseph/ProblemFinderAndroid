@@ -34,6 +34,10 @@ import com.example.problemfinder.app.ApplicationState
 import com.example.problemfinder.app.R
 import com.example.problemfinder.core.designsystem.R as DesignSystemR
 
+/**
+ * Shared bars and snackbar host. Navigation supplies route-derived visibility and callbacks;
+ * the only local state is menu expansion, while sign-out progress comes from ApplicationState.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ImmensityScaffold(

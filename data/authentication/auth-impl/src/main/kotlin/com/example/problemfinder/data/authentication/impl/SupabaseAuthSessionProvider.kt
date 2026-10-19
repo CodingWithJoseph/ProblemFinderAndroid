@@ -13,6 +13,10 @@ import kotlinx.coroutines.flow.mapLatest
 import javax.inject.Inject
 import kotlin.time.Clock
 
+/**
+ * Keeps cached content associated with a known account while the SDK initializes or fails to refresh.
+ * Network callers still need the separate, unexpired session returned by [currentSession].
+ */
 class SupabaseAuthSessionProvider @Inject constructor(
     private val client: SupabaseClient
 ) : AuthSessionProvider {
@@ -23,6 +27,7 @@ class SupabaseAuthSessionProvider @Inject constructor(
             .mapLatest { status ->
                 when (status) {
                     is SessionStatus.Authenticated -> status.session.user?.id
+                    // An explicit signed-out state takes precedence over any persisted identity.
                     is SessionStatus.NotAuthenticated -> null
                     SessionStatus.Initializing,
                     is SessionStatus.RefreshFailure -> persistedUserId()
@@ -35,6 +40,7 @@ class SupabaseAuthSessionProvider @Inject constructor(
         val session = client.auth.currentSessionOrNull() ?: return null
         val userId = session.user?.id ?: return null
 
+        // Reading credentials does not trigger refresh; expired tokens cannot authorize a request.
         if(session.expiresAt <= Clock.System.now()) return null
 
         return AuthSession(
@@ -44,6 +50,7 @@ class SupabaseAuthSessionProvider @Inject constructor(
     }
 
 
+    /** Missing persistence means no account; other read failures propagate so callers can retry. */
     private suspend fun persistedUserId(): String? =
         try {
             client.auth.sessionManager.loadSession().user?.id

@@ -21,6 +21,10 @@ import com.example.problemfinder.feature.opportunities.impl.discovery.DiscoveryI
 import com.example.problemfinder.feature.opportunities.impl.discovery.DiscoveryScreen
 import com.example.problemfinder.feature.opportunities.impl.discovery.DiscoveryViewModel
 
+/**
+ * Connects feature screens to their back-stack-scoped ViewModels. The app host owns destination
+ * changes and message display through callbacks, keeping NavController out of screen/UI logic.
+ */
 fun NavGraphBuilder.opportunities(
     onOpenCluster: (Int) -> Unit,
     onOpenBrowse: (OpportunityCategory) -> Unit,
@@ -31,6 +35,8 @@ fun NavGraphBuilder.opportunities(
         val state = viewModel.state.collectAsStateWithLifecycle().value
         val context = LocalContext.current
 
+        // Entry/effect collection runs once per composition entry, not on every recomposition.
+        // State collection above follows lifecycle state; this effect is cancelled on composition exit.
         LaunchedEffect(viewModel) {
             viewModel.onIntent(DiscoveryIntent.Entered)
 
@@ -52,6 +58,7 @@ fun NavGraphBuilder.opportunities(
     composable(
         route = OpportunitiesDestinations.BROWSE_ROUTE,
         arguments = listOf(
+            // SavedStateHandle exposes this argument to BrowseViewModel as its initial category.
             navArgument(OpportunitiesDestinations.CATEGORY_ARGUMENT){
                 type = NavType.StringType
                 defaultValue = OpportunityCategoryFilter.ALL.name

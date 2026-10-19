@@ -19,6 +19,7 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.handleDeeplinks
 import javax.inject.Inject
 
+/** Android entry point: installs the theme and hands session/link state to app navigation. */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
@@ -45,12 +46,17 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    // A link can arrive while this singleTop activity is already running, not only at cold start.
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
         handleAuthLink(intent)
     }
 
+    /**
+     * Accepts only the app's auth routes. The destination becomes pending only after Supabase
+     * successfully imports the link's session; AppNavigation consumes it after choosing a root.
+     */
     private fun handleAuthLink(intent: Intent){
         val uri = intent.data ?: return
 

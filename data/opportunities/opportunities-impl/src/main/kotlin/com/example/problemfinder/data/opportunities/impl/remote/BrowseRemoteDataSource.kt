@@ -11,10 +11,12 @@ import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import javax.inject.Inject
 
+/** HTTP boundary for Browse; returns DTOs and lets the repository classify request/decoding failures. */
 class BrowseRemoteDataSource @Inject constructor(
     private val client: HttpClient,
     private val config: OpportunitiesApiConfig
 ) {
+    /** Fetches one authenticated page; omitting [cursor] requests the first page. */
     suspend fun fetchBrowsePage(
         category: OpportunityCategoryFilter,
         sortType: SortType,
@@ -33,6 +35,7 @@ class BrowseRemoteDataSource @Inject constructor(
     }.body()
 }
 
+// Keep wire values explicit: API spellings are a separate contract from Kotlin enum names.
 private val OpportunityCategoryFilter.apiValue: String
     get() = when (this) {
         OpportunityCategoryFilter.ALL -> "all"

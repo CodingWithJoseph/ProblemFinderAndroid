@@ -3,6 +3,7 @@ package com.example.problemfinder.feature.authentication.impl
 import androidx.annotation.StringRes
 import com.example.problemfinder.core.model.auth.AuthFailure
 
+/** Keeps local form validation distinct from service failures until the UI selects localized text. */
 sealed interface AuthUIError {
     data class Service(val failure: AuthFailure): AuthUIError
     enum class Validation: AuthUIError {
@@ -50,6 +51,7 @@ private val validationMessages = mapOf(
     AuthUIError.Validation.PASSWORD_MISMATCH to R.string.auth_error_password_mismatch
 )
 
+/** Uses operation-specific fallback text and explains an expired recovery session as an expired link. */
 @StringRes
 internal fun AuthUIError.messageRes(operation: AuthOperation): Int = when(this) {
     is AuthUIError.Service -> {

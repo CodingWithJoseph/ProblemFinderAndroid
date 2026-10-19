@@ -64,6 +64,7 @@ private fun AuthMessageScreenStandardPreview() = ImmensityTheme {
 }
 
 
+/** Shared confirmation screen for sign-up and recovery email requests; returning to sign-in is caller-owned. */
 @Composable
 fun AuthMessageScreen(
     @StringRes messageRes: Int,

@@ -40,6 +40,7 @@ import com.example.problemfinder.feature.opportunities.impl.util.toOpportunityDa
 import java.time.ZoneId
 import kotlin.time.Instant
 
+/** Prominent dashboard card using the same open/watch intents and pending state as collection cards. */
 @Composable
 internal fun FeaturedDiscoveryCard(
     cluster: Opportunity,

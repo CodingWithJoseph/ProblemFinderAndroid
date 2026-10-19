@@ -8,6 +8,10 @@ import com.example.problemfinder.feature.authentication.impl.AuthUIError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
+/**
+ * Owns both sign-up steps in one state object, preserving credentials when moving between steps.
+ * Successful creation clears the password and requests the email-confirmation message screen.
+ */
 @HiltViewModel
 class SignUpViewModel @Inject constructor(
     private val signUpUseCase: SignUpUseCase
@@ -39,6 +43,7 @@ class SignUpViewModel @Inject constructor(
         }
     }
 
+    /** Performs the first step's local email/length checks without making a network request. */
     private fun continueToProfile() {
         if (state.value.isLoading) return
 
@@ -58,7 +63,9 @@ class SignUpViewModel @Inject constructor(
         }
     }
 
+    /** Captures the form for one request; safeLaunch routes non-cancellation failures to onError. */
     private fun submit() = safeLaunch {
+        // Only the profile step creates an account; Continue is a local transition.
         if (state.value.isLoading || state.value.step != SignUpStep.PROFILE) return@safeLaunch
 
         val firstname = state.value.firstname.trim()
@@ -86,6 +93,7 @@ class SignUpViewModel @Inject constructor(
             reduce { copy(password = "") }
             sendEffect(SignUpEffect.EmailSent)
         } finally {
+            // Always release the loading state, including when the request fails or is cancelled.
             reduce { copy(isLoading = false) }
         }
     }

@@ -11,6 +11,10 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 
+/**
+ * Wires feature-facing use-case contracts to their repository delegates. These use cases currently
+ * add no business rules; the layer keeps feature code independent of the data implementation.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class BrowseDomainModule {

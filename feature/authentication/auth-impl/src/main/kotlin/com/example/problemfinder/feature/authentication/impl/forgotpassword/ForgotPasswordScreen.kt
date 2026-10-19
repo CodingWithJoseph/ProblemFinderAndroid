@@ -76,6 +76,7 @@ private fun ForgotPasswordScreenStandardPreview() = ImmensityTheme {
 }
 
 
+/** Renders the email request form; submission and navigation are expressed as intents to the caller. */
 @Composable
 fun ForgotPasswordScreen(
     modifier: Modifier = Modifier,
