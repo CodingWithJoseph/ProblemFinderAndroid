@@ -1,51 +1,35 @@
-# Problem Finder Android scaffold
+# Problem Finder Android
 
-This repository is an intentionally incomplete Android foundation. It sets up module boundaries, MVI contracts, Hilt, Jetpack Compose, Kotlin, coroutines, and Flow without implementing the product behavior.
+Problem Finder, branded **Immensity** in the app, is an Android client for discovering problem clusters and adding opportunities to a pipeline. It uses Kotlin, Jetpack Compose, MVI-style ViewModels, Hilt, Supabase authentication, Ktor, and Room.
 
-## Requirements
+**Use `main` for the developed app.** The repository's default branch currently points to the older `scaffold/problem-finder-foundation` branch.
 
-- Android Studio with JDK 17 or newer
-- Android SDK Platform 37
-- Android SDK Build Tools 36.0.0+
-- Gradle 9.5.0 (the wrapper metadata is pinned; if `gradle/wrapper/gradle-wrapper.jar` is absent, run `powershell -ExecutionPolicy Bypass -File scripts/bootstrap-gradle-wrapper.ps1` or `gradle wrapper` once)
+## What works
 
-## Modules
+- Sign-in, two-step registration, recovery-email requests, password reset through auth links, and sign-out.
+- Account-aware startup and a signed-in tab shell.
+- Discovery dashboard with featured and category collections.
+- Browse filters, sorting, cursor pagination, refresh, and account-scoped cached content.
+- Server-confirmed add/remove watch actions reflected across Discovery and Browse.
 
-```text
-app                         Composition root and top-level navigation
-core:model                  Shared, dependency-free domain models
-core:common                 Cross-cutting contracts such as dispatcher policy
-core:mvi                    Reusable MVI contracts and lifecycle plumbing
-core:designsystem           Compose theme and reusable UI primitives
-```
+Search, Projects, Builds, Settings, and opportunity detail content are placeholders. Cached content can remain readable without a usable network session; writes require a session and are not queued offline. See [feature behavior](docs/navigation-and-features.md) for exact scope.
 
-Dependency direction is inward toward contracts:
+## Start reading
 
-```text
-app -> feature impl -> feature api
-                  \-> domain api <- domain impl -> data api <- data impl
-                  \-> core modules
-```
+The [documentation map](docs/README.md) gives a short reading order. Each layer answers a different question:
 
-The `app` module is allowed to know implementation modules because it is the composition root. Feature modules consume domain APIs, never data implementations. API modules remain small and stable so implementations can be replaced without forcing unrelated callers to change.
+| Question | Guide |
+|---|---|
+| Who calls whom, and how does data return? | [Runtime flows](docs/runtime-flows.md) |
+| How do screens, Back, and auth redirects work? | [Navigation and features](docs/navigation-and-features.md) |
+| Why these boundaries and patterns? | [Architecture and tradeoffs](docs/architecture-and-decisions.md) |
+| How do I run, test, debug, or change it? | [Development](docs/development.md) |
+| Can I explain the implementation myself? | [Study guide](docs/study-guide.md) |
 
-## Start here
+KDoc and inline comments explain meaningful contracts and non-obvious behavior next to the source. The guides link to that code instead of duplicating it.
 
-1. Read [`docs/architecture.md`](docs/architecture.md).
-2. Work through [`docs/implementation-checklist.md`](docs/implementation-checklist.md).
-3. Find all intentional gaps with `rg "TODO\\("` and `rg "TODO:"`.
-4. Add tests beside each behavior as you implement it.
+## Build and contribute
 
-The current app can render the placeholder route. Any real intent or data operation intentionally reaches a `TODO(...)` until you implement it.
+Open in Android Studio with SDK 37 and the pinned Gradle 9.5.0 toolchain. Configure the local SDK path plus `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY`; read [setup and test commands](docs/development.md) for wrapper bootstrap and the distinct Java daemon/compilation requirements.
 
-## Toolchain choices
-
-Versions are centralized in `gradle/libs.versions.toml`. Android modules use AGP 9's built-in Kotlin support; the obsolete `org.jetbrains.kotlin.android` plugin is intentionally absent. Compose dependencies use the official BOM.
-
-Useful references:
-
-- [Guide to app architecture](https://developer.android.com/topic/architecture)
-- [Modularization guide](https://developer.android.com/topic/modularization)
-- [Hilt](https://developer.android.com/training/dependency-injection/hilt-android)
-- [Compose setup](https://developer.android.com/develop/ui/compose/setup-compose-dependencies-and-compiler)
-- [StateFlow and SharedFlow](https://developer.android.com/kotlin/flow/stateflow-and-sharedflow)
+The 27 modules are listed in [settings.gradle.kts](settings.gradle.kts) and grouped in the architecture guide. Follow [CONTRIBUTING](CONTRIBUTING.md). [Implementation status](docs/implementation-checklist.md) records remaining work without treating placeholder tests or screens as finished features.
