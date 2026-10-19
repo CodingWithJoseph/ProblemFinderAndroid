@@ -2,7 +2,17 @@
 <resources>
     <string name="logo_immensity">Immensity Logo</string>
     <string name="wordmark_immensity">immensity</string>
-    <string name="icon_forward_arrow">icon forward arrow</string>
-    <string name="icon_airplane">icon airplane</string>
-    <string name="icon_close">icon close</string>
+    <string name="icon_close">Close</string>
+    <string name="icon_desc_add">Add</string>
+    <string name="icon_desc_remove">Remove</string>
+
+    <string name="label_build_tooling">Build &amp; Tooling</string>
+    <string name="label_data_apis">Data &amp; APIs</string>
+    <string name="label_workflow_automation">Workflow</string>
+    <string name="label_uncategorized">Uncategorized</string>
+
+    <string name="description_build_tooling">Friction in the developer experience</string>
+    <string name="description_data_apis">Where connections break down</string>
+    <string name="description_workflow_automation">The work around the work</string>
+    <string name="description_uncategorized">Uncategorized</string>
 </resources>

@@ -35,7 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -248,7 +247,7 @@ private fun SignInHeader() {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             stringResource(R.string.auth_sign_in_greeting).uppercase(),
-            style = TextStyle(letterSpacing = 2.sp),
+            style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 2.sp),
             color = MaterialTheme.colorScheme.secondary,
             fontSize = 12.sp,
             fontWeight = FontWeight.SemiBold
@@ -355,7 +354,7 @@ private fun SignInButton(
                 Text(stringResource(R.string.auth_sign_in))
                 Icon(
                     painter = painterResource(DesignSystemR.drawable.icon_arrow_forward),
-                    contentDescription = stringResource(DesignSystemR.string.icon_forward_arrow)
+                    contentDescription = null,
                 )
             }
         }

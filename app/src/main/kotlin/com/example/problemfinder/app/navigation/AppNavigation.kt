@@ -19,6 +19,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,8 +41,8 @@ import com.example.problemfinder.app.R
 import com.example.problemfinder.core.mvi.RequestState
 import com.example.problemfinder.feature.authentication.api.AuthDestinations
 import com.example.problemfinder.feature.authentication.impl.authentication
-import com.example.problemfinder.feature.browse.api.BrowseDestination
-import com.example.problemfinder.feature.browse.impl.browse
+import com.example.problemfinder.feature.opportunities.api.OpportunitiesDestinations
+import com.example.problemfinder.feature.opportunities.impl.opportunities
 import com.example.problemfinder.feature.builds.api.BuildsDestination
 import com.example.problemfinder.feature.builds.impl.builds
 import com.example.problemfinder.feature.projects.api.ProjectsDestination
@@ -49,16 +51,20 @@ import com.example.problemfinder.feature.search.api.SearchDestination
 import com.example.problemfinder.feature.search.impl.search
 import com.example.problemfinder.feature.settings.api.SettingsDestination
 import com.example.problemfinder.feature.settings.impl.settings
+import com.example.problemfinder.feature.opportunitydetails.api.OpportunityDetailsDestination
+import com.example.problemfinder.feature.opportunitydetails.impl.opportunityDetails
 import io.github.jan.supabase.auth.status.SessionStatus
 
 internal const val STARTUP_ROUTE = "startup"
 
 internal val signedInRoutes = setOf(
-    BrowseDestination.ROUTE,
+    OpportunitiesDestinations.DISCOVERY,
+    OpportunitiesDestinations.BROWSE_ROUTE,
     SearchDestination.ROUTE,
     ProjectsDestination.ROUTE,
     BuildsDestination.ROUTE,
-    SettingsDestination.ROUTE
+    SettingsDestination.ROUTE,
+    OpportunityDetailsDestination.ROUTE,
 )
 
 enum class LinkDestination {
@@ -113,6 +119,7 @@ fun AppNavigation(
 
 
     val snackbarHostState = remember { SnackbarHostState() }
+    val messageScope = rememberCoroutineScope()
     val failureMessage = stringResource(R.string.sign_out_failed)
     val retryLabel = stringResource(R.string.retry_label)
 
@@ -127,17 +134,26 @@ fun AppNavigation(
         }
     }
 
-    val selectedTab = MainTab.entries.firstOrNull { it.route == currentRoute }
-    val showChromeApp = currentRoute in signedInRoutes && currentRoute != SettingsDestination.ROUTE
+    val selectedTab = when (currentRoute) {
+        OpportunitiesDestinations.BROWSE_ROUTE -> MainTab.DISCOVERY
+        else -> MainTab.entries.firstOrNull {
+            it.route == currentRoute
+        }
+    }
+    val showChromeApp = currentRoute in signedInRoutes && currentRoute != SettingsDestination.ROUTE &&
+        currentRoute != OpportunityDetailsDestination.ROUTE
 
     ImmensityScaffold(
         state = state,
         snackbarHost = snackbarHostState,
         showAppChrome = showChromeApp,
         selectedTab = selectedTab,
+        onNavigateBack = if (currentRoute == OpportunitiesDestinations.BROWSE_ROUTE) {
+            { navController.popBackStack() }
+        } else null,
         onTabSelected = { tab ->
             navController.navigate(tab.route) {
-                popUpTo(BrowseDestination.ROUTE)
+                popUpTo(OpportunitiesDestinations.DISCOVERY)
                 launchSingleTop = true
             }
         },
@@ -164,7 +180,7 @@ fun AppNavigation(
 
                 authentication(
                     onSignedIn = {
-                        navigateToRoot(BrowseDestination.ROUTE)
+                        navigateToRoot(OpportunitiesDestinations.DISCOVERY)
                     },
 
                     onOpenSignIn = {
@@ -184,7 +200,7 @@ fun AppNavigation(
                     },
 
                     onPasswordUpdated = {
-                        navigateToRoot(BrowseDestination.ROUTE)
+                        navigateToRoot(OpportunitiesDestinations.DISCOVERY)
                     },
 
                     onSignUpEmailSent = {
@@ -202,7 +218,22 @@ fun AppNavigation(
                     }
                 )
 
-                browse()
+                opportunities(
+                    onMessage = { message -> messageScope.launch { snackbarHostState.showSnackbar(message) } },
+                    onOpenCluster = { clusterId ->
+                        navController.navigate(OpportunityDetailsDestination.route(clusterId)) {
+                            launchSingleTop = true
+                        }
+                    },
+                    onOpenBrowse = {
+                        navController.navigate(
+                            OpportunitiesDestinations.browseRoute(it.name)
+                        ) {
+                            launchSingleTop = true
+                        }
+                    }
+                )
+                opportunityDetails(onBack = { navController.popBackStack() })
                 search()
                 projects()
                 builds()

@@ -118,5 +118,9 @@ private fun ColorScheme.withImmensityFixedRoles(): ColorScheme = copy(
 fun ImmensityTheme(content: @Composable () -> Unit) {
 
     val immensityScheme = if (isSystemInDarkTheme()) DarkScheme else LightScheme
-    MaterialTheme(colorScheme = immensityScheme, content = content)
+    MaterialTheme(
+        colorScheme = immensityScheme,
+        typography = ImmensityTypography,
+        content = content,
+    )
 }

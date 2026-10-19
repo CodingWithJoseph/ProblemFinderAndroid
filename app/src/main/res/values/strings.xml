@@ -11,7 +11,8 @@
     <string name="tab_label_projects">Projects</string>
     <string name="tab_label_builds">Build</string>
     <string name="session_restore_failed">Unable to restore your account. Please try again.</string>
-    <string name="sign_out_failed">Couldn’t sign out. Please try again.</string>
+    <string name="sign_out_failed">Couldnâ€™t sign out. Please try again.</string>
     <string name="retry_label">Retry</string>
+    <string name="action_navigate_back">Back to Discovery</string>
 </resources>
 

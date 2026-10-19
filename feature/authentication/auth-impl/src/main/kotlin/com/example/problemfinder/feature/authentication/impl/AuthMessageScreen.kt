@@ -28,7 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -188,13 +187,13 @@ private fun AuthMessageMainContent(
 @Composable
 private fun AuthMessageHeader(@StringRes messageRes: Int) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        AuthAirplaneIcon()
+        AuthMailIcon()
 
         Spacer(Modifier.height(24.dp))
 
         Text(
             stringResource(R.string.auth_one_more_step).uppercase(),
-            style = TextStyle(letterSpacing = 2.sp),
+            style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 2.sp),
             color = MaterialTheme.colorScheme.secondary,
             fontSize = 12.sp,
             fontWeight = FontWeight.SemiBold
@@ -254,8 +253,8 @@ private fun AuthMessageButton(onBackToSignIn: () -> Unit) {
         ) {
             Text(stringResource(R.string.auth_back_to_sign_in))
             Icon(
-                painter = painterResource(DesignSystemR.drawable.icon_arrow_forward),
-                contentDescription = stringResource(DesignSystemR.string.icon_forward_arrow)
+                painter = painterResource(DesignSystemR.drawable.icon_arrow_back),
+                contentDescription = null,
             )
         }
     }

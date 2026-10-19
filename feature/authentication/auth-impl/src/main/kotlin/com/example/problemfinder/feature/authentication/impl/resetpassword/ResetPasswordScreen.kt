@@ -31,7 +31,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -189,7 +188,7 @@ private fun ResetPasswordHeader() {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             stringResource(R.string.auth_secure_your_account).uppercase(),
-            style = TextStyle(letterSpacing = 2.sp),
+            style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 2.sp),
             color = MaterialTheme.colorScheme.secondary,
             fontSize = 12.sp,
             fontWeight = FontWeight.SemiBold
@@ -292,7 +291,7 @@ private fun ResetPasswordButton(
                 Text(stringResource(R.string.auth_update_password))
                 Icon(
                     painter = painterResource(DesignSystemR.drawable.icon_arrow_forward),
-                    contentDescription = stringResource(DesignSystemR.string.icon_forward_arrow)
+                    contentDescription = null,
                 )
             }
         }
