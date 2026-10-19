@@ -1,42 +1,24 @@
-# Implementation checklist
+# Implementation status and next decisions
 
-The ordering below keeps decisions local and testable.
+This replaces the original scaffold checklist, whose Problem/search repository classes no longer exist. The current product model is `Opportunity`, representing a backend cluster. See [navigation and features](navigation-and-features.md) for behavior and [development](development.md) for tests.
 
-## Product contract
+## Implemented foundations
 
-- [ ] Define what a "problem" represents and extend `Problem` accordingly.
-- [ ] Decide search/filter/sort semantics and validation rules.
-- [ ] Decide which UI conditions are durable state and which are one-time effects.
-- [ ] Define loading, empty, partial, offline, and failure behavior.
+- [x] Authentication commands, recovery callback handling, session-driven root navigation, and sign-out retry.
+- [x] Discovery and Browse with separate cache observation and network request state.
+- [x] Room account/query isolation, transactional membership writes, cursor paging, and shared watch state.
+- [x] ViewModel, mapping, request-contract, route-policy, Room, and Compose test sources. The development guide distinguishes tests run from tests merely present.
+- [x] Shared theme, typography, accessibility semantics, and preview variants for key opportunity controls.
 
-## Data
+## Open work, not a committed roadmap
 
-- [ ] Choose local and/or remote data sources inside `data:problems-impl`.
-- [ ] Add implementation-private DTO/entity models.
-- [ ] Map implementation models to `core:model` at the boundary.
-- [ ] Implement `DefaultProblemRepository` and its unit tests.
-- [ ] Add Retrofit/Room/DataStore only when a concrete requirement needs one.
+- [ ] Define and implement real opportunity details, Search, Projects, Builds, and Settings behavior. Their destinations exist, but the product workflows do not.
+- [ ] Add focused authentication form/repository tests and integration coverage for actual sign-in/recovery callbacks. Existing root-policy tests do not exercise email delivery or the SDK end to end.
+- [ ] Replace the stale `core:model/ProblemTest` and `core:common/AppDispatchersTest` placeholders with meaningful coverage, or remove unused scaffolding in a separate code change.
+- [ ] Add CI for build, unit tests, lint, and an appropriate device-test lane; no workflow is checked in.
+- [ ] Establish Room migration/schema testing before changing persisted entities, plus a deliberate cache retention/cleanup policy.
+- [ ] Decide whether offline writes, background sync, automatic retries, or configurable API environments are product requirements before adding infrastructure for them.
+- [ ] Define release signing, minification/R8 requirements, observability, and performance measurement before claiming production readiness.
 
-## Domain
-
-- [ ] Implement `DefaultSearchProblems`.
-- [ ] Add domain validation and error types only when their behavior is known.
-- [ ] Test the use case against a fake `ProblemRepository`.
-
-## Feature
-
-- [ ] Implement every branch in `ProblemFinderViewModel.onIntent`.
-- [ ] Define cancellation, debounce, and stale-result behavior.
-- [ ] Replace the placeholder `ProblemFinderScreen` with stateless UI.
-- [ ] Handle effects in `ProblemFinderRoute`.
-- [ ] Add ViewModel and Compose UI tests.
-
-## Production readiness
-
-- [ ] Add structured logging and crash reporting behind abstractions.
-- [ ] Add accessibility labels and test large font/display sizes.
-- [ ] Define analytics events behind a stable API if analytics is required.
-- [ ] Add baseline profiles and macrobenchmarks after real user journeys exist.
-- [ ] Add CI for lint, unit tests, and debug assembly.
-- [ ] Review R8 rules and release signing outside source control.
+For the next feature, write down its inputs, loading/empty/error behavior, account ownership, navigation, and tests first. Keep that specification short and link it to the implementation.
 
