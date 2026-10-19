@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.example.problemfinder.core.designsystem.theme.ImmensityTheme
 import com.example.problemfinder.core.designsystem.R as DesignR
 
+/** Navigation placeholder: shows the selected ID and back action; no detail data is loaded yet. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun OpportunityDetailsScreen(clusterId: Int, onBack: () -> Unit) {

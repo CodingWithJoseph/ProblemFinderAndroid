@@ -2,6 +2,7 @@ package com.example.problemfinder.data.opportunities.impl.model.dto
 
 import kotlinx.serialization.Serializable
 
+/** Backend card shape; mapping trims text, parses the optional timestamp, and validates model rules. */
 @Serializable
 data class OpportunityDto(
     val id: Int,

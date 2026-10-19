@@ -36,6 +36,7 @@ import com.example.problemfinder.feature.opportunities.impl.R
 import com.example.problemfinder.feature.opportunities.impl.discovery.DiscoveryIntent
 import com.example.problemfinder.core.designsystem.R as DesignSystemR
 
+/** Horizontal category preview; See all opens Browse with the category, while cards open by ID. */
 @Composable
 internal fun DiscoveryCollectionRow(
     category: OpportunityCategory,

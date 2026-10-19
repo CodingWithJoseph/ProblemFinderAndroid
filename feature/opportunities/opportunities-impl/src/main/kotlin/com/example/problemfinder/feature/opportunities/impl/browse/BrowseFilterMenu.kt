@@ -30,6 +30,7 @@ import com.example.problemfinder.core.model.opportunity.OpportunityCategory
 import com.example.problemfinder.feature.opportunities.impl.R
 import com.example.problemfinder.core.designsystem.R as DesignR
 
+/** Non-ALL filter names must match OpportunityCategory names to reuse their presentation metadata. */
 @StringRes internal fun OpportunityCategoryFilter.titleRes(): Int =
     if (this == OpportunityCategoryFilter.ALL) R.string.title_browse_all
     else OpportunityCategory.valueOf(name).appearance().title
@@ -41,6 +42,7 @@ import com.example.problemfinder.core.designsystem.R as DesignR
     SortType.SMALLEST -> R.string.label_sort_smallest
 }
 
+/** Owns only menu visibility; selected filters remain in ViewModel state and change through intents. */
 @Composable
 internal fun BrowseFilterMenu(state: BrowseState, onIntent: (BrowseIntent) -> Unit) {
     var expanded by rememberSaveable { mutableStateOf(false) }

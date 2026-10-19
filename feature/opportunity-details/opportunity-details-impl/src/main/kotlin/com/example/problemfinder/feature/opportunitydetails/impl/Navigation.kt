@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.problemfinder.feature.opportunitydetails.api.OpportunityDetailsDestination
 
+/** Reads the integer route argument and delegates back navigation to the app's owning NavController. */
 fun NavGraphBuilder.opportunityDetails(onBack: () -> Unit) {
     composable(
         route = OpportunityDetailsDestination.ROUTE,

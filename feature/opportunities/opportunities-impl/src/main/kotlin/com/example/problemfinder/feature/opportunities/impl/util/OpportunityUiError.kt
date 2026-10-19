@@ -3,6 +3,7 @@ package com.example.problemfinder.feature.opportunities.impl.util
 import com.example.problemfinder.core.model.opportunity.OpportunityFailure
 import com.example.problemfinder.feature.opportunities.impl.R
 
+/** Presentation-safe failure category; raw exception details are not shown to the user. */
 data class OpportunityUiError(
     val failure: OpportunityFailure
 )
@@ -16,5 +17,6 @@ private val serviceMessage = mapOf(
     OpportunityFailure.UNKNOWN to (R.string.title_failure to R.string.message_failure),
 )
 
+/** Returns title then message resource IDs; composables/hosts resolve them with the current locale. */
 internal fun OpportunityUiError.messageRes(): Pair<Int, Int> = serviceMessage[this.failure] ?:
     Pair(R.string.title_failure, R.string.message_failure)

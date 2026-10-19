@@ -9,8 +9,13 @@ import com.example.problemfinder.data.opportunities.impl.model.entity.BrowseQuer
 import com.example.problemfinder.data.opportunities.impl.model.entity.BrowseQueryItemEntity
 import kotlinx.coroutines.flow.Flow
 
+/** Query metadata and ordered memberships; multi-table writes are grouped by BrowseLocalDataSource. */
 @Dao
 interface BrowseDao {
+    /**
+     * Left joins retain metadata for a successfully synced empty query. Every join includes userId
+     * so the same cluster ID in another account cannot supply content or watch state.
+     */
     @Query(
         """
         SELECT
@@ -78,6 +83,7 @@ interface BrowseDao {
         sort: String
     ): List<BrowseQueryItemEntity>
 
+    /** Inserts/updates metadata without deleting the memberships that refer to it. */
     @Upsert
     suspend fun upsertQuery(
         query: BrowseQueryEntity
@@ -88,6 +94,7 @@ interface BrowseDao {
         items: List<BrowseQueryItemEntity>
     )
 
+    /** Deletes this query's arrangement, retaining shared opportunity content and other queries. */
     @Query(
         """
     DELETE FROM browse_query_items

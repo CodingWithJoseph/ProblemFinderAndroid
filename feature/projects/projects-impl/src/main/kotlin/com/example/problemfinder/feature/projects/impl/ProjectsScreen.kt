@@ -57,6 +57,7 @@ private fun ProjectsScreenStandardPreview() = ImmensityTheme {
 }
 
 
+/** Placeholder tab content; the title does not represent an implemented projects workflow. */
 @Composable
 fun ProjectsScreen(
     modifier: Modifier = Modifier,

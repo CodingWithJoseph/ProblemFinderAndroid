@@ -8,6 +8,7 @@ enum class OpportunityCategory {
 }
 
 
+/** Parses the backend category key strictly; unknown keys are invalid data, not UNCATEGORIZED. */
 fun String.toOpportunityCategory(): OpportunityCategory =
     when (this) {
         "build_and_tooling" -> OpportunityCategory.BUILD_AND_TOOLING

@@ -67,6 +67,7 @@ private fun SettingsScreenPreview() = ImmensityTheme {
 }
 
 
+/** Placeholder settings surface with a working close action; no preferences are implemented. */
 @Composable
 fun SettingsScreen(
     onClose: () -> Unit,

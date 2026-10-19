@@ -10,8 +10,13 @@ import com.example.problemfinder.data.opportunities.impl.model.entity.DiscoveryC
 import com.example.problemfinder.data.opportunities.impl.model.entity.DiscoveryDashboardEntity
 import kotlinx.coroutines.flow.Flow
 
+/** Reads dashboard structure and shared card content as one account-scoped, ordered result. */
 @Dao
 interface DiscoveryDao {
+    /**
+     * Left joins preserve dashboards without a featured card and collections without items.
+     * Collection order is fixed here; item order follows each collection's saved server positions.
+     */
     @Query(
         """
     SELECT
@@ -77,6 +82,7 @@ interface DiscoveryDao {
     @Insert
     suspend fun insertCollectionItems(items: List<DiscoveryCollectionItemEntity>)
 
+    /** Cascades to collection memberships without deleting the shared opportunity rows. */
     @Query("DELETE FROM discovery_collections where userId = :userId")
     suspend fun clearCollections(userId: String)
 }

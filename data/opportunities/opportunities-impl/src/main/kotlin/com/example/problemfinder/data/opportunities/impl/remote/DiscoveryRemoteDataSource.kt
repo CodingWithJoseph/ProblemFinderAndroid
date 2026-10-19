@@ -8,6 +8,7 @@ import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.get
 import javax.inject.Inject
 
+/** Fetches the full authenticated dashboard; cache replacement and model validation live above HTTP. */
 class DiscoveryRemoteDataSource @Inject constructor(
     private val client: HttpClient,
     private val config: OpportunitiesApiConfig

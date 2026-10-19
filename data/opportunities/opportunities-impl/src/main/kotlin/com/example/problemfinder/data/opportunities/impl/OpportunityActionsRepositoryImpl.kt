@@ -14,6 +14,10 @@ import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.sync.withLock
 
+/**
+ * Performs server-confirmed watch changes, then updates the shared cached opportunity row.
+ * Holding the same lock as refresh prevents an older in-flight read from overwriting the mutation.
+ */
 class OpportunityActionsRepositoryImpl @Inject constructor(
     private val sessions: AuthSessionProvider,
     private val remote: OpportunityActionsRemoteDataSource,
@@ -23,10 +27,12 @@ class OpportunityActionsRepositoryImpl @Inject constructor(
     override suspend fun setWatched(userId: String, clusterId: Int, watched: Boolean): Unit = opportunityCall {
         require(clusterId > 0)
         val session = requireSession(sessions)
+        // The caller carries the rendered card's owner so a delayed tap cannot cross accounts.
         if (session.userId != userId) throw CancellationException("Opportunity account changed")
         sync.mutex.withLock {
             ensureSameAccount(userId, sessions)
             val response = remote.setWatched(clusterId, watched, session.accessToken)
+            // An HTTP success with the wrong membership is not a successful requested change.
             if (response.isWatched != watched) throw OpportunityOperationException(
                 OpportunityFailure.INVALID_RESPONSE,
                 IllegalStateException("Unexpected opportunity membership"),

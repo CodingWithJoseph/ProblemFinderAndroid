@@ -8,6 +8,10 @@ import com.example.problemfinder.feature.authentication.impl.AuthUIError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
+/**
+ * Owns sign-in form state and calls the domain use case. Success emits a navigation effect;
+ * validation and service failures remain in state for the screen to render.
+ */
 @HiltViewModel
 class SignInViewModel @Inject constructor(
     private val signInUseCase: SignInUseCase
@@ -28,9 +32,11 @@ class SignInViewModel @Inject constructor(
         }
     }
 
+    /** Captures the form for one request; safeLaunch routes non-cancellation failures to onError. */
     private fun submit() = safeLaunch {
         if (state.value.isLoading) return@safeLaunch
 
+        // Normalize surrounding email whitespace, but preserve the password exactly as entered.
         val email = state.value.email.trim()
         val password = state.value.password
 
@@ -45,6 +51,7 @@ class SignInViewModel @Inject constructor(
             signInUseCase(SignInUseCase.Params(email = email, password = password))
             sendEffect(SignInEffect.SignedIn)
         } finally {
+            // Always release the loading state, including when the request fails or is cancelled.
             reduce { copy(isLoading = false) }
         }
     }

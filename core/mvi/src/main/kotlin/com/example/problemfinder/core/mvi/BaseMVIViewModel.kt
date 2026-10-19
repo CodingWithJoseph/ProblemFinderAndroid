@@ -15,6 +15,11 @@ import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
 
 
+/**
+ * Shared coroutine and stream plumbing; each feature owns its intents and state transitions.
+ * StateFlow exposes the latest state to collectors. The buffered channel queues effects for a
+ * consumer while this ViewModel lives; effects are neither broadcast nor persisted across death.
+ */
 abstract class BaseMVIViewModel<Intent, State, Effect>(initialState: State) : ViewModel(),
     MVIStore<Intent, State, Effect> {
 
@@ -25,6 +30,7 @@ abstract class BaseMVIViewModel<Intent, State, Effect>(initialState: State) : Vi
     final override val effects: Flow<Effect> = effectChannel.receiveAsFlow()
 
 
+    /** Runs in viewModelScope, forwarding ordinary exceptions to [onError] but preserving cancellation. */
     protected fun safeLaunch(block: suspend CoroutineScope.() -> Unit): Job =
         viewModelScope.launch {
             try {
@@ -36,10 +42,12 @@ abstract class BaseMVIViewModel<Intent, State, Effect>(initialState: State) : Vi
             }
         }
 
+    /** Atomically updates state. Keep the transform free of side effects: update may retry it. */
     protected fun reduce(transform: State.() -> State) {
         mutableState.update(transform)
     }
 
+    /** Enqueues a transient UI command without blocking the caller; delivery needs an active consumer. */
     protected fun sendEffect(effect: Effect) {
         viewModelScope.launch {
             effectChannel.send(effect)

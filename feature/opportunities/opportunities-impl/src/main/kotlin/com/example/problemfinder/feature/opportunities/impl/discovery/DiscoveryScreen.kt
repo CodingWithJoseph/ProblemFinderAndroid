@@ -36,6 +36,7 @@ import com.example.problemfinder.feature.opportunities.impl.components.Discovery
 import com.example.problemfinder.feature.opportunities.impl.components.FeaturedDiscoveryCard
 import com.example.problemfinder.feature.opportunities.impl.util.messageRes
 
+/** Displays the supplied dashboard; refresh/error status supplements cached cards instead of hiding them. */
 @Composable
 internal fun DiscoveryScreen(
     state: DiscoveryState,
@@ -90,6 +91,7 @@ internal fun DiscoveryScreen(
     }
 }
 
+/** Distinguishes initial loading, refreshing existing content, unsynced data, and confirmed emptiness. */
 @Composable
 private fun DiscoveryStatus(state: DiscoveryState) {
     val error = state.contentError

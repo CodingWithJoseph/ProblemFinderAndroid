@@ -13,18 +13,27 @@ import java.io.IOException
 import kotlin.coroutines.cancellation.CancellationException
 
 
+/** Obtains credentials only for network work; observing an existing cache does not need a token. */
 internal suspend fun requireSession(sessions: AuthSessionProvider): AuthSession =
     sessions.currentSession() ?: throw OpportunityOperationException(
         OpportunityFailure.SESSION_UNAVAILABLE,
         IllegalStateException("No usable opportunity session"),
     )
 
+/**
+ * Rejects work for an account no longer active at this checkpoint. Compare user IDs, not access
+ * tokens: a token refresh for the same account does not make its response stale.
+ */
 internal suspend fun ensureSameAccount(userId: String, sessions: AuthSessionProvider) {
     if (sessions.observeUserId().first() != userId) {
         throw CancellationException("Opportunity account changed")
     }
 }
 
+/**
+ * Converts infrastructure failures into the feature's stable failure categories. Cancellation and
+ * already-classified failures pass through unchanged so account switches do not become error UI.
+ */
 internal suspend fun <T> opportunityCall(block: suspend () -> T): T =
     try {
         block()

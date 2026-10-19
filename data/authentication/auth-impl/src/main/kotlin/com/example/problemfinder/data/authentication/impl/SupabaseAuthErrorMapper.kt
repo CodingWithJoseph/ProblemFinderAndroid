@@ -5,6 +5,7 @@ import io.github.jan.supabase.auth.exception.AuthErrorCode
 import io.github.jan.supabase.auth.exception.AuthRestException
 import kotlinx.io.IOException
 
+/** Converts SDK-specific codes into app failure categories; unrecognized errors remain UNKNOWN. */
 internal object SupabaseAuthErrorMapper {
     private val code = mapOf(
         AuthErrorCode.InvalidCredentials to AuthFailure.INVALID_CREDENTIALS,

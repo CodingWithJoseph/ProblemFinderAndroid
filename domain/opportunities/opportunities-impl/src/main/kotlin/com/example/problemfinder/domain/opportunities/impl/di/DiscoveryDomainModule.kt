@@ -15,6 +15,7 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 
+/** Binds dashboard observation and refresh independently so features can inject or fake either operation. */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class DiscoveryDomainModule {

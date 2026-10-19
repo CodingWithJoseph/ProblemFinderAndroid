@@ -7,6 +7,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.example.problemfinder.feature.settings.api.SettingsDestination
 
+/** Registers the placeholder destination; the reserved ViewModel state/effects do not drive UI yet. */
 fun NavGraphBuilder.settings(
     onClose: () -> Unit
 ) {

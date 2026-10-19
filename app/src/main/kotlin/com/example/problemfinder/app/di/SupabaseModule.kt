@@ -10,6 +10,10 @@ import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.createSupabaseClient
 import javax.inject.Singleton
 
+/**
+ * One auth client is shared by the activity and repositories. Its callback scheme/host must match
+ * the manifest intent filter and the redirect URLs sent by the auth repository.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 object SupabaseModule {

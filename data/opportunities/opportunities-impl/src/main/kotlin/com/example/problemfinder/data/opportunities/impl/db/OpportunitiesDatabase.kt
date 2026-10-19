@@ -9,6 +9,10 @@ import com.example.problemfinder.data.opportunities.impl.model.entity.DiscoveryC
 import com.example.problemfinder.data.opportunities.impl.model.entity.DiscoveryCollectionEntity
 import com.example.problemfinder.data.opportunities.impl.model.entity.DiscoveryDashboardEntity
 
+/**
+ * One Room database for shared cards and the separate Browse/Discovery arrangements that reference
+ * them. This lets each local data source update content, membership, and metadata in one transaction.
+ */
 @Database(
     entities = [
         DiscoveryCollectionItemEntity::class,

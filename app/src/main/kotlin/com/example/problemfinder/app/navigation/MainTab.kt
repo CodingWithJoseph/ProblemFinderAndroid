@@ -9,6 +9,7 @@ import com.example.problemfinder.feature.builds.api.BuildsDestination
 import com.example.problemfinder.feature.projects.api.ProjectsDestination
 import com.example.problemfinder.feature.search.api.SearchDestination
 
+/** Top-level tab metadata; Discovery also represents the nested Browse destination. */
 enum class MainTab(
     val route: String,
     @StringRes val label: Int,

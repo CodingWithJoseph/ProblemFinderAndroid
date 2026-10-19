@@ -7,6 +7,7 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 
+/** Connects the shared watch-action contract to its repository-backed implementation. */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class OpportunityActionsDomainModule {

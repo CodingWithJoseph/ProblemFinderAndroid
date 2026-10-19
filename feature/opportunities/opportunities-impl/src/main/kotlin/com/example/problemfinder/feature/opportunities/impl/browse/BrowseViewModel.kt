@@ -19,6 +19,11 @@ import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlin.coroutines.cancellation.CancellationException
 
+/**
+ * Owns one category/sort query. Observed cache snapshots supply rows and paging metadata;
+ * refresh/page operations only report progress and errors until the cache emits again.
+ * Navigation and watch failures leave through effects rather than persistent screen state.
+ */
 @HiltViewModel
 class BrowseViewModel @Inject constructor(
     private val observeBrowse: ObserveBrowseUseCase,
@@ -33,6 +38,8 @@ class BrowseViewModel @Inject constructor(
     private var observationJob: Job? = null
     private var refreshJob: Job? = null
     private var pageJob: Job? = null
+    // Cancellation stops work; generations also reject completions that arrive after cancellation.
+    // Query generations guard observation, request generations guard refresh/page results.
     private var queryVersion = 0L
     private var requestVersion = 0L
     private var needsInitialSync = false
@@ -56,6 +63,7 @@ class BrowseViewModel @Inject constructor(
             is BrowseIntent.WatchCluster -> watchCluster(intent.clusterId)
             is BrowseIntent.OpenCluster -> sendEffect(BrowseEffect.NavigateToCluster(intent.clusterId))
             BrowseIntent.Entered -> {
+                // Initial observation schedules the first sync; a later composition entry requests fresh data.
                 if (hasEntered) refreshCurrentQuery() else hasEntered = true
             }
             BrowseIntent.Reload -> refreshCurrentQuery()
@@ -74,6 +82,7 @@ class BrowseViewModel @Inject constructor(
         }
     }
 
+    /** Replaces the observer; only recovery of the same query retains its last visible cache. */
     private fun startQuery(
         category: OpportunityCategoryFilter,
         sort: SortType,
@@ -94,6 +103,7 @@ class BrowseViewModel @Inject constructor(
                     pageRequest = RequestState.Idle,
                 )
             } else {
+                // Watch actions belong to the account, so they can survive a filter/sort change.
                 BrowseState(category = category, sort = sort, userId = userId, pendingClusterIds = pendingClusterIds)
             }
         }
@@ -112,8 +122,10 @@ class BrowseViewModel @Inject constructor(
         }
     }
 
+    /** Applies the complete cache view; the first ready snapshot after setup/account change starts sync. */
     private fun acceptSnapshot(snapshot: BrowseSnapshot) {
         if (state.value.userId != snapshot.userId) {
+            // Clear the previous account's rows and pending actions before showing the new cache.
             cancelWatchActions()
             invalidateRequests()
             needsInitialSync = true
@@ -127,6 +139,7 @@ class BrowseViewModel @Inject constructor(
         }
 
         if (!snapshot.cacheReady) {
+            // A cache read in progress is different from a successful read with no results.
             reduce {
                 copy(cacheReady = false, observationRequest = RequestState.Loading)
             }
@@ -145,11 +158,13 @@ class BrowseViewModel @Inject constructor(
         }
 
         if (snapshot.userId != null && needsInitialSync) {
+            // Publish cached content before requesting the network, including an empty cache.
             needsInitialSync = false
             refreshCurrentQuery()
         }
     }
 
+    /** Recovers a failed observer first; otherwise refreshes without discarding visible rows. */
     private fun refreshCurrentQuery() {
         val current = state.value
         if (current.observationRequest is RequestState.Error) {
@@ -184,10 +199,12 @@ class BrowseViewModel @Inject constructor(
         }
     }
 
+    /** Explicit retry may repeat a cursor; scroll-triggered paging must wait for it to advance. */
     private fun loadNextPage(explicit: Boolean) {
         val current = state.value
         if (!current.canLoadNextPage) return
         if (!explicit && !current.canAutoLoadNextPage) return
+        // The operation can finish before Room emits the new cursor; do not fetch that page twice.
         if (!explicit && current.cursor == lastPageCursor) return
 
         val version = requestVersion
@@ -214,6 +231,7 @@ class BrowseViewModel @Inject constructor(
         }
     }
 
+    /** Serializes taps per card; the observed cache, rather than a local toggle, updates isWatched. */
     private fun watchCluster(clusterId: Int) {
         val current = state.value
         val userId = current.userId ?: return
@@ -238,10 +256,12 @@ class BrowseViewModel @Inject constructor(
             }
         }
         watchJobs[clusterId] = job
+        // An old completion must not remove a newer job registered for this same ID.
         job.invokeOnCompletion { if (watchJobs[clusterId] === job) watchJobs.remove(clusterId) }
     }
 
     private fun cancelWatchActions() {
+        // Increment first so cancellation cleanup cannot affect the next account's pending state.
         watchVersion += 1
         watchJobs.values.toList().forEach { it.cancel() }
         watchJobs.clear()
@@ -256,6 +276,7 @@ class BrowseViewModel @Inject constructor(
         lastPageCursor = null
     }
 
+    /** Observation failure keeps the last rows readable but stops refresh/paging until observation recovers. */
     override fun onError(error: Throwable) {
         invalidateRequests()
         reduce {

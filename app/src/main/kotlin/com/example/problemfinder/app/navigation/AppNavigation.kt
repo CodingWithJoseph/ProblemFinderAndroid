@@ -57,6 +57,7 @@ import io.github.jan.supabase.auth.status.SessionStatus
 
 internal const val STARTUP_ROUTE = "startup"
 
+// Route patterns (including argument placeholders) used by the auth policy and shell visibility.
 internal val signedInRoutes = setOf(
     OpportunitiesDestinations.DISCOVERY,
     OpportunitiesDestinations.BROWSE_ROUTE,
@@ -67,11 +68,13 @@ internal val signedInRoutes = setOf(
     OpportunityDetailsDestination.ROUTE,
 )
 
+/** Destinations produced only after MainActivity has accepted an auth callback session. */
 enum class LinkDestination {
     RESET_PASSWORD,
     HOME
 }
 
+/** Holds navigation while account restoration is pending and offers retry if that read fails. */
 fun NavGraphBuilder.startup(
     accountRequest: RequestState<String?, Unit>,
     onRetry: () -> Unit,
@@ -104,6 +107,10 @@ fun NavGraphBuilder.startup(
     }
 }
 
+/**
+ * Composition root for feature routes, shared shell, and auth redirects. Features emit callbacks;
+ * only this layer chooses cross-feature destinations and changes the root back stack.
+ */
 @Composable
 fun AppNavigation(
     sessionStatus: SessionStatus,
@@ -123,6 +130,8 @@ fun AppNavigation(
     val failureMessage = stringResource(R.string.sign_out_failed)
     val retryLabel = stringResource(R.string.retry_label)
 
+    // Remove previous destinations so Back cannot return to auth forms after sign-in, or to
+    // signed-in content after sign-out. Keep the graph itself as the navigation anchor.
     fun navigateToRoot(route: String) {
         if (navController.currentDestination?.route == route) return
 
@@ -134,6 +143,7 @@ fun AppNavigation(
         }
     }
 
+    // Browse is a child of Discovery, so its category route keeps the Discovery tab selected.
     val selectedTab = when (currentRoute) {
         OpportunitiesDestinations.BROWSE_ROUTE -> MainTab.DISCOVERY
         else -> MainTab.entries.firstOrNull {
@@ -151,6 +161,7 @@ fun AppNavigation(
         onNavigateBack = if (currentRoute == OpportunitiesDestinations.BROWSE_ROUTE) {
             { navController.popBackStack() }
         } else null,
+        // Tabs share one stack rooted at Discovery; they do not maintain separate saved stacks.
         onTabSelected = { tab ->
             navController.navigate(tab.route) {
                 popUpTo(OpportunitiesDestinations.DISCOVERY)
@@ -242,6 +253,7 @@ fun AppNavigation(
         }
     )
 
+    // Re-evaluate after account, SDK session, link, or route changes; the pure policy is unit tested.
     LaunchedEffect(sessionStatus, state.accountRequest, linkDestination, currentRoute) {
         val nextRoute = resolveRootRoute(
             sessionStatus = sessionStatus,
@@ -255,6 +267,8 @@ fun AppNavigation(
         if (linkDestination != null) onLinkDestinationConsumed()
     }
 
+    // Effects are transient commands. Keeping the snackbar here lets sign-out retry survive a
+    // feature change while this app-level composition remains active.
     LaunchedEffect(viewmodel) {
         viewmodel.effects.collect {
             when(it) {

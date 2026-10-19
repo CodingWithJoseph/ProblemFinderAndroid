@@ -97,6 +97,7 @@ private val DarkScheme = darkColorScheme(
     surfaceContainerHighest = Color(0xFF433C35)
 ).withImmensityFixedRoles()
 
+// Fixed roles deliberately retain the same colors in both schemes, including tab selection colors.
 private fun ColorScheme.withImmensityFixedRoles(): ColorScheme = copy(
     primaryFixed = Color(0xFFEAE2D8),
     primaryFixedDim = Color(0xFFCFC5B8),
@@ -114,6 +115,7 @@ private fun ColorScheme.withImmensityFixedRoles(): ColorScheme = copy(
     onTertiaryFixedVariant = Color(0xFF614733)
 )
 
+/** Applies the app's light/dark Material colors and shared Inter typography to all feature content. */
 @Composable
 fun ImmensityTheme(content: @Composable () -> Unit) {
 

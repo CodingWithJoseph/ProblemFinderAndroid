@@ -5,6 +5,7 @@ import com.example.problemfinder.core.common.shared.OpportunityCategoryFilter
 import com.example.problemfinder.core.common.shared.SortType
 import com.example.problemfinder.core.model.browse.BrowseSnapshot
 
+/** Observes account-scoped cached rows for a category/sort query; collecting does not request a refresh. */
 abstract class ObserveBrowseUseCase: ObservableUseCase<ObserveBrowseUseCase.Params, BrowseSnapshot>() {
     data class Params(val category: OpportunityCategoryFilter, val sort: SortType)
 }

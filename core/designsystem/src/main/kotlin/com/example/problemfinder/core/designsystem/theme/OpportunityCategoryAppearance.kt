@@ -15,6 +15,7 @@ data class OpportunityAppearance(
     val foregroundColor: Color,
 )
 
+/** Maps domain categories to localized labels, icons, and colors without putting UI types in models. */
 fun OpportunityCategory.appearance(darkTheme: Boolean = false): OpportunityAppearance {
     val foreground = if (darkTheme) Color(0xFFF4F4EC) else Color(0xFF242621)
     return when (this) {

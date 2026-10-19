@@ -50,6 +50,7 @@ import com.example.problemfinder.feature.opportunities.impl.util.OpportunityUiEr
 import com.example.problemfinder.feature.opportunities.impl.util.messageRes
 import kotlin.time.Instant
 
+/** Renders cached results and independent request states; all user actions return as intents. */
 @Composable
 fun BrowseScreen(
     state: BrowseState,
@@ -78,6 +79,7 @@ fun BrowseScreen(
         }
 
         val contentError = state.contentError
+        // A failed refresh/observation leaves existing rows useful; show an inline retry banner.
         if (contentError != null && state.data.isNotEmpty()) {
             BrowseBanner(
                 message = stringResource(contentError.messageRes().second),
@@ -105,6 +107,7 @@ private fun BrowseNoDataScreen(
     val loading = error == null && (
         !state.cacheReady || state.refreshRequest == RequestState.Loading
         )
+    // Only a synced cache establishes a successful empty result; a first read may still need sync.
     val resources = when {
         error != null -> error.messageRes()
         loading -> R.string.title_no_data_loading to R.string.message_no_data_loading
@@ -153,6 +156,7 @@ private fun BrowseDataScreen(
     onIntent: (BrowseIntent) -> Unit,
 ) {
     val listState = rememberLazyListState()
+    // Request ahead of the final row; derivedStateOf avoids reacting to every scroll pixel.
     val reachedBottom by remember(listState) {
         derivedStateOf {
             val layout = listState.layoutInfo
@@ -162,6 +166,8 @@ private fun BrowseDataScreen(
         }
     }
 
+    // A new cursor can trigger the next page while the viewport is still near the bottom.
+    // The ViewModel also deduplicates cursors and requires explicit retry after page errors.
     LaunchedEffect(reachedBottom, state.cursor, state.canAutoLoadNextPage) {
         if (reachedBottom && state.canAutoLoadNextPage) {
             onIntent(BrowseIntent.LoadNextPage)
@@ -188,6 +194,7 @@ private fun BrowseDataScreen(
     }
 }
 
+/** Keeps pagination errors local to the footer and provides a manual alternative to auto-loading. */
 @Composable
 private fun BrowsePageFooter(state: BrowseState, onIntent: (BrowseIntent) -> Unit) {
     when (val request = state.pageRequest) {

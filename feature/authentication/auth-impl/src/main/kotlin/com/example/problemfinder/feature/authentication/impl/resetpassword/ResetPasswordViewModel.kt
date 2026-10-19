@@ -8,6 +8,10 @@ import com.example.problemfinder.feature.authentication.impl.AuthUIError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
+/**
+ * Validates matching password fields and updates the recovery session established by the app's
+ * auth-link handler. Password policy and session validity are also checked by the auth service.
+ */
 @HiltViewModel
 class ResetPasswordViewModel @Inject constructor(
     private val resetPasswordUseCase: ResetPasswordUseCase
@@ -26,6 +30,7 @@ class ResetPasswordViewModel @Inject constructor(
         }
     }
 
+    /** Captures the form for one request; safeLaunch routes non-cancellation failures to onError. */
     private fun submit() = safeLaunch {
         if (state.value.isLoading) return@safeLaunch
 
@@ -48,6 +53,7 @@ class ResetPasswordViewModel @Inject constructor(
             resetPasswordUseCase(ResetPasswordUseCase.Params(password=password))
             sendEffect(ResetPasswordEffect.PasswordUpdated)
         } finally {
+            // Always release the loading state, including when the request fails or is cancelled.
             reduce { copy(isLoading = false) }
         }
     }

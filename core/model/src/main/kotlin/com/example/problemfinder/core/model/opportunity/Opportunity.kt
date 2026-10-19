@@ -2,6 +2,10 @@ package com.example.problemfinder.core.model.opportunity
 
 import kotlin.time.Instant
 
+/**
+ * Validated app model for a backend cluster. isWatched belongs to the account reading it, while
+ * date may be absent. Network/database mappers must satisfy these invariants before UI sees it.
+ */
 data class Opportunity(
     val id: Int,
     val name: String,

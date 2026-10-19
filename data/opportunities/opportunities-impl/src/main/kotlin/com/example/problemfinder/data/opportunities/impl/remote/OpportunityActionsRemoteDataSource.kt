@@ -13,10 +13,12 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import javax.inject.Inject
 
+/** Adapts a desired watch state to the backend's POST-add and DELETE-remove routes. */
 class OpportunityActionsRemoteDataSource @Inject constructor(
     private val client: HttpClient,
     private val config: OpportunitiesApiConfig,
 ) {
+    /** Returns server membership for repository validation; this layer does not alter the cache. */
     suspend fun setWatched(clusterId: Int, watched: Boolean, accessToken: String): OpportunityWatchDto {
         val url = "${config.baseUrl.trimEnd('/')}/pipeline/watch"
         return if (watched) client.post(url) {

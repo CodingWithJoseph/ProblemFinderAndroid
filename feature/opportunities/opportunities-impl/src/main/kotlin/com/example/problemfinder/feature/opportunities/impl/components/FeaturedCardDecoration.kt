@@ -20,6 +20,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import com.example.problemfinder.core.designsystem.theme.DiscoverySpotlightColors
 
+/** Decorative category artwork excluded from accessibility; the card's text carries its meaning. */
 @Composable
 internal fun FeaturedCardDecoration(
     @DrawableRes iconRes: Int,

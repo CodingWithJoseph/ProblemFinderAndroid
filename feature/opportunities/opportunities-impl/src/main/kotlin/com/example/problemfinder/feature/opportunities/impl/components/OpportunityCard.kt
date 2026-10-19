@@ -44,6 +44,7 @@ import com.example.problemfinder.feature.opportunities.impl.util.toOpportunityDa
 import java.time.ZoneId
 
 
+/** Fixed-size collection card with separate open/watch callbacks and no local watch-state ownership. */
 @Composable
 internal fun OpportunityCard(
     cluster: Opportunity,

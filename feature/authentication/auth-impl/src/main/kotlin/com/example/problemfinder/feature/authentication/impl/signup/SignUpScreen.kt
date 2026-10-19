@@ -54,6 +54,7 @@ import com.example.problemfinder.feature.authentication.impl.R
 import com.example.problemfinder.feature.authentication.impl.messageRes
 import com.example.problemfinder.core.designsystem.R as DesignSystemR
 
+/** Selects a layout for the supplied sign-up step; validation and step transitions belong to the ViewModel. */
 @Composable
 fun SignUpScreen(
     modifier: Modifier = Modifier,
