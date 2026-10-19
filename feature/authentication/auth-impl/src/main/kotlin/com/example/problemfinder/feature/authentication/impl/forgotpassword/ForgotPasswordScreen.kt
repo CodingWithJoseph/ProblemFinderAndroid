@@ -35,7 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,7 +42,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.problemfinder.core.designsystem.theme.ImmensityTheme
-import com.example.problemfinder.feature.authentication.impl.AuthAirplaneIcon
+import com.example.problemfinder.feature.authentication.impl.AuthMailIcon
 import com.example.problemfinder.feature.authentication.impl.AuthOperation
 import com.example.problemfinder.feature.authentication.impl.R
 import com.example.problemfinder.feature.authentication.impl.AuthLogo
@@ -204,13 +203,13 @@ private fun ForgotPasswordMainContent(
 @Composable
 private fun ForgotPasswordHeader() {
     Column(modifier = Modifier.fillMaxWidth()) {
-        AuthAirplaneIcon()
+        AuthMailIcon()
 
         Spacer(Modifier.height(24.dp))
 
         Text(
             stringResource(R.string.auth_account_recovery).uppercase(),
-            style = TextStyle(letterSpacing = 2.sp),
+            style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 2.sp),
             color = MaterialTheme.colorScheme.secondary,
             fontSize = 12.sp,
             fontWeight = FontWeight.SemiBold
@@ -294,7 +293,7 @@ private fun ForgotPasswordButton(
                 Text(stringResource(R.string.auth_send_reset_email))
                 Icon(
                     painter = painterResource(DesignSystemR.drawable.icon_arrow_forward),
-                    contentDescription = stringResource(DesignSystemR.string.icon_forward_arrow)
+                    contentDescription = null,
                 )
             }
         }

@@ -1,5 +1,6 @@
 package com.example.problemfinder.app.navigation
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,11 +14,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,6 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.problemfinder.app.ApplicationState
 import com.example.problemfinder.app.R
+import com.example.problemfinder.core.designsystem.R as DesignSystemR
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,12 +44,15 @@ fun ImmensityScaffold(
     selectedTab: MainTab?,
     onTabSelected: (MainTab) -> Unit,
     onSettingsClicked: () -> Unit,
-    onSignOutClicked: () -> Unit
+    onSignOutClicked: () -> Unit,
+    onNavigateBack: (() -> Unit)? = null,
 ) {
     var isExpanded by remember { mutableStateOf(false) }
-
+    val colorScheme = MaterialTheme.colorScheme
 
     Scaffold(
+        containerColor = colorScheme.background,
+        contentColor = colorScheme.onBackground,
         snackbarHost = {
             SnackbarHost(snackbarHost)
         },
@@ -53,8 +60,25 @@ fun ImmensityScaffold(
         topBar = {
             if(showAppChrome){
                 TopAppBar(
-                    title = { Text(text = stringResource(R.string.app_name)) },
-                    navigationIcon = {},
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = colorScheme.background,
+                        scrolledContainerColor = colorScheme.background,
+                        titleContentColor = colorScheme.onBackground,
+                        navigationIconContentColor = colorScheme.onBackground,
+                        actionIconContentColor = colorScheme.onBackground,
+                    ),
+                    title = {
+                        Image(
+                            painter = painterResource(DesignSystemR.drawable.logo_orange),
+                            contentDescription = stringResource(R.string.app_name),
+                            modifier = Modifier.size(32.dp),
+                        )
+                    },
+                    navigationIcon = {
+                        if (onNavigateBack != null) IconButton(onClick = onNavigateBack) {
+                            Icon(painterResource(DesignSystemR.drawable.icon_arrow_back), stringResource(R.string.action_navigate_back))
+                        }
+                    },
                     actions = {
                         if(state.isSigningOut) {
                             CircularProgressIndicator(
@@ -66,7 +90,7 @@ fun ImmensityScaffold(
                                 onClick = { isExpanded = true },
                                 content = {
                                     Icon(
-                                        painter = painterResource(R.drawable.icon_menu),
+                                        painter = painterResource(DesignSystemR.drawable.icon_menu),
                                         contentDescription = stringResource(R.string.top_app_bar_nav_icon)
                                     )
                                 }
@@ -86,7 +110,7 @@ fun ImmensityScaffold(
                                     },
                                     leadingIcon = {
                                         Icon(
-                                            painter = painterResource(R.drawable.icon_settings),
+                                            painter = painterResource(DesignSystemR.drawable.icon_settings),
                                             contentDescription = null
                                         )
                                     }
@@ -101,7 +125,7 @@ fun ImmensityScaffold(
                                     },
                                     leadingIcon = {
                                         Icon(
-                                            painter = painterResource(R.drawable.icon_sign_out),
+                                            painter = painterResource(DesignSystemR.drawable.icon_sign_out),
                                             contentDescription = null
                                         )
                                     }
@@ -116,9 +140,17 @@ fun ImmensityScaffold(
             if(showAppChrome && selectedTab != null){
                 NavigationBar(
                     modifier = Modifier.fillMaxWidth(),
+                    containerColor = colorScheme.background,
+                    contentColor = colorScheme.onBackground,
+                    tonalElevation = 0.dp,
                     content = {
                         MainTab.entries.forEach {
                             NavigationBarItem(
+                                colors = NavigationBarItemDefaults.colors(
+                                    indicatorColor = colorScheme.secondaryFixed,
+                                    selectedIconColor = colorScheme.onSecondaryFixed,
+                                    unselectedIconColor = colorScheme.onSurfaceVariant,
+                                ),
                                 selected = it == selectedTab,
                                 onClick = { onTabSelected(it) },
                                 enabled = !state.isSigningOut,

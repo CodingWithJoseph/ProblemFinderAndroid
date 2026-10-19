@@ -22,10 +22,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.problemfinder.core.designsystem.theme.ImmensityColors
+import com.example.problemfinder.core.designsystem.theme.ImmensityTheme
 import com.example.problemfinder.core.designsystem.R as DesignSystemR
 
 
-@Preview
 @Composable
 fun AuthLogo() = Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Image(
@@ -45,12 +45,19 @@ fun AuthLogo() = Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Ali
 
 @Preview
 @Composable
-fun AuthAirplaneIcon(padding: Dp = 20.dp) {
+private fun AuthLogoPreview() = ImmensityTheme {
+    AuthLogo()
+}
+
+@Preview
+@Composable
+fun AuthMailIcon(padding: Dp = 20.dp) {
     Icon(
-        painter = painterResource(DesignSystemR.drawable.icon_airplane),
-        contentDescription = stringResource(DesignSystemR.string.icon_airplane),
+        painter = painterResource(DesignSystemR.drawable.icon_mail),
+        contentDescription = null,
         tint = ImmensityColors.Orange,
         modifier = Modifier
+            .size(24.dp + padding * 2)
             .background(ImmensityColors.Orange.copy(alpha = 0.10f), shape = RoundedCornerShape(25))
             .padding(padding),
     )

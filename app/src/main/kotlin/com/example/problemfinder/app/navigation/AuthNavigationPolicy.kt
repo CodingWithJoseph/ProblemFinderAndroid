@@ -2,7 +2,7 @@ package com.example.problemfinder.app.navigation
 
 import com.example.problemfinder.core.mvi.RequestState
 import com.example.problemfinder.feature.authentication.api.AuthDestinations
-import com.example.problemfinder.feature.browse.api.BrowseDestination
+import com.example.problemfinder.feature.opportunities.api.OpportunitiesDestinations
 import io.github.jan.supabase.auth.status.SessionStatus
 
 internal fun resolveRootRoute(
@@ -18,17 +18,17 @@ internal fun resolveRootRoute(
 
     val destination = when {
         linkDestination == LinkDestination.RESET_PASSWORD -> AuthDestinations.RESET_PASSWORD
-        linkDestination == LinkDestination.HOME -> BrowseDestination.ROUTE
+        linkDestination == LinkDestination.HOME -> OpportunitiesDestinations.DISCOVERY
 
         sessionStatus is SessionStatus.NotAuthenticated && requiresAccount ->
             AuthDestinations.SIGN_IN
 
         sessionStatus is SessionStatus.Authenticated &&
             (currentRoute == STARTUP_ROUTE || currentRoute == AuthDestinations.SIGN_IN) ->
-            BrowseDestination.ROUTE
+            OpportunitiesDestinations.DISCOVERY
 
         sessionStatus == SessionStatus.Initializing &&
-            currentRoute == STARTUP_ROUTE && hasKnownAccount -> BrowseDestination.ROUTE
+            currentRoute == STARTUP_ROUTE && hasKnownAccount -> OpportunitiesDestinations.DISCOVERY
 
         sessionStatus is SessionStatus.RefreshFailure -> when {
             accountRequest is RequestState.Error && currentRoute in signedInRoutes -> STARTUP_ROUTE
@@ -36,7 +36,7 @@ internal fun resolveRootRoute(
             account == null -> null
             hasKnownAccount &&
                 (currentRoute == STARTUP_ROUTE || currentRoute == AuthDestinations.SIGN_IN) ->
-                BrowseDestination.ROUTE
+                OpportunitiesDestinations.DISCOVERY
             !hasKnownAccount && requiresAccount -> AuthDestinations.SIGN_IN
             else -> null
         }

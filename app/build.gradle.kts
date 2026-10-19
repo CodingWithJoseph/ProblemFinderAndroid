@@ -58,6 +58,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":feature:opportunity-details:opportunity-details-impl"))
     implementation(project(":core:mvi"))
     implementation(project(":core:designsystem"))
 
@@ -67,12 +68,12 @@ dependencies {
     implementation(project(":feature:authentication:auth-impl"))
     implementation(project(":feature:authentication:auth-api"))
 
-    implementation(project(":feature:browse:browse-api"))
-    implementation(project(":feature:browse:browse-impl"))
-    implementation(project(":domain:browse:browse-impl"))
-    implementation(project(":domain:browse:browse-api"))
-    implementation(project(":data:browse:browse-impl"))
-    implementation(project(":data:browse:browse-api"))
+    implementation(project(":feature:opportunities:opportunities-api"))
+    implementation(project(":feature:opportunities:opportunities-impl"))
+    implementation(project(":domain:opportunities:opportunities-impl"))
+    implementation(project(":domain:opportunities:opportunities-api"))
+    implementation(project(":data:opportunities:opportunities-impl"))
+    implementation(project(":data:opportunities:opportunities-api"))
 
     implementation(project(":feature:builds:builds-api"))
     implementation(project(":feature:builds:builds-impl"))

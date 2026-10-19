@@ -2,7 +2,7 @@ package com.example.problemfinder.app.navigation
 
 import com.example.problemfinder.core.mvi.RequestState
 import com.example.problemfinder.feature.authentication.api.AuthDestinations
-import com.example.problemfinder.feature.browse.api.BrowseDestination
+import com.example.problemfinder.feature.opportunities.api.OpportunitiesDestinations
 import io.github.jan.supabase.auth.status.RefreshFailureCause
 import io.github.jan.supabase.auth.status.SessionStatus
 import io.github.jan.supabase.auth.user.UserSession
@@ -21,7 +21,7 @@ class AuthNavigationPolicyTest {
 
     @Test
     fun offlineKnownAccountCanOpenBrowseFromStartup() {
-        assertEquals(BrowseDestination.ROUTE, route(refreshFailure, knownAccount, STARTUP_ROUTE))
+        assertEquals(OpportunitiesDestinations.DISCOVERY, route(refreshFailure, knownAccount, STARTUP_ROUTE))
     }
 
     @Test
@@ -43,13 +43,13 @@ class AuthNavigationPolicyTest {
     fun refreshFailureWaitsForIdentityRatherThanAssumingSignOut() {
         for (request in listOf(RequestState.Loading, RequestState.Idle)) {
             assertNull(route(refreshFailure, request, STARTUP_ROUTE))
-            assertNull(route(refreshFailure, request, BrowseDestination.ROUTE))
+            assertNull(route(refreshFailure, request, OpportunitiesDestinations.DISCOVERY))
         }
     }
 
     @Test
     fun unreadableIdentityUsesRecoverableStartupInsteadOfSignIn() {
-        assertEquals(STARTUP_ROUTE, route(refreshFailure, RequestState.Error(Unit), BrowseDestination.ROUTE))
+        assertEquals(STARTUP_ROUTE, route(refreshFailure, RequestState.Error(Unit), OpportunitiesDestinations.DISCOVERY))
         assertNull(route(refreshFailure, RequestState.Error(Unit), STARTUP_ROUTE))
         assertNull(route(refreshFailure, RequestState.Error(Unit), AuthDestinations.SIGN_IN))
     }
@@ -63,13 +63,13 @@ class AuthNavigationPolicyTest {
 
     @Test
     fun authenticatedSessionOpensBrowseAndRecoversASignInRoute() {
-        assertEquals(BrowseDestination.ROUTE, route(authenticated, knownAccount, STARTUP_ROUTE))
-        assertEquals(BrowseDestination.ROUTE, route(authenticated, RequestState.Loading, AuthDestinations.SIGN_IN))
+        assertEquals(OpportunitiesDestinations.DISCOVERY, route(authenticated, knownAccount, STARTUP_ROUTE))
+        assertEquals(OpportunitiesDestinations.DISCOVERY, route(authenticated, RequestState.Loading, AuthDestinations.SIGN_IN))
     }
 
     @Test
     fun initializationCanOpenPersistedCacheBeforeNetworkRefreshCompletes() {
-        assertEquals(BrowseDestination.ROUTE, route(SessionStatus.Initializing, knownAccount, STARTUP_ROUTE))
+        assertEquals(OpportunitiesDestinations.DISCOVERY, route(SessionStatus.Initializing, knownAccount, STARTUP_ROUTE))
     }
 
     @Test
@@ -80,8 +80,8 @@ class AuthNavigationPolicyTest {
 
     @Test
     fun validAuthLinksKeepTheirDestinations() {
-        assertEquals(AuthDestinations.RESET_PASSWORD, resolveRootRoute(authenticated, knownAccount, LinkDestination.RESET_PASSWORD, BrowseDestination.ROUTE))
-        assertEquals(BrowseDestination.ROUTE, resolveRootRoute(authenticated, knownAccount, LinkDestination.HOME, AuthDestinations.RESET_PASSWORD))
+        assertEquals(AuthDestinations.RESET_PASSWORD, resolveRootRoute(authenticated, knownAccount, LinkDestination.RESET_PASSWORD, OpportunitiesDestinations.DISCOVERY))
+        assertEquals(OpportunitiesDestinations.DISCOVERY, resolveRootRoute(authenticated, knownAccount, LinkDestination.HOME, AuthDestinations.RESET_PASSWORD))
     }
 
     @Test
@@ -93,7 +93,7 @@ class AuthNavigationPolicyTest {
 
     @Test
     fun sameDestinationDoesNotRecreateRoot() {
-        assertNull(resolveRootRoute(authenticated, knownAccount, LinkDestination.HOME, BrowseDestination.ROUTE))
+        assertNull(resolveRootRoute(authenticated, knownAccount, LinkDestination.HOME, OpportunitiesDestinations.DISCOVERY))
         assertNull(resolveRootRoute(authenticated, knownAccount, LinkDestination.RESET_PASSWORD, AuthDestinations.RESET_PASSWORD))
     }
 
