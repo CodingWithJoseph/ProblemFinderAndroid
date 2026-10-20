@@ -1,0 +1,21 @@
+package com.example.problemfinder.feature.search.impl
+
+/**
+ * TODO [SEARCH-7] Copy this template into src/test/kotlin under the matching package, then write tests.
+ * The template intentionally contains NO fake
+ * passing tests or @Ignore placeholders. Use existing BrowseViewModelTest/DiscoveryViewModelTest
+ * for Main dispatcher setup, runTest, fake use cases and controllable flows/deferred responses.
+ * - Entry without a query shows initial state and executes no search.
+ * - Editing A into B does not change submitted A's results or pagination.
+ * - Submit B while A waits: A's late snapshot/error/finally cannot replace B's state.
+ * - Same text with different filters/sort/page size uses distinct cache membership/progress.
+ * - Page failure preserves results and retries the saved offset; duplicate taps are ignored.
+ * - Empty synced search is distinct from never submitted, loading and observation failure.
+ * - Account change clears old results and suppresses every pending request/watch/draft effect.
+ * - Assistant draft/fallback/clarification executes zero result requests until confirmation.
+ * - Opening a result emits its real cluster ID; watch state updates across Details/Discovery.
+ * Also add data-layer MockEngine tests for exact paths/headers/JSON and malformed DTO mapping,
+ * plus Room instrumentation tests for transaction rollback, account isolation and migration.
+ * Verify the real screen at 2x font/dark/landscape, including Back and every independent action.
+ * Completion means the assertions describe app behavior, not just that a fake method was called.
+ */

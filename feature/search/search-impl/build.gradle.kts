@@ -27,6 +27,7 @@ dependencies {
     api(project(":feature:search:search-api"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:mvi"))
+    implementation(project(":domain:opportunities:opportunities-api"))
 
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose)
@@ -40,6 +41,9 @@ dependencies {
     implementation(libs.compose.ui)
     implementation(libs.compose.material3)
     debugImplementation(libs.androidx.ui.tooling)
+
+    testImplementation(libs.junit4)
+    testImplementation(libs.coroutines.test)
 
     ksp(libs.hilt.compiler)
 }

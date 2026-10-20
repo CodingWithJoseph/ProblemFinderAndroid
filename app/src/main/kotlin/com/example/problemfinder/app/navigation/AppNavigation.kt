@@ -244,8 +244,18 @@ fun AppNavigation(
                         }
                     }
                 )
-                opportunityDetails(onBack = { navController.popBackStack() })
-                search()
+                opportunityDetails(
+                    onBack = { navController.popBackStack() },
+                    onMessage = { message -> messageScope.launch { snackbarHostState.showSnackbar(message) } },
+                )
+                search(
+                    onOpenCluster = { clusterId ->
+                        navController.navigate(OpportunityDetailsDestination.route(clusterId)) {
+                            launchSingleTop = true
+                        }
+                    },
+                    onMessage = { message -> messageScope.launch { snackbarHostState.showSnackbar(message) } },
+                )
                 projects()
                 builds()
 
@@ -286,4 +296,3 @@ fun AppNavigation(
         }
     }
 }
-

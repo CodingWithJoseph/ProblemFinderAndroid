@@ -33,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -85,6 +86,7 @@ fun ForgotPasswordScreen(
 ) = Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
 
     val configuration = LocalConfiguration.current
+    val window = LocalWindowInfo.current
     val scrollState = rememberScrollState()
 
     BoxWithConstraints(
@@ -97,7 +99,7 @@ fun ForgotPasswordScreen(
 
         val landscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE &&
             maxWidth >= 560.dp
-        val compact = configuration.screenHeightDp < 720
+        val compact = window.containerSize.height < 720
         val contentModifier = Modifier
             .align(Alignment.Center)
             .widthIn(max = 440.dp)

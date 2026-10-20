@@ -1,6 +1,9 @@
 <resources>
     <string name="title_opportunity_details">Opportunity details</string>
     <string name="action_back">Back</string>
-    <string name="message_details_placeholder">Opportunity details are coming soon.</string>
     <string name="label_opportunity_id">Opportunity #%1$d</string>
+    <string name="message_details_placeholder">The full opportunity details will appear here.</string>
+    <string name="message_details_scaffold">Opportunity details are not ready yet.</string>
+    <string name="action_refresh_details">Refresh opportunity details</string>
+    <string name="message_details_action_failed">Could not update this opportunity. Try again.</string>
 </resources>

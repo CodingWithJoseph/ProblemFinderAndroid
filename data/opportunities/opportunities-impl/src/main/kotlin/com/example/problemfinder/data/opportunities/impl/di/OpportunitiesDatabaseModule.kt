@@ -43,3 +43,7 @@ object OpportunitiesDatabaseModule {
         database: OpportunitiesDatabase
     ): DiscoveryDao = database.discoveryDao()
 }
+
+// TODO [DETAILS-2 / SEARCH-2] After the new @Dao interfaces are registered on OpportunitiesDatabase,
+// provide their instances here and inject them into the new local sources. Preserve existing DAO
+// bindings and the shared opportunities.db file; constructor injection alone cannot create a DAO.

@@ -36,8 +36,10 @@ include(":feature:authentication:auth-impl")
 
 include(":data:opportunities:opportunities-api")
 include(":data:opportunities:opportunities-impl")
+
 include(":domain:opportunities:opportunities-api")
 include(":domain:opportunities:opportunities-impl")
+
 include(":feature:opportunities:opportunities-api")
 include(":feature:opportunities:opportunities-impl")
 
