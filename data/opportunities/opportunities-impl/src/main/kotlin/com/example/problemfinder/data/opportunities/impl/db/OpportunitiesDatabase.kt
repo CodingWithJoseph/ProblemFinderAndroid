@@ -30,3 +30,7 @@ abstract class OpportunitiesDatabase : RoomDatabase() {
     abstract fun browseDao(): BrowseDao
     abstract fun discoveryDao(): DiscoveryDao
 }
+
+// TODO [DETAILS-2 / SEARCH-2] Register the new entities/DAOs only AFTER completing their blueprints.
+// Increment from the current version and add/test a migration preserving existing cached content.
+// The scaffold currently makes no schema change; adding a Kotlin file does not register a table.

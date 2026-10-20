@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -11,8 +13,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -21,33 +23,67 @@ import androidx.compose.ui.unit.dp
 import com.example.problemfinder.core.designsystem.theme.ImmensityTheme
 import com.example.problemfinder.core.designsystem.R as DesignR
 
-/** Navigation placeholder: shows the selected ID and back action; no detail data is loaded yet. */
+/** State and intent wiring are supplied; the full text/evidence layout belongs to DETAILS-6. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun OpportunityDetailsScreen(clusterId: Int, onBack: () -> Unit) {
-    Scaffold(topBar = {
-        TopAppBar(
-            title = { Text(stringResource(R.string.title_opportunity_details)) },
-            navigationIcon = {
-                IconButton(onClick = onBack) {
-                    Icon(painterResource(DesignR.drawable.icon_arrow_back), stringResource(R.string.action_back))
-                }
-            },
-        )
-    }) { padding ->
+internal fun OpportunityDetailsScreen(
+    state: OpportunityDetailsState,
+    onIntent: (OpportunityDetailsIntent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Scaffold(
+        modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
+                title = { Text(stringResource(R.string.title_opportunity_details)) },
+                navigationIcon = {
+                    IconButton(onClick = { onIntent(OpportunityDetailsIntent.BackClicked) }) {
+                        Icon(painterResource(DesignR.drawable.icon_arrow_back), stringResource(R.string.action_back))
+                    }
+                },
+                actions = {
+                    IconButton(
+                        enabled = !state.implementationPending,
+                        onClick = { onIntent(OpportunityDetailsIntent.Reload) },
+                    ) {
+                        Icon(painterResource(DesignR.drawable.icon_refresh), stringResource(R.string.action_refresh_details))
+                    }
+                },
+            )
+        },
+    ) { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
-            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text(stringResource(R.string.label_opportunity_id, clusterId), style = MaterialTheme.typography.titleLarge)
-            Text(stringResource(R.string.message_details_placeholder))
+            // TODO [DETAILS-6] Replace this shell with branches for initial loading, cached content,
+            // refresh failure with content, missing/not-found data, and retry. Never initiate work
+            // during composition; send intents from callbacks. Use resources for all user copy.
+            state.clusterId?.let { Text(stringResource(R.string.label_opportunity_id, it)) }
+            if (state.implementationPending) Text(stringResource(R.string.message_details_scaffold))
+            state.details?.let { detail ->
+                Text(detail.name, style = MaterialTheme.typography.headlineSmall)
+                Text(detail.summary)
+                Text(detail.problemStatement)
+            }
+            // TODO [DETAILS-6] Use ONE LazyColumn for full text, top evidence and paged evidence.
+            // Full descriptions belong here: do not inherit the card's two-line limit. Preserve
+            // separate top/page roles with stable keys, including role when an ID appears in both.
+            // Add source/date/author/link metadata, a paging footer, independent watch pending/error,
+            // headings and accessible actions. Reuse/extract common action UI without depending on
+            // feature:opportunities:opportunities-impl; sibling features share API/design-system code.
+            // Check: long text + 2x font + landscape scrolls to every action without nested scrolling.
         }
     }
 }
 
-@Preview(showBackground = true)
+@Preview(name = "Details scaffold", widthDp = 393, heightDp = 850)
+@Preview(name = "Details scaffold large text", widthDp = 320, heightDp = 640, fontScale = 2f)
 @Composable
 private fun OpportunityDetailsPreview() = ImmensityTheme {
-    OpportunityDetailsScreen(clusterId = 42, onBack = {})
+    OpportunityDetailsScreen(OpportunityDetailsState(clusterId = 42), {})
+    // TODO [DETAILS-6] Add preview fixtures for full content, no evidence, missing post URLs,
+    // loading, offline refresh failure and append failure. Fixtures stay in previews/tests only.
 }

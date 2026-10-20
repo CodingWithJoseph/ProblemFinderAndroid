@@ -1,0 +1,28 @@
+package com.example.problemfinder.domain.opportunities.impl.details
+
+import com.example.problemfinder.core.model.details.OpportunityDetailsSnapshot
+import com.example.problemfinder.domain.opportunities.api.details.ObserveOpportunityDetailsUseCase
+import com.example.problemfinder.domain.opportunities.api.details.RefreshOpportunityDetailsUseCase
+import com.example.problemfinder.domain.opportunities.api.details.LoadNextOpportunityEvidenceUseCase
+import com.example.problemfinder.data.opportunities.api.OpportunityDetailsRepository
+import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
+
+/** Supplied delegation for step 4; the repository contains the unfinished feature work. */
+class ObserveOpportunityDetailsUseCaseImpl @Inject constructor(
+    private val repository: OpportunityDetailsRepository,
+) : ObserveOpportunityDetailsUseCase() {
+    override suspend fun execute(params: Int): Flow<OpportunityDetailsSnapshot> = repository.observeDetails(params)
+}
+
+class RefreshOpportunityDetailsUseCaseImpl @Inject constructor(
+    private val repository: OpportunityDetailsRepository,
+) : RefreshOpportunityDetailsUseCase() {
+    override suspend fun execute(params: Int): Unit = repository.refreshDetails(params)
+}
+
+class LoadNextOpportunityEvidenceUseCaseImpl @Inject constructor(
+    private val repository: OpportunityDetailsRepository,
+) : LoadNextOpportunityEvidenceUseCase() {
+    override suspend fun execute(params: Int): Unit = repository.loadNextEvidencePage(params)
+}

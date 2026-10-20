@@ -37,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -62,6 +63,7 @@ fun SignUpScreen(
     onIntent: (SignUpIntent) -> Unit = {}
 ) {
     val configuration = LocalConfiguration.current
+    val window = LocalWindowInfo.current
     BackHandler(enabled = state.step == SignUpStep.PROFILE && !state.isLoading) {
         onIntent(SignUpIntent.PreviousClicked)
     }
@@ -74,7 +76,7 @@ fun SignUpScreen(
                 maxWidth >= 560.dp
             when {
                 landscape -> SignUpLandscape(state, onIntent)
-                configuration.screenHeightDp < 720 -> SignUpCompact(state, onIntent)
+                window.containerSize.height < 720 -> SignUpCompact(state, onIntent)
                 else -> SignUpTall(state, onIntent)
             }
         }
