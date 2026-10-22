@@ -24,6 +24,7 @@ android {
 dependencies {
     api(project(":data:opportunities:opportunities-api"))
     implementation(project(":data:authentication:auth-api"))
+    implementation(project(":core:model"))
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 

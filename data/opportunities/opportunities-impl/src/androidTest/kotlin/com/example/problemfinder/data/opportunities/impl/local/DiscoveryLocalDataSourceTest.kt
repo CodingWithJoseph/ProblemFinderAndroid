@@ -13,11 +13,11 @@ import com.example.problemfinder.core.model.opportunity.Opportunity
 import com.example.problemfinder.core.model.discovery.DiscoveryCollection
 import com.example.problemfinder.core.model.discovery.DiscoveryDashboard
 import com.example.problemfinder.core.model.discovery.DiscoverySnapshot
-import com.example.problemfinder.data.opportunities.impl.db.BrowseDao
-import com.example.problemfinder.data.opportunities.impl.db.DiscoveryDao
+import com.example.problemfinder.data.opportunities.impl.db.dao.BrowseDao
+import com.example.problemfinder.data.opportunities.impl.db.dao.DiscoveryDao
 import com.example.problemfinder.data.opportunities.impl.db.OpportunitiesDatabase
 import com.example.problemfinder.data.opportunities.impl.model.entity.DiscoveryCollectionItemEntity
-import com.example.problemfinder.data.opportunities.impl.util.toEntity
+import com.example.problemfinder.data.opportunities.impl.util.toModel
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
@@ -158,7 +158,7 @@ class DiscoveryLocalDataSourceTest {
                 val before = withTimeout(10_000) { emissions.receive() }
                 assertFalse(requireNotNull(before.dashboard.featuredCluster).isWatched)
                 val watched = original.copy(isWatched = true)
-                database.opportunityDao().upsertOpportunities(listOf(watched.toEntity(USER)))
+                database.opportunityDao().upsertOpportunities(listOf(watched.toModel(USER)))
                 val after = withTimeout(10_000) { emissions.receive() }
                 assertEquals(dashboard(watched), after.dashboard)
                 assertNull(after.dashboard.featuredCluster?.date)

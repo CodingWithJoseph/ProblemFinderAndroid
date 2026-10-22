@@ -3,14 +3,14 @@ package com.example.problemfinder.data.opportunities.impl.local
 import androidx.room3.withWriteTransaction
 import com.example.problemfinder.core.model.discovery.DiscoveryDashboard
 import com.example.problemfinder.core.model.discovery.DiscoverySnapshot
-import com.example.problemfinder.data.opportunities.impl.db.OpportunityDao
-import com.example.problemfinder.data.opportunities.impl.db.DiscoveryDao
+import com.example.problemfinder.data.opportunities.impl.db.dao.OpportunityDao
+import com.example.problemfinder.data.opportunities.impl.db.dao.DiscoveryDao
 import com.example.problemfinder.data.opportunities.impl.db.OpportunitiesDatabase
 import com.example.problemfinder.data.opportunities.impl.model.entity.DiscoveryCollectionItemEntity
 import com.example.problemfinder.data.opportunities.impl.model.entity.DiscoveryCollectionEntity
 import com.example.problemfinder.data.opportunities.impl.model.entity.DiscoveryDashboardEntity
 import com.example.problemfinder.data.opportunities.impl.util.toDiscoverySnapshot
-import com.example.problemfinder.data.opportunities.impl.util.toEntity
+import com.example.problemfinder.data.opportunities.impl.util.toModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -45,7 +45,7 @@ class DiscoveryLocalDataSource @Inject constructor(
             dashboard.collections.forEach {
                 addAll(it.clusters)
             }
-        }.distinctBy { it.id }.map { it.toEntity(userId) }
+        }.distinctBy { it.id }.map { it.toModel(userId) }
 
         val dashboardEntity = DiscoveryDashboardEntity(
             userId = userId,

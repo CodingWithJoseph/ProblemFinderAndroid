@@ -7,6 +7,7 @@ kotlin {
 }
 
 dependencies {
+    implementation(project(":core:common"))
     testImplementation(libs.junit4)
 }
 

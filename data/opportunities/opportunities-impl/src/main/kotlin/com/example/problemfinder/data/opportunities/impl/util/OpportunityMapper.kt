@@ -34,7 +34,7 @@ fun BrowsePageDto.toModel(): BrowsePage = BrowsePage(
 )
 
 /** Adds cache ownership and stores the full timestamp as ISO text without truncating precision. */
-fun Opportunity.toEntity(userId: String): OpportunityEntity = OpportunityEntity(
+fun Opportunity.toModel(userId: String): OpportunityEntity = OpportunityEntity(
     userId = userId,
     clusterId = id,
     name = name.trim(),

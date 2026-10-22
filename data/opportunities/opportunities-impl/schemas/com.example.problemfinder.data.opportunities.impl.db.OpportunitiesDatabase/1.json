@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "27ab01d7db12eb3af61b1c2d9b6cbdb1",
+    "identityHash": "0b99e9a0781d8df7c5001fd213dae38e",
     "entities": [
       {
         "tableName": "discovery_collection_items",
@@ -367,11 +367,400 @@
             ]
           }
         ]
+      },
+      {
+        "tableName": "opportunity_details",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`userId` TEXT NOT NULL, `clusterId` INTEGER NOT NULL, `name` TEXT NOT NULL, `summary` TEXT NOT NULL, `problemStatement` TEXT NOT NULL, `postCount` INTEGER NOT NULL, `firstSeen` TEXT, `lastSeen` TEXT, `authorCount` INTEGER NOT NULL, `communityCount` INTEGER NOT NULL, `hasSynced` INTEGER NOT NULL, `pageSize` INTEGER NOT NULL, `lastLoadedPage` INTEGER NOT NULL, PRIMARY KEY(`userId`, `clusterId`))",
+        "fields": [
+          {
+            "fieldPath": "userId",
+            "columnName": "userId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clusterId",
+            "columnName": "clusterId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "summary",
+            "columnName": "summary",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "problemStatement",
+            "columnName": "problemStatement",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "postCount",
+            "columnName": "postCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "firstSeen",
+            "columnName": "firstSeen",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastSeen",
+            "columnName": "lastSeen",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "authorCount",
+            "columnName": "authorCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "communityCount",
+            "columnName": "communityCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hasSynced",
+            "columnName": "hasSynced",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pageSize",
+            "columnName": "pageSize",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastLoadedPage",
+            "columnName": "lastLoadedPage",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "userId",
+            "clusterId"
+          ]
+        }
+      },
+      {
+        "tableName": "opportunity_evidence",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`userId` TEXT NOT NULL, `clusterId` INTEGER NOT NULL, `postId` INTEGER NOT NULL, `title` TEXT NOT NULL, `body` TEXT, `url` TEXT, `author` TEXT, `community` TEXT, `source` TEXT, `score` INTEGER, `commentCount` INTEGER, `postedAt` TEXT, `problemStatement` TEXT, PRIMARY KEY(`userId`, `clusterId`, `postId`), FOREIGN KEY(`userId`, `clusterId`) REFERENCES `opportunity_details`(`userId`, `clusterId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "userId",
+            "columnName": "userId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clusterId",
+            "columnName": "clusterId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "postId",
+            "columnName": "postId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "body",
+            "columnName": "body",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "url",
+            "columnName": "url",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "author",
+            "columnName": "author",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "community",
+            "columnName": "community",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "source",
+            "columnName": "source",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "score",
+            "columnName": "score",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "commentCount",
+            "columnName": "commentCount",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "postedAt",
+            "columnName": "postedAt",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "problemStatement",
+            "columnName": "problemStatement",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "userId",
+            "clusterId",
+            "postId"
+          ]
+        },
+        "foreignKeys": [
+          {
+            "table": "opportunity_details",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "userId",
+              "clusterId"
+            ],
+            "referencedColumns": [
+              "userId",
+              "clusterId"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "opportunity_evidence_membership",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`userId` TEXT NOT NULL, `clusterId` INTEGER NOT NULL, `postId` INTEGER NOT NULL, `section` TEXT NOT NULL, `page` INTEGER NOT NULL, `position` INTEGER NOT NULL, PRIMARY KEY(`userId`, `clusterId`, `postId`, `section`), FOREIGN KEY(`userId`, `clusterId`) REFERENCES `opportunity_details`(`userId`, `clusterId`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`userId`, `clusterId`, `postId`) REFERENCES `opportunity_evidence`(`userId`, `clusterId`, `postId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "userId",
+            "columnName": "userId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clusterId",
+            "columnName": "clusterId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "postId",
+            "columnName": "postId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "section",
+            "columnName": "section",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "page",
+            "columnName": "page",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "userId",
+            "clusterId",
+            "postId",
+            "section"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_opportunity_evidence_membership_userId_clusterId_section_page_position",
+            "unique": false,
+            "columnNames": [
+              "userId",
+              "clusterId",
+              "section",
+              "page",
+              "position"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_opportunity_evidence_membership_userId_clusterId_section_page_position` ON `${TABLE_NAME}` (`userId`, `clusterId`, `section`, `page`, `position`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "opportunity_details",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "userId",
+              "clusterId"
+            ],
+            "referencedColumns": [
+              "userId",
+              "clusterId"
+            ]
+          },
+          {
+            "table": "opportunity_evidence",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "userId",
+              "clusterId",
+              "postId"
+            ],
+            "referencedColumns": [
+              "userId",
+              "clusterId",
+              "postId"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "evidence_source_count",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`userId` TEXT NOT NULL, `clusterId` INTEGER NOT NULL, `source` TEXT NOT NULL, `count` INTEGER NOT NULL, PRIMARY KEY(`userId`, `clusterId`, `source`), FOREIGN KEY(`userId`, `clusterId`) REFERENCES `opportunity_details`(`userId`, `clusterId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "userId",
+            "columnName": "userId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clusterId",
+            "columnName": "clusterId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "source",
+            "columnName": "source",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "count",
+            "columnName": "count",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "userId",
+            "clusterId",
+            "source"
+          ]
+        },
+        "foreignKeys": [
+          {
+            "table": "opportunity_details",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "userId",
+              "clusterId"
+            ],
+            "referencedColumns": [
+              "userId",
+              "clusterId"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "evidence_date_count",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`userId` TEXT NOT NULL, `clusterId` INTEGER NOT NULL, `date` TEXT NOT NULL, `count` INTEGER NOT NULL, PRIMARY KEY(`userId`, `clusterId`, `date`), FOREIGN KEY(`userId`, `clusterId`) REFERENCES `opportunity_details`(`userId`, `clusterId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "userId",
+            "columnName": "userId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clusterId",
+            "columnName": "clusterId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "count",
+            "columnName": "count",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "userId",
+            "clusterId",
+            "date"
+          ]
+        },
+        "foreignKeys": [
+          {
+            "table": "opportunity_details",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "userId",
+              "clusterId"
+            ],
+            "referencedColumns": [
+              "userId",
+              "clusterId"
+            ]
+          }
+        ]
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '27ab01d7db12eb3af61b1c2d9b6cbdb1')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0b99e9a0781d8df7c5001fd213dae38e')"
     ]
   }
 }

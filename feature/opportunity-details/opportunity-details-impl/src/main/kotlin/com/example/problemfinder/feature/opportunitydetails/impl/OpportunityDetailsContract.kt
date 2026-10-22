@@ -10,12 +10,6 @@ import com.example.problemfinder.core.mvi.RequestState
  * START HERE - this scaffold already supplies the files and wiring. Complete their TODO bodies.
  * Work through Details before Search so both Browse and Search can open one finished destination.
  *
- * First milestone: validated app data, with NO database or live request yet (DETAILS-1).
- * 1A. core/model/details/OpportunityDetails.kt: finish constructor checks on the existing models.
- * 1B. data/opportunities/.../model/dto/OpportunityDetailsDto.kt: review the existing wire fields.
- * 1C. .../util/OpportunityDetailsMapper.kt: write DTO -> OpportunityDetailsPage, including nested
- *     evidence/date mapping. Add mapper/model unit tests using fixtures, then stop and check them.
- *
  * Second milestone: persisted data you can reopen offline (DETAILS-2).
  * 2A. .../model/entity/OpportunityDetailsEntities.kt: finish schema and model <-> entity mappings.
  * 2B. .../db/OpportunityDetailsDao.kt: write ordered account-scoped read/write queries and register

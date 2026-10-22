@@ -1,12 +1,13 @@
 package com.example.problemfinder.data.opportunities.impl.di
 
 import android.content.Context
-import com.example.problemfinder.data.opportunities.impl.db.OpportunityDao
+import com.example.problemfinder.data.opportunities.impl.db.dao.OpportunityDao
 import androidx.room3.Room
 import androidx.sqlite.driver.AndroidSQLiteDriver
-import com.example.problemfinder.data.opportunities.impl.db.BrowseDao
-import com.example.problemfinder.data.opportunities.impl.db.DiscoveryDao
+import com.example.problemfinder.data.opportunities.impl.db.dao.BrowseDao
+import com.example.problemfinder.data.opportunities.impl.db.dao.DiscoveryDao
 import com.example.problemfinder.data.opportunities.impl.db.OpportunitiesDatabase
+import com.example.problemfinder.data.opportunities.impl.db.dao.OpportunityDetailsDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,7 +32,9 @@ object OpportunitiesDatabaseModule {
             .build()
 
     @Provides
-    fun provideOpportunityDao(database: OpportunitiesDatabase): OpportunityDao = database.opportunityDao()
+    fun provideOpportunityDao(
+        database: OpportunitiesDatabase
+    ): OpportunityDao = database.opportunityDao()
 
     @Provides
     fun provideBrowseDao(
@@ -42,6 +45,11 @@ object OpportunitiesDatabaseModule {
     fun provideDiscoveryDao(
         database: OpportunitiesDatabase
     ): DiscoveryDao = database.discoveryDao()
+
+    @Provides
+    fun provideDiscoveryDetailsDao(
+        database: OpportunitiesDatabase
+    ): OpportunityDetailsDao = database.discoveryDetailsDao()
 }
 
 // TODO [DETAILS-2 / SEARCH-2] After the new @Dao interfaces are registered on OpportunitiesDatabase,

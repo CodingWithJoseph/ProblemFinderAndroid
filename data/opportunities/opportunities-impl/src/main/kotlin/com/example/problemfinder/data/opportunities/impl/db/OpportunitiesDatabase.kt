@@ -1,18 +1,26 @@
 package com.example.problemfinder.data.opportunities.impl.db
 
+import androidx.room3.ColumnTypeConverters
 import androidx.room3.Database
 import androidx.room3.RoomDatabase
+import com.example.problemfinder.data.opportunities.impl.db.converters.DateConverter
+import com.example.problemfinder.data.opportunities.impl.db.converters.SectionConverter
+import com.example.problemfinder.data.opportunities.impl.db.dao.BrowseDao
+import com.example.problemfinder.data.opportunities.impl.db.dao.DiscoveryDao
+import com.example.problemfinder.data.opportunities.impl.db.dao.OpportunityDao
+import com.example.problemfinder.data.opportunities.impl.db.dao.OpportunityDetailsDao
 import com.example.problemfinder.data.opportunities.impl.model.entity.OpportunityEntity
 import com.example.problemfinder.data.opportunities.impl.model.entity.BrowseQueryEntity
 import com.example.problemfinder.data.opportunities.impl.model.entity.BrowseQueryItemEntity
 import com.example.problemfinder.data.opportunities.impl.model.entity.DiscoveryCollectionItemEntity
 import com.example.problemfinder.data.opportunities.impl.model.entity.DiscoveryCollectionEntity
 import com.example.problemfinder.data.opportunities.impl.model.entity.DiscoveryDashboardEntity
+import com.example.problemfinder.data.opportunities.impl.model.entity.EvidenceDateCountEntity
+import com.example.problemfinder.data.opportunities.impl.model.entity.EvidenceSourceCountEntity
+import com.example.problemfinder.data.opportunities.impl.model.entity.OpportunityDetailsEntity
+import com.example.problemfinder.data.opportunities.impl.model.entity.OpportunityEvidenceEntity
+import com.example.problemfinder.data.opportunities.impl.model.entity.OpportunityEvidenceMembershipEntity
 
-/**
- * One Room database for shared cards and the separate Browse/Discovery arrangements that reference
- * them. This lets each local data source update content, membership, and metadata in one transaction.
- */
 @Database(
     entities = [
         DiscoveryCollectionItemEntity::class,
@@ -20,17 +28,26 @@ import com.example.problemfinder.data.opportunities.impl.model.entity.DiscoveryD
         DiscoveryDashboardEntity::class,
         OpportunityEntity::class,
         BrowseQueryEntity::class,
-        BrowseQueryItemEntity::class
+        BrowseQueryItemEntity::class,
+        OpportunityDetailsEntity::class,
+        OpportunityEvidenceEntity::class,
+        OpportunityEvidenceMembershipEntity::class,
+        EvidenceSourceCountEntity::class,
+        EvidenceDateCountEntity::class,
     ],
     version = 1,
     exportSchema = true
+)
+@ColumnTypeConverters(
+    value = [
+        DateConverter::class,
+        SectionConverter::class
+    ]
 )
 abstract class OpportunitiesDatabase : RoomDatabase() {
     abstract fun opportunityDao(): OpportunityDao
     abstract fun browseDao(): BrowseDao
     abstract fun discoveryDao(): DiscoveryDao
-}
 
-// TODO [DETAILS-2 / SEARCH-2] Register the new entities/DAOs only AFTER completing their blueprints.
-// Increment from the current version and add/test a migration preserving existing cached content.
-// The scaffold currently makes no schema change; adding a Kotlin file does not register a table.
+    abstract fun discoveryDetailsDao(): OpportunityDetailsDao
+}

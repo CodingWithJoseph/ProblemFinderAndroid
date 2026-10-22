@@ -2,13 +2,23 @@ package com.example.problemfinder.data.opportunities.impl.local
 
 import com.example.problemfinder.core.model.details.OpportunityDetailsPage
 import com.example.problemfinder.core.model.details.OpportunityDetailsSnapshot
+import com.example.problemfinder.data.opportunities.impl.db.dao.OpportunityDetailsDao
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.forEach
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-class OpportunityDetailsLocalDataSource @Inject constructor() {
+class OpportunityDetailsLocalDataSource @Inject constructor(
+    private val discoverDetailsDao: OpportunityDetailsDao
+) {
     fun observeDetails(userId: String, clusterId: Int): Flow<OpportunityDetailsSnapshot> {
         // TODO [DETAILS-2C] Assemble entity reads into OpportunityDetailsSnapshot; no HTTP belongs here.
         // 1. Inject the completed database/DAO after registering it. Observe this exact userId + clusterId.
+        discoverDetailsDao.observeDetails(userId, clusterId).collect {
+
+        }
+
         // 2. Map parent/evidence entities back to validated app models with the cache mappers from DETAILS-2A.
         // 3. Reassemble top and ordinary evidence using membership role/page/position; collapse duplicated
         //    joined rows by identity WITHIN each role. Page posts accumulate from saved contiguous pages.
@@ -17,6 +27,7 @@ class OpportunityDetailsLocalDataSource @Inject constructor() {
         //    hasSynced from persisted metadata, not from whether a list happens to be empty/non-empty.
         // 6. Emit stored lastLoadedPage/pageSize/totalPosts so later pagination can resume after restart.
         // Finish check: opening the app offline reads cached full details and page progress without a token.
+
         throw UnsupportedOperationException("Complete DETAILS-2c: observe cached details")
     }
 
