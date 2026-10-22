@@ -12,7 +12,7 @@ import com.example.problemfinder.core.model.browse.BrowseSnapshot
 import com.example.problemfinder.core.model.opportunity.Opportunity
 import com.example.problemfinder.data.opportunities.impl.model.entity.BrowseQueryEntity
 import com.example.problemfinder.data.opportunities.impl.model.entity.BrowseQueryItemEntity
-import com.example.problemfinder.data.opportunities.impl.db.BrowseDao
+import com.example.problemfinder.data.opportunities.impl.db.dao.BrowseDao
 import com.example.problemfinder.data.opportunities.impl.db.OpportunitiesDatabase
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll

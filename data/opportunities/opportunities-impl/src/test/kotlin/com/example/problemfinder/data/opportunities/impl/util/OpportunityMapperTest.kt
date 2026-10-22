@@ -20,7 +20,7 @@ class OpportunityMapperTest {
         for (category in OpportunityCategory.entries) {
             val model = card().copy(category = category.name.lowercase()).toModel()
             assertEquals(category, model.category)
-            assertEquals(model, model.toEntity("user-one").toModel())
+            assertEquals(model, model.toModel("user-one").toModel())
         }
     }
     @Test fun `invalid content cannot enter the model or cache`() {

@@ -1,37 +1,200 @@
 package com.example.problemfinder.data.opportunities.impl.util
 
+import com.example.problemfinder.core.common.util.toDateInstant
+import com.example.problemfinder.core.model.details.EvidenceDateCount
+import com.example.problemfinder.core.model.details.EvidenceSourceCount
+import com.example.problemfinder.core.model.details.OpportunityDetails
 import com.example.problemfinder.core.model.details.OpportunityDetailsPage
+import com.example.problemfinder.core.model.details.OpportunityEvidence
+import com.example.problemfinder.data.opportunities.impl.model.dto.EvidenceDateCountDto
+import com.example.problemfinder.data.opportunities.impl.model.dto.EvidenceSourceCountDto
 import com.example.problemfinder.data.opportunities.impl.model.dto.OpportunityDetailsDto
+import com.example.problemfinder.data.opportunities.impl.model.dto.OpportunityEvidenceDto
+import com.example.problemfinder.data.opportunities.impl.model.entity.EvidenceDateCountEntity
+import com.example.problemfinder.data.opportunities.impl.model.EvidenceSection
+import com.example.problemfinder.data.opportunities.impl.model.entity.EvidenceSourceCountEntity
+import com.example.problemfinder.data.opportunities.impl.model.entity.OpportunityDetailsEntity
+import com.example.problemfinder.data.opportunities.impl.model.entity.OpportunityEvidenceEntity
+import com.example.problemfinder.data.opportunities.impl.model.entity.OpportunityEvidenceMembershipEntity
+import kotlin.String
 
-internal fun OpportunityDetailsDto.toDetailsPage(): OpportunityDetailsPage {
-    // TODO [DETAILS-1C] Implement DTO -> validated app model. Return OpportunityDetailsPage, not an entity.
-    // Prerequisite: finish the model checks in DETAILS-1A and review the DTO in DETAILS-1B.
-    //
-    // Write this conversion in small pieces:
-    // 1. Add a mapper for OpportunityEvidenceDto -> OpportunityEvidence. Preserve nullable fields,
-    //    rename numComments -> commentCount, parse postedAt when supplied, and retain signed score.
-    // 2. Map the aggregate lists: platform -> EvidenceSourceCount.source; calendar date/count ->
-    //    EvidenceDateCount. Validate calendar dates separately from full event timestamps.
-    // 3. For parent name/summary/problemStatement, obtain the non-null value, trim it and require
-    //    non-blank text. A missing legacy value should fail mapping, not become "Untitled" or empty.
-    // 4. Build OpportunityDetails using those cleaned values, counts, mapped aggregate lists and
-    //    parsed firstSeen/lastSeenDate. Wire lastSeenDate maps to model.lastSeen.
-    // 5. Map BOTH topEvidence and posts with the evidence mapper, preserving the order of each list.
-    //    Do not merge these lists or deduplicate across their separate roles.
-    // 6. Build OpportunityDetailsPage with the parent, both lists and page/pageSize/totalPosts.
-    //    Validate paging metadata. The current server assigns postCount and totalPosts from the same
-    //    count, so reject contradictory values rather than choosing one silently.
-    //
-    // Date policy: null stays null; a supplied malformed timestamp is invalid data, not a null/current
-    // time fallback. Cluster ID matching the requested route belongs in the repository because this
-    // mapper has no requested ID argument. This function checks the response's own positive identity.
-    //
-    // Ownership: this file only transforms/validates values. No HTTP, DAO calls, coroutine launches,
-    // screen state updates or writes belong here. Map the complete page before the later transaction.
-    //
-    // DETAILS-1 completion check (write unit tests now): a valid fixture maps every renamed field;
-    // required text null/blank fails; optional missing post body/URL succeeds; malformed supplied dates
-    // fail; negative score succeeds; negative counts/invalid page metadata fail. No database is needed.
-    // NEXT: DETAILS-2A entities. Add model -> entity and entity -> model functions here in that phase.
-    throw UnsupportedOperationException("Complete DETAILS-1: detail/evidence mapping")
+internal fun OpportunityDetailsDto.toDetailsPage(): OpportunityDetailsPage = OpportunityDetailsPage(
+    details = this.toModel(),
+    topEvidence = this.topEvidence.map { it.toModel() },
+    posts = this.posts.map { it.toModel() },
+    page = this.page,
+    pageSize = this.pageSize,
+    totalPosts = this.totalPosts
+)
+
+internal fun OpportunityDetailsDto.toModel(): OpportunityDetails = OpportunityDetails(
+    id = this.id,
+    name = requireNotNull(this.name).trim(),
+    summary = requireNotNull(this.summary).trim(),
+    problemStatement = requireNotNull(this.problemStatement).trim(),
+    postCount = requireNotNull(this.postCount),
+    firstSeen = this.firstSeen?.trim()?.toDateInstant(),
+    lastSeen = this.lastSeenDate?.trim()?.toDateInstant(),
+    authorCount = this.authorCount,
+    communityCount = this.communityCount,
+    sourceBreakdown = this.sourceBreakdown.map { it.toModel() },
+    postVolumeByDate = this.postVolumeByDate.map { it.toModel() }
+)
+
+internal fun OpportunityEvidenceDto.toModel(): OpportunityEvidence = OpportunityEvidence(
+    id = this.id,
+    title = this.title,
+    body = this.body,
+    url = this.url,
+    author = this.author,
+    community = this.community,
+    source = this.source,
+    score = this.score,
+    commentCount = this.numComments,
+    postedAt = this.postedAt?.toDateInstant(),
+    problemStatement = this.problemStatement
+)
+
+internal fun EvidenceSourceCountDto.toModel(): EvidenceSourceCount = EvidenceSourceCount(
+    source = this.platform,
+    count = this.count
+)
+
+
+internal fun EvidenceDateCountDto.toModel(): EvidenceDateCount = EvidenceDateCount(
+    count = this.count,
+    date = this.date
+)
+
+
+internal fun OpportunityDetails.toEntity(
+    userId: String,
+    hasSynced: Boolean,
+    pageSize: Int,
+    lastLoadedPage: Int
+): OpportunityDetailsEntity =
+    OpportunityDetailsEntity(
+        userId = userId,
+        clusterId = this.id,
+        name = this.name,
+        summary = this.summary,
+        problemStatement = this.problemStatement,
+        postCount = this.postCount,
+        firstSeen = this.firstSeen,
+        lastSeen = this.lastSeen,
+        authorCount = this.authorCount,
+        communityCount = this.communityCount,
+        hasSynced = hasSynced,
+        pageSize = pageSize,
+        lastLoadedPage = lastLoadedPage
+    )
+
+internal fun OpportunityDetailsEntity.toModel(
+    sources: List<EvidenceSourceCount>, dates: List<EvidenceDateCount>
+): OpportunityDetails =
+    OpportunityDetails(
+        id = this.clusterId,
+        name = this.name,
+        summary = this.summary,
+        problemStatement = this.problemStatement,
+        postCount = this.postCount,
+        firstSeen = this.firstSeen,
+        lastSeen = this.lastSeen,
+        authorCount = this.authorCount,
+        communityCount = this.communityCount,
+        sourceBreakdown = sources,
+        postVolumeByDate = dates
+    )
+
+internal fun OpportunityEvidence.toEntity(
+    userId: String,
+    clusterId: Int,
+): OpportunityEvidenceEntity = OpportunityEvidenceEntity(
+    userId = userId,
+    clusterId = clusterId,
+    postId = this.id,
+    title = this.title,
+    body = this.body,
+    url = this.url,
+    author = this.author,
+    community = this.community,
+    source = this.source,
+    score = this.score,
+    commentCount = this.commentCount,
+    postedAt = this.postedAt,
+    problemStatement = this.problemStatement
+)
+
+internal fun OpportunityEvidenceEntity.toModel(): OpportunityEvidence =
+    OpportunityEvidence(
+        id = this.postId,
+        title = this.title,
+        body = this.body,
+        url = this.url,
+        author = this.author,
+        community = this.community,
+        source = this.source,
+        score = this.score,
+        commentCount = this.commentCount,
+        postedAt = this.postedAt,
+        problemStatement = this.problemStatement
+    )
+
+internal fun EvidenceDateCount.toEntity(userId: String, clusterId: Int): EvidenceDateCountEntity =
+    EvidenceDateCountEntity(
+        userId = userId,
+        clusterId = clusterId,
+        date = this.date,
+        count = this.count
+    )
+
+
+internal fun EvidenceDateCountEntity.toModel(): EvidenceDateCount = EvidenceDateCount(
+    count = this.count,
+    date = this.date
+)
+
+
+internal fun EvidenceSourceCount.toEntity(
+    userId: String,
+    clusterId: Int
+): EvidenceSourceCountEntity = EvidenceSourceCountEntity(
+    userId = userId,
+    clusterId = clusterId,
+    source = this.source,
+    count = this.count
+)
+
+
+internal fun EvidenceSourceCountEntity.toModel(): EvidenceSourceCount = EvidenceSourceCount(
+    count = this.count,
+    source = this.source
+)
+
+
+internal fun OpportunityDetailsPage.toMembershipEntities(userId: String): List<OpportunityEvidenceMembershipEntity> {
+    val topPost = topEvidence.mapIndexed { index, evidence ->
+        OpportunityEvidenceMembershipEntity(
+            userId = userId,
+            clusterId = details.id,
+            postId = evidence.id,
+            section = EvidenceSection.TOP,
+            page = 0,
+            position = index
+        )
+    }
+
+    val standardPost = posts.mapIndexed { index, evidence ->
+        OpportunityEvidenceMembershipEntity(
+            userId = userId,
+            clusterId = details.id,
+            postId = evidence.id,
+            section = EvidenceSection.POSTS,
+            page = page,
+            position = index
+        )
+    }
+    return topPost + standardPost
 }
+
+

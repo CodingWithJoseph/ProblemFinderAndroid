@@ -4,7 +4,7 @@ import com.example.problemfinder.core.model.opportunity.OpportunityFailure
 import com.example.problemfinder.core.model.opportunity.OpportunityOperationException
 import com.example.problemfinder.data.authentication.api.AuthSessionProvider
 import com.example.problemfinder.data.opportunities.api.OpportunityActionsRepository
-import com.example.problemfinder.data.opportunities.impl.db.OpportunityDao
+import com.example.problemfinder.data.opportunities.impl.db.dao.OpportunityDao
 import com.example.problemfinder.data.opportunities.impl.remote.OpportunityActionsRemoteDataSource
 import com.example.problemfinder.data.opportunities.impl.util.OpportunitySyncCoordinator
 import com.example.problemfinder.data.opportunities.impl.util.ensureSameAccount

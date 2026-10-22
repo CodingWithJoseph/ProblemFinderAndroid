@@ -1,4 +1,4 @@
-package com.example.problemfinder.data.opportunities.impl.db
+package com.example.problemfinder.data.opportunities.impl.db.dao
 
 import androidx.room3.Dao
 import androidx.room3.Insert

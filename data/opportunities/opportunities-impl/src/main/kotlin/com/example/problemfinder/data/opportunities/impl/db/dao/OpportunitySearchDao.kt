@@ -1,4 +1,4 @@
-package com.example.problemfinder.data.opportunities.impl.db
+package com.example.problemfinder.data.opportunities.impl.db.dao
 
 import com.example.problemfinder.data.opportunities.impl.model.entity.OpportunitySearchQueryEntity
 import kotlinx.coroutines.flow.Flow

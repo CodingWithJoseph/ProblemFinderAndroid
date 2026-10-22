@@ -15,22 +15,15 @@ import com.example.problemfinder.data.opportunities.impl.util.opportunityCall
 import com.example.problemfinder.data.opportunities.impl.util.ensureSameAccount
 import com.example.problemfinder.data.opportunities.impl.util.requireSession
 import com.example.problemfinder.data.opportunities.impl.util.toModel
-import io.ktor.client.plugins.HttpRequestTimeoutException
-import io.ktor.client.plugins.ResponseException
-import io.ktor.serialization.ContentConvertException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import com.example.problemfinder.data.opportunities.impl.util.OpportunitySyncCoordinator
 import kotlinx.coroutines.sync.withLock
-import kotlinx.serialization.SerializationException
-import java.io.IOException
 import javax.inject.Inject
-import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * Coordinates authenticated page requests with Room, the observable source of Browse content.
@@ -48,16 +41,13 @@ class BrowseRepositoryImpl @Inject constructor(
     override fun observeBrowse(
         category: OpportunityCategoryFilter,
         sortType: SortType,
-    ): Flow<BrowseSnapshot> =
-        // Cancel the old account's database subscription before observing the new account's rows.
-        sessions.observeUserId().flatMapLatest { userId ->
+    ): Flow<BrowseSnapshot> = sessions.observeUserId().flatMapLatest { userId ->
             if (userId == null) {
                 flowOf(BrowseSnapshot())
             } else {
                 local.observeBrowse(userId, category, sortType)
                     .map { it.copy(userId = userId) }
                     .onStart {
-                        // An unfinished cache read is different from a completed read with no data.
                         emit(BrowseSnapshot(userId = userId, cacheReady = false))
                     }
             }

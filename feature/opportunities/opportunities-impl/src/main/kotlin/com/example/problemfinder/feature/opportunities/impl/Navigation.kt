@@ -36,7 +36,7 @@ fun NavGraphBuilder.opportunities(
         val context = LocalContext.current
 
         // Entry/effect collection runs once per composition entry, not on every recomposition.
-        // State collection above follows lifecycle state; this effect is cancelled on composition exit.
+        // State collection above follows lifecycle state; this effect is canceled on composition exit.
         LaunchedEffect(viewModel) {
             viewModel.onIntent(DiscoveryIntent.Entered)
 
