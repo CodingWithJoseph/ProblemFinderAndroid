@@ -110,13 +110,23 @@ interface OpportunityDetailsDao {
     suspend fun upsertOpportunityEvidence(opportunityEvidence: OpportunityEvidenceEntity)
 
     @Upsert
+    suspend fun upsertOpportunityEvidence(opportunityEvidence: List<OpportunityEvidenceEntity>)
+
+    @Upsert
     suspend fun upsertOpportunityEvidenceMembership(opportunityEvidenceMembership: OpportunityEvidenceMembershipEntity)
 
     @Upsert
+    suspend fun upsertOpportunityEvidenceMembership(opportunityEvidenceMembership: List<OpportunityEvidenceMembershipEntity>)
+
+    @Upsert
     suspend fun upsertEvidenceSourceCount(evidenceSourceCount: EvidenceSourceCountEntity)
+    @Upsert
+    suspend fun upsertEvidenceSourceCount(evidenceSourceCount: List<EvidenceSourceCountEntity>)
 
     @Upsert
     suspend fun upsertEvidenceDateCount(evidenceDateCount: EvidenceDateCountEntity)
+    @Upsert
+    suspend fun upsertEvidenceDateCount(evidenceDateCount: List<EvidenceDateCountEntity>)
 
     @Query("DELETE FROM opportunity_details WHERE userId = :userId AND clusterId = :clusterId")
     suspend fun deleteOpportunityDetails(userId: String, clusterId: Int)
