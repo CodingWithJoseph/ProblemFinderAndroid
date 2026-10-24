@@ -121,3 +121,9 @@ data class EvidenceDateCountEntity(
     val date: String,
     val count: Int
 )
+
+data class PaginationMetadata (
+    val hasSynced: Boolean,
+    val pageSize: Int,
+    val lastLoadedPage: Int
+)
