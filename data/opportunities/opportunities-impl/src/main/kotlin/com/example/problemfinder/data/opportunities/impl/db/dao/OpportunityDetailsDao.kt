@@ -3,15 +3,16 @@ package com.example.problemfinder.data.opportunities.impl.db.dao
 import androidx.room3.Dao
 import androidx.room3.Query
 import androidx.room3.Upsert
-import com.example.problemfinder.core.model.details.EvidenceDateCount
+import com.example.problemfinder.data.opportunities.impl.model.EvidenceSection
 import com.example.problemfinder.data.opportunities.impl.model.entity.EvidenceDateCountEntity
 import com.example.problemfinder.data.opportunities.impl.model.entity.EvidenceSourceCountEntity
 import com.example.problemfinder.data.opportunities.impl.model.entity.OpportunityDetailsCacheRow
 import com.example.problemfinder.data.opportunities.impl.model.entity.OpportunityDetailsEntity
 import com.example.problemfinder.data.opportunities.impl.model.entity.OpportunityEvidenceEntity
 import com.example.problemfinder.data.opportunities.impl.model.entity.OpportunityEvidenceMembershipEntity
-import kotlinx.coroutines.flow.Flow
+import com.example.problemfinder.data.opportunities.impl.model.entity.PaginationMetadata
 
+/** SQL access only. The local source coordinates invalidation and reads all snapshot parts in one transaction. */
 @Dao
 interface OpportunityDetailsDao {
 
@@ -81,7 +82,30 @@ interface OpportunityDetailsDao {
             m.position ASC
     """
     )
-    fun observeDetails(userId: String, clusterId: Int): Flow<List<OpportunityDetailsCacheRow>>
+    suspend fun getDetailsRows(userId: String, clusterId: Int): List<OpportunityDetailsCacheRow>
+
+    @Query(
+        """
+        SELECT
+            hasSynced,
+            pageSize,
+            lastLoadedPage
+        FROM opportunity_details
+        WHERE userId = :userId
+        AND clusterId = :clusterId
+    """
+    )
+    suspend fun getPaginationMetadata(userId: String, clusterId: Int): PaginationMetadata?
+
+    @Query(
+        """
+        SELECT postId FROM opportunity_evidence_membership
+        WHERE userId = :userId
+        AND clusterId = :clusterId
+        AND section = 'posts'
+    """
+    )
+    suspend fun getStandardPostIds(userId: String, clusterId: Int): List<Int>
 
     @Query(
         """
@@ -120,14 +144,34 @@ interface OpportunityDetailsDao {
 
     @Upsert
     suspend fun upsertEvidenceSourceCount(evidenceSourceCount: EvidenceSourceCountEntity)
+
     @Upsert
     suspend fun upsertEvidenceSourceCount(evidenceSourceCount: List<EvidenceSourceCountEntity>)
 
     @Upsert
     suspend fun upsertEvidenceDateCount(evidenceDateCount: EvidenceDateCountEntity)
+
     @Upsert
     suspend fun upsertEvidenceDateCount(evidenceDateCount: List<EvidenceDateCountEntity>)
 
     @Query("DELETE FROM opportunity_details WHERE userId = :userId AND clusterId = :clusterId")
     suspend fun deleteOpportunityDetails(userId: String, clusterId: Int)
+
+    @Query("""
+        DELETE FROM opportunity_evidence_membership
+        WHERE userId = :userId AND clusterId = :clusterId AND section = :section
+    """)
+    suspend fun clearMembershipsForSection(userId: String, clusterId: Int, section: EvidenceSection)
+
+    @Query("""
+        DELETE FROM evidence_source_count
+        WHERE userId = :userId AND clusterId = :clusterId
+    """)
+    suspend fun clearEvidenceSourceCount(userId: String, clusterId: Int)
+
+    @Query("""
+        DELETE FROM evidence_date_count
+        WHERE userId = :userId AND clusterId = :clusterId
+    """)
+    suspend fun clearEvidenceDateCount(userId: String, clusterId: Int)
 }

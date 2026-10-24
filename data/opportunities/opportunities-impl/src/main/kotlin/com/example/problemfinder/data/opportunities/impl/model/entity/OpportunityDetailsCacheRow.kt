@@ -15,3 +15,4 @@ data class OpportunityDetailsCacheRow (
     @Embedded(prefix = "evidence_")
     val evidence: OpportunityEvidenceEntity?
 )
+
