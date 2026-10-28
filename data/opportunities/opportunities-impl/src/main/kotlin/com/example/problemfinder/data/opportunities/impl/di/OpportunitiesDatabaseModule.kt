@@ -15,7 +15,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-/** Gives all opportunity data sources the same persistent database and its three DAO views. */
 @Module
 @InstallIn(SingletonComponent::class)
 object OpportunitiesDatabaseModule {
@@ -51,7 +50,3 @@ object OpportunitiesDatabaseModule {
         database: OpportunitiesDatabase
     ): OpportunityDetailsDao = database.discoveryDetailsDao()
 }
-
-// TODO [DETAILS-2 / SEARCH-2] After the new @Dao interfaces are registered on OpportunitiesDatabase,
-// provide their instances here and inject them into the new local sources. Preserve existing DAO
-// bindings and the shared opportunities.db file; constructor injection alone cannot create a DAO.

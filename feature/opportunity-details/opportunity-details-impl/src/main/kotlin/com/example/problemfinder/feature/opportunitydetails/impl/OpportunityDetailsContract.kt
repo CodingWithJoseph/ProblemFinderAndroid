@@ -7,22 +7,6 @@ import com.example.problemfinder.core.model.opportunity.OpportunityFailure
 import com.example.problemfinder.core.mvi.RequestState
 
 /**
- * START HERE - this scaffold already supplies the files and wiring. Complete their TODO bodies.
- * Work through Details before Search so both Browse and Search can open one finished destination.
- *
- * Second milestone: persisted data you can reopen offline (DETAILS-2).
- * 2A. .../model/entity/OpportunityDetailsEntities.kt: finish schema and model <-> entity mappings.
- * 2B. .../db/OpportunityDetailsDao.kt: write ordered account-scoped read/write queries and register
- *     the DAO/entities on OpportunitiesDatabase. Add/test the migration and its Hilt DAO binding.
- * 2C. .../local/OpportunityDetailsLocalDataSource.kt: assemble cached snapshots and atomic writes.
- *
- * Third milestone: fetch -> save -> observe (DETAILS-3/4).
- * 3A. .../remote/OpportunityDetailsRemoteDataSource.kt: authenticated GET, returning only a DTO.
- * 3B. .../OpportunityDetailsRepositoryImpl.kt: account observation and page-1 refresh orchestration.
- * 3C. Same repository: append evidence pages using saved progress. Test failure/retry/account switch.
- * 4. Domain use cases and Hilt bindings ALREADY delegate to that repository. Read them to trace
- *    the call, but no replacement implementation is needed just to connect the feature.
- *
  * Fourth milestone: usable screen (DETAILS-5/6/7).
  * 5. OpportunityDetailsViewModel.kt: consume snapshots; coordinate refresh/page/watch jobs and errors.
  * 6. OpportunityDetailsScreen.kt + Navigation.kt: finish content/evidence/states and external links.

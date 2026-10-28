@@ -23,10 +23,7 @@ import com.example.problemfinder.data.opportunities.impl.util.OpportunitySyncCoo
 import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
-/**
- * Follows account-scoped dashboard rows in Room and refreshes them on explicit request.
- * Shared opportunity rows let Browse refreshes and watch actions also update Discovery cards.
- */
+
 class DiscoveryRepositoryImpl @Inject constructor(
     private val sessions: AuthSessionProvider,
     private val localDataSource: DiscoveryLocalDataSource,
@@ -34,12 +31,10 @@ class DiscoveryRepositoryImpl @Inject constructor(
     private val sync: OpportunitySyncCoordinator,
 ) : DiscoveryRepository {
 
-
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun observeDiscovery(): Flow<DiscoverySnapshot> = sessions.observeUserId()
         .distinctUntilChanged()
         .flatMapLatest { userId ->
-            // Clear the previous account's content while Room reads the new account's dashboard.
             val emptySnapshot = DiscoverySnapshot(
                 userId = userId,
                 dashboard = DiscoveryDashboard(
@@ -64,7 +59,7 @@ class DiscoveryRepositoryImpl @Inject constructor(
         sync.mutex.withLock {
             ensureSameAccount(session.userId, sessions)
             val dashboard = fetchDashboard(session)
-            // A successful response still belongs to the account that initiated the request.
+
             ensureSameAccount(session.userId, sessions)
             localDataSource.replaceDashboard(
                 userId = session.userId,
@@ -73,7 +68,6 @@ class DiscoveryRepositoryImpl @Inject constructor(
         }
     }
 
-    /** Converts the full response before replacement so invalid cards do not partially enter Room. */
     private suspend fun fetchDashboard(session: AuthSession): DiscoveryDashboard {
         val dto = remoteDataSource.fetchDashboard(
             accessToken = session.accessToken

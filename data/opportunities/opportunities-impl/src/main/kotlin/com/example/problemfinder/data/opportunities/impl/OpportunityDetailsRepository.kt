@@ -1,20 +1,27 @@
 package com.example.problemfinder.data.opportunities.impl
 
+import com.example.problemfinder.core.model.details.OpportunityDetailsPage
 import com.example.problemfinder.core.model.details.OpportunityDetailsSnapshot
+import com.example.problemfinder.core.model.opportunity.OpportunityFailure
+import com.example.problemfinder.core.model.opportunity.OpportunityOperationException
 import com.example.problemfinder.data.authentication.api.AuthSessionProvider
 import com.example.problemfinder.data.opportunities.api.OpportunityDetailsRepository
 import com.example.problemfinder.data.opportunities.impl.local.OpportunityDetailsLocalDataSource
 import com.example.problemfinder.data.opportunities.impl.remote.OpportunityDetailsRemoteDataSource
 import com.example.problemfinder.data.opportunities.impl.util.OpportunitySyncCoordinator
+import com.example.problemfinder.data.opportunities.impl.util.ensureSameAccount
+import com.example.problemfinder.data.opportunities.impl.util.opportunityCall
+import com.example.problemfinder.data.opportunities.impl.util.requireSession
+import com.example.problemfinder.data.opportunities.impl.util.toDetailsPage
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
-/**
- * TODO [DETAILS-3] Coordinate identity, HTTP, mapping and cache writes here.
- * Implement DETAILS-1 (contracts/mappers) and DETAILS-2 (Room/local) first. The constructor is
- * already wired by Hilt; the method bodies are intentionally yours to complete.
- * The screen will observe local snapshots; returning from refresh never supplies screen content.
- */
 class OpportunityDetailsRepositoryImpl @Inject constructor(
     private val sessions: AuthSessionProvider,
     private val remote: OpportunityDetailsRemoteDataSource,
@@ -22,51 +29,133 @@ class OpportunityDetailsRepositoryImpl @Inject constructor(
     private val sync: OpportunitySyncCoordinator,
 ) : OpportunityDetailsRepository {
 
-    override fun observeDetails(clusterId: Int): Flow<OpportunityDetailsSnapshot> {
-        // TODO [DETAILS-3B] Connect observed identity to the completed local observation.
-        // 1. Observe sessions.observeUserId(), remove duplicate IDs, and flatMapLatest to the account's flow.
-        // 2. For null identity, emit a signed-out snapshot with no previous user's content.
-        // 3. For a known identity, emit a fresh cacheReady=false snapshot before collecting
-        //    local.observeDetails(userId, clusterId). The local source reports when its first read finishes.
-        // 4. Keep reading the known account's cache even if currentSession() cannot provide a usable token.
-        //    Identity selects cached data; credentials are required only for the network methods below.
-        // 5. Let account changes cancel the previous local collector; don't keep merging old account rows.
-        // Reference DiscoveryRepositoryImpl.observeDiscovery for this flow structure, changing only the
-        // selected data to details. This method must not call refreshDetails automatically.
-        // Finish check: switching accounts immediately hides old details; offline refresh failure still
-        // permits the persisted account's cached details to display. NEXT: the explicit refresh operation.
-        throw UnsupportedOperationException("Complete DETAILS-3b: account-scoped observation")
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun observeDetails(clusterId: Int): Flow<OpportunityDetailsSnapshot> =
+        sessions.observeUserId()
+            .distinctUntilChanged()
+            .flatMapLatest { userId ->
+                val emptySnapshot = OpportunityDetailsSnapshot(
+                    userId = userId,
+                    cacheReady = false
+                )
+
+                if (userId == null) {
+                    flowOf(emptySnapshot.copy(cacheReady = true))
+                } else {
+                    local.observeDetails(userId, clusterId).onStart {
+                        emit(emptySnapshot)
+                    }
+                }
+            }
+
+    override suspend fun refreshDetails(clusterId: Int): Unit = opportunityCall {
+            require(clusterId > 0) { "clusterId must be nonnegative: $clusterId" }
+            val session = requireSession(sessions)
+            sync.mutex.withLock {
+
+                var detailsPage: OpportunityDetailsPage
+                ensureSameAccount(
+                    userId = session.userId,
+                    sessions = sessions
+                )
+
+                val details = remote.fetchDetails(
+                    clusterId = clusterId,
+                    accessToken = session.accessToken
+                )
+
+                try {
+                    require(details.id == clusterId) {
+                        "Error collecting cluster: requesting cluster $clusterId - response cluster ${details.id}"
+                    }
+
+                    require(details.page == 1) {
+                        "Error collecting cluster: invalid page ${details.page} should be 1"
+                    }
+
+                    require(details.pageSize == 20) {
+                        "Error collecting cluster: invalid pageSize ${details.pageSize} should be 20"
+                    }
+
+                    detailsPage = details.toDetailsPage()
+
+                }catch (e: IllegalArgumentException) {
+                    throw OpportunityOperationException(OpportunityFailure.INVALID_RESPONSE, e)
+
+                }
+
+                ensureSameAccount(
+                    userId = session.userId,
+                    sessions = sessions
+                )
+
+                local.storePage(
+                    userId = session.userId,
+                    page = detailsPage,
+                    replace = true
+                )
+            }
+
     }
 
-    override suspend fun refreshDetails(clusterId: Int) {
-        // TODO [DETAILS-3B] Coordinate one page-1 refresh; the local source owns the actual transaction.
-        // 1. Validate the positive cluster ID. Use opportunityCall around infrastructure work so failures
-        //    become stable categories; preserve a specific not-found outcome before flattening HTTP 404.
-        // 2. Obtain requireSession(sessions) and capture its userId. Acquire the existing sync.mutex.
-        // 3. ensureSameAccount before requesting page 1. Fetch the DTO through remote using the token.
-        // 4. Confirm DTO.id matches clusterId, then map/validate the ENTIRE response with toDetailsPage().
-        // 5. ensureSameAccount again after the request. Store the mapped page with replace=true, still
-        //    inside the same sync lock, and let the local transaction commit before returning success.
-        // 6. Preserve CancellationException; a cancelled old account must not write or become an error UI.
-        // No content is returned to the ViewModel from this method. Room observation delivers the saved data.
-        // Do not clear cached text before fetching, and do not perform a second Add/Remove implementation.
-        // Finish check: a failed/malformed request leaves the old cache untouched; a delayed old account
-        // cannot write into the new account. NEXT: evidence pagination uses the same account/lock discipline.
-        throw UnsupportedOperationException("Complete DETAILS-3b: refresh details")
-    }
+    override suspend fun loadNextEvidencePage(clusterId: Int) = opportunityCall {
+        require(clusterId > 0) { "clusterId must be nonnegative: $clusterId" }
+        val session = requireSession(sessions)
+        sync.mutex.withLock {
 
-    override suspend fun loadNextEvidencePage(clusterId: Int) {
-        // TODO [DETAILS-3C] Resume from STORED progress, not from the count of visible list rows.
-        // 1. Require a usable session and acquire sync.mutex before reading this account/cluster's progress.
-        // 2. Return without a request if no successful first page is stored or all ordinary evidence is read.
-        //    With contiguous pages, the next page is lastLoadedPage+1; keep the saved pageSize unchanged.
-        // 3. Fetch that page, validate response ID/page/pageSize and map the complete response.
-        // 4. Check the account again and append with local.storePage(replace=false). Advance saved progress
-        //    only as part of its successful transaction. Failed pages retry the same number.
-        // 5. Two callers waiting for the same lock must re-read progress inside it, so the second cannot
-        //    append the same page a second time. The ViewModel also suppresses repeated UI taps.
-        // Highlighted topEvidence does not count as additional ordinary-page progress.
-        // Finish check: page 2 failure preserves page 1; retry gets page 2; the final page stops further calls.
-        throw UnsupportedOperationException("Complete DETAILS-3c: evidence pagination")
+            val cache = local.getOpportunityDetails(
+                userId = session.userId,
+                clusterId = clusterId
+            )
+            var detailsPage: OpportunityDetailsPage
+            ensureSameAccount(
+                userId = session.userId,
+                sessions = sessions
+            )
+
+            val pageSize = cache.pageSize
+            val nextPage = cache.lastLoadedPage + 1
+
+            if(cache.hasSynced.not()) return@withLock
+            if(cache.lastLoadedPage * cache.pageSize >= cache.totalPosts) return@withLock
+
+            val response = remote.fetchDetails(
+                clusterId = clusterId,
+                accessToken = session.accessToken,
+                page = nextPage,
+                pageSize = pageSize
+            )
+
+            try {
+                require(response.id == clusterId) {
+                    "Error collecting cluster: requesting cluster $clusterId - response cluster ${response.id}"
+                }
+
+                require(response.page == nextPage) {
+                    "Error collecting cluster: invalid page ${response.page} should be $nextPage"
+                }
+
+                require(response.pageSize == pageSize) {
+                    "Error collecting cluster: invalid pageSize ${response.pageSize} should be $pageSize"
+                }
+
+                detailsPage = response.toDetailsPage()
+
+            }catch (e: IllegalArgumentException) {
+                throw OpportunityOperationException(OpportunityFailure.INVALID_RESPONSE, e)
+
+            }
+
+            ensureSameAccount(
+                userId = session.userId,
+                sessions = sessions
+            )
+
+            local.storePage(
+                userId = session.userId,
+                page = detailsPage,
+                replace = false
+            )
+        }
     }
 }

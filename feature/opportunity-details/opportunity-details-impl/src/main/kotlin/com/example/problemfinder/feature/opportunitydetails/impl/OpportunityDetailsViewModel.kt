@@ -1,45 +1,85 @@
 package com.example.problemfinder.feature.opportunitydetails.impl
 
+import com.example.problemfinder.core.model.opportunity.OpportunityFailure
+import com.example.problemfinder.core.model.opportunity.OpportunityOperationException
 import com.example.problemfinder.core.mvi.BaseMVIViewModel
 import com.example.problemfinder.domain.opportunities.api.actions.SetOpportunityWatchedUseCase
 import com.example.problemfinder.domain.opportunities.api.details.LoadNextOpportunityEvidenceUseCase
 import com.example.problemfinder.domain.opportunities.api.details.ObserveOpportunityDetailsUseCase
 import com.example.problemfinder.domain.opportunities.api.details.RefreshOpportunityDetailsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import javax.inject.Inject
 
-/** Dependencies and dispatch are supplied; DETAILS-5 is the state/request coordination YOU implement. */
 @HiltViewModel
 class OpportunityDetailsViewModel @Inject constructor(
     private val observeDetails: ObserveOpportunityDetailsUseCase,
     private val refreshDetails: RefreshOpportunityDetailsUseCase,
     private val loadNextEvidence: LoadNextOpportunityEvidenceUseCase,
     private val setWatched: SetOpportunityWatchedUseCase,
-) : BaseMVIViewModel<OpportunityDetailsIntent, OpportunityDetailsState, OpportunityDetailsEffect>(OpportunityDetailsState()) {
+) : BaseMVIViewModel<OpportunityDetailsIntent, OpportunityDetailsState, OpportunityDetailsEffect>(
+    OpportunityDetailsState()
+) {
+
+    // job, id
+    private var observationJob: Job? = null
+    private var activeId: Int = -1
+
     override fun onIntent(intent: OpportunityDetailsIntent) {
         when (intent) {
             is OpportunityDetailsIntent.Entered -> startObserving(intent.clusterId)
+            is OpportunityDetailsIntent.OpenEvidence -> openEvidence(intent.evidenceId)
             OpportunityDetailsIntent.Reload -> reload()
             OpportunityDetailsIntent.LoadNextEvidencePage,
             OpportunityDetailsIntent.RetryEvidencePage -> loadMore()
             OpportunityDetailsIntent.WatchClicked -> watch()
-            is OpportunityDetailsIntent.OpenEvidence -> openEvidence(intent.evidenceId)
             OpportunityDetailsIntent.BackClicked -> sendEffect(OpportunityDetailsEffect.NavigateBack)
         }
     }
 
     private fun startObserving(clusterId: Int) {
-        // Route-to-state identity is provided so the placeholder remains useful while you build.
+        if (observationJob?.isActive == true ) return
+        if (clusterId == activeId) return
+
+        if (clusterId <= 0) onError(
+            OpportunityOperationException(
+                OpportunityFailure.CLUSTER_NOT_FOUND,
+                Exception()
+            )
+        )
+
+        cancelObserve()
+
+        observationJob = safeLaunch {
+            observeDetails(ObserveOpportunityDetailsUseCase.Params(clusterId)).collect { response ->
+                reduce {
+                    copy(
+                        details = response.details,
+                        cachedOpportunity = response.cachedOpportunity,
+                        topEvidence = response.topEvidence,
+                        posts = response.posts,
+                        canLoadMore = (response.pageSize * response.lastLoadedPage) < response.totalPosts,
+                        cacheReady = response.cacheReady,
+                        hasSynced = response.hasSynced
+                    )
+                }
+            }
+        }
+
         reduce { copy(clusterId = clusterId) }
         // TODO [DETAILS-5A] Start this after the repository can emit real account-scoped snapshots.
         // 1. Reject a non-positive ID. Retain the selected ID and one observation Job; same-ID re-entry
         //    should reuse the active observation instead of starting another collector/initial refresh.
+
         // 2. For a different ID, invalidate request generations, cancel old refresh/page/watch work and
         //    clear old content BEFORE collecting the new use case. Account changes need the same cleanup.
+
         // 3. Collect observeDetails(clusterId) in safeLaunch. Reduce details, cachedOpportunity, evidence,
         //    userId, paging availability, cacheReady and hasSynced from the snapshot into screen state.
+
         // 4. Let the first completed cache read display before triggering ONE initial refresh for a known
         //    account. Later Room emissions from page/watch updates must not trigger infinite refreshes.
+
         // Reference DiscoveryViewModel.startObserving for jobs, account switching and the one-refresh flag;
         // add cluster identity to its guards. No DTO, HttpClient or DAO belongs in this ViewModel.
         // Finish check: repeated Entered creates one subscription; cached details appear while HTTP waits.
@@ -95,5 +135,11 @@ class OpportunityDetailsViewModel @Inject constructor(
         // map the stable failure category, end relevant Loading/pending states and keep useful content.
         // Retry must be able to restart the observer. Preserve cancellation instead of displaying it.
         // Finish check: losing the observer is visible/recoverable; one failed Add never blanks the details.
+    }
+
+    private fun cancelObserve() {
+        activeId = -1
+        observationJob?.cancel()
+        observationJob = null
     }
 }

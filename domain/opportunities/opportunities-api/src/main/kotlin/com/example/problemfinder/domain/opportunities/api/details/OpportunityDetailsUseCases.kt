@@ -4,11 +4,21 @@ import com.example.problemfinder.core.common.ObservableUseCase
 import com.example.problemfinder.core.common.UseCase
 import com.example.problemfinder.core.model.details.OpportunityDetailsSnapshot
 
-/**
- * DETAILS-4: These boundaries and their repository delegation are already supplied.
- * Int means cluster identity, not a navigation route or page number. Observe starts no HTTP call.
- * Add domain policy only when needed; HTTP/Room logic stays in the data implementation.
- */
-abstract class ObserveOpportunityDetailsUseCase : ObservableUseCase<Int, OpportunityDetailsSnapshot>()
-abstract class RefreshOpportunityDetailsUseCase : UseCase<Int, Unit>()
-abstract class LoadNextOpportunityEvidenceUseCase : UseCase<Int, Unit>()
+
+abstract class ObserveOpportunityDetailsUseCase :
+    ObservableUseCase<ObserveOpportunityDetailsUseCase.Params, OpportunityDetailsSnapshot>() {
+    data class Params(
+        val clusterId: Int
+    )
+}
+abstract class RefreshOpportunityDetailsUseCase : UseCase<RefreshOpportunityDetailsUseCase.Params, Unit>() {
+    data class Params(
+        val clusterId: Int
+    )
+}
+
+abstract class LoadNextOpportunityEvidenceUseCase : UseCase<LoadNextOpportunityEvidenceUseCase.Params, Unit>() {
+    data class Params(
+        val clusterId: Int
+    )
+}
