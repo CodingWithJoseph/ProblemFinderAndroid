@@ -10,11 +10,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-/**
- * Wiring supplied for DETAILS-4 / SEARCH-4. Features receive use cases; use cases receive these
- * contracts. Completing a repository body replaces its unfinished behavior without changing UI DI.
- * DAO bindings are deliberately still your task in OpportunitiesDatabaseModule after Room is ready.
- */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class GuidedOpportunitiesDataModule {

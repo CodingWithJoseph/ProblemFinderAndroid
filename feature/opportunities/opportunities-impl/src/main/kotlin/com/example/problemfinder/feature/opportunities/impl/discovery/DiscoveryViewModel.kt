@@ -52,7 +52,6 @@ class DiscoveryViewModel @Inject constructor(
         }
     }
 
-    /** Starts on entry and retries a failed observer; repeated entry reuses an active subscription. */
     private fun startObserving() {
         if (observationJob?.isActive == true) return
 
@@ -66,7 +65,6 @@ class DiscoveryViewModel @Inject constructor(
             observeDiscoveryUseCase(Unit).collect { snapshot ->
 
                 if (state.value.userId != snapshot.userId) {
-                    // Invalidate old work before replacing state, including when the user signs out.
                     cancelWatchActions()
                     cancelRefresh()
                     needsInitialRefresh = true
@@ -96,7 +94,6 @@ class DiscoveryViewModel @Inject constructor(
                 }
 
                 if (snapshot.cacheReady && snapshot.userId != null && needsInitialRefresh){
-                    // Let the screen display the first cache read before refreshing it once.
                     needsInitialRefresh = false
                     reloadDashboard()
                 }

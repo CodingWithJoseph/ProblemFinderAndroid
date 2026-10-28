@@ -3,14 +3,13 @@
     <string name="title_discovery_dashboard">Discover the\nnext possibility.</string>
     <string name="description_discovery_dashboard">Real problems. A place to start.</string>
     <string name="title_no_data_loading">Finding opportunities</string>
-    <string name="message_no_data_loading">Loading the latest opportunitiesâ€¦</string>
-
+    <string name="message_no_data_loading">Loading the latest opportunities</string>
     <string name="title_no_data_succeeded">Nothing to browse yet</string>
     <string name="message_no_data_succeeded">New opportunities will appear here when they are available.</string>
-
     <string name="title_failure">Unable to load opportunities</string>
     <string name="message_failure">Something went wrong. Please try again.</string>
-
+    <string name="title_cluster_not_found">Opportunity not found</string>
+    <string name="message_cluster_not_found">This opportunity may no longer be available. Go back to explore other opportunities.</string>
     <string name="title_error_network">Network Connection</string>
     <string name="message_error_network">Check your connection and try again.</string>
     <plurals name="browse_post_count">
@@ -24,7 +23,7 @@
     <string name="title_retry_refresh_button">Retry refresh</string>
     <string name="title_retry_page_button">Retry loading more</string>
     <string name="title_load_more_button">Load more</string>
-    <string name="message_loading_more">Loading more opportunitiesâ€¦</string>
+    <string name="message_loading_more">Loading more opportunities</string>
     <string name="title_unnamed_opportunity">Untitled opportunity</string>
     <string name="problem_statement_missing">The problem statement for this opportunity has not been classified.</string>
     <string name="title_refresh_button">Refresh</string>

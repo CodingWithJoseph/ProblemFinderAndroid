@@ -12,17 +12,23 @@ import javax.inject.Inject
 class ObserveOpportunityDetailsUseCaseImpl @Inject constructor(
     private val repository: OpportunityDetailsRepository,
 ) : ObserveOpportunityDetailsUseCase() {
-    override suspend fun execute(params: Int): Flow<OpportunityDetailsSnapshot> = repository.observeDetails(params)
+    override suspend fun execute(params: Params): Flow<OpportunityDetailsSnapshot> = repository.observeDetails(
+        params.clusterId
+    )
 }
 
 class RefreshOpportunityDetailsUseCaseImpl @Inject constructor(
     private val repository: OpportunityDetailsRepository,
 ) : RefreshOpportunityDetailsUseCase() {
-    override suspend fun execute(params: Int): Unit = repository.refreshDetails(params)
+    override suspend fun execute(params: Params): Unit = repository.refreshDetails(
+        params.clusterId
+    )
 }
 
 class LoadNextOpportunityEvidenceUseCaseImpl @Inject constructor(
     private val repository: OpportunityDetailsRepository,
 ) : LoadNextOpportunityEvidenceUseCase() {
-    override suspend fun execute(params: Int): Unit = repository.loadNextEvidencePage(params)
+    override suspend fun execute(params: Params): Unit = repository.loadNextEvidencePage(
+        params.clusterId
+    )
 }

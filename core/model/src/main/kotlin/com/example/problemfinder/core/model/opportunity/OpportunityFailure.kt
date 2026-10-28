@@ -6,6 +6,7 @@ enum class OpportunityFailure {
     SESSION_UNAVAILABLE,
     REQUEST_REJECTED,
     SERVER,
+    CLUSTER_NOT_FOUND,
     INVALID_RESPONSE,
     UNKNOWN,
 }
