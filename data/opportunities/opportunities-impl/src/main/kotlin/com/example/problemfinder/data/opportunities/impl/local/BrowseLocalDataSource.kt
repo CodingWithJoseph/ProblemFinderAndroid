@@ -35,7 +35,6 @@ class BrowseLocalDataSource @Inject constructor(
     ) {
         val categoryKey = category.name
         val sortKey = sortType.name
-        // Keep the first occurrence and its server order when a page repeats an opportunity ID.
         val clusters = page.clusters.distinctBy { it.id }
 
         val clusterEntities = clusters.map {
