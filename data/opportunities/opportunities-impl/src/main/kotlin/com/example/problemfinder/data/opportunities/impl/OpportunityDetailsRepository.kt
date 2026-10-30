@@ -54,6 +54,7 @@ class OpportunityDetailsRepositoryImpl @Inject constructor(
             sync.mutex.withLock {
 
                 var detailsPage: OpportunityDetailsPage
+
                 ensureSameAccount(
                     userId = session.userId,
                     sessions = sessions
