@@ -44,9 +44,10 @@ import com.example.problemfinder.core.model.opportunity.OpportunityFailure
 import com.example.problemfinder.core.model.opportunity.Opportunity
 import com.example.problemfinder.core.mvi.RequestState
 import com.example.problemfinder.feature.opportunities.impl.R
+import com.example.problemfinder.core.designsystem.R as DesignSystemR
 import com.example.problemfinder.feature.opportunities.impl.components.OpportunityRefreshAction
 import com.example.problemfinder.feature.opportunities.impl.components.BrowseOpportunityRow
-import com.example.problemfinder.feature.opportunities.impl.util.OpportunityUiError
+import com.example.problemfinder.feature.opportunities.impl.util.OpportunityUIError
 import com.example.problemfinder.feature.opportunities.impl.util.messageRes
 import kotlin.time.Instant
 
@@ -111,7 +112,7 @@ private fun BrowseNoDataScreen(
     val resources = when {
         error != null -> error.messageRes()
         loading -> R.string.title_no_data_loading to R.string.message_no_data_loading
-        state.userId == null -> R.string.title_failure to R.string.message_error_session
+        state.userId == null -> DesignSystemR.string.title_failure to DesignSystemR.string.message_error_session
         state.hasSynced -> R.string.title_no_data_succeeded to R.string.message_no_data_succeeded
         else -> R.string.title_not_synced to R.string.message_not_synced
     }
@@ -225,7 +226,7 @@ private fun BrowsePageFooter(state: BrowseState, onIntent: (BrowseIntent) -> Uni
                 }
             } else if (state.hasSynced) {
                 Text(
-                    stringResource(R.string.message_end_of_results),
+                    stringResource(DesignSystemR.string.message_end_of_results),
                     modifier = Modifier.fillMaxWidth().padding(16.dp),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodySmall,
@@ -305,7 +306,7 @@ private fun BrowseErrorPreview() = ImmensityTheme {
             userId = "preview",
             cacheReady = true,
             observationRequest = RequestState.Success(Unit),
-            refreshRequest = RequestState.Error(OpportunityUiError(OpportunityFailure.NETWORK)),
+            refreshRequest = RequestState.Error(OpportunityUIError(OpportunityFailure.NETWORK)),
         ),
     ) {}
 }

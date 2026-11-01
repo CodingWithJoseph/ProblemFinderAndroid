@@ -34,11 +34,11 @@ import com.example.problemfinder.core.designsystem.theme.DiscoveryTypography
 import com.example.problemfinder.core.designsystem.theme.appearance
 import com.example.problemfinder.core.designsystem.theme.featurePalette
 import com.example.problemfinder.core.model.opportunity.Opportunity
-import com.example.problemfinder.feature.opportunities.impl.R
 import com.example.problemfinder.feature.opportunities.impl.discovery.DiscoveryIntent
 import com.example.problemfinder.feature.opportunities.impl.util.toOpportunityDateLabelCompact
 import java.time.ZoneId
 import kotlin.time.Instant
+import com.example.problemfinder.core.designsystem.R as DesignSystemR
 
 /** Prominent dashboard card using the same open/watch intents and pending state as collection cards. */
 @Composable
@@ -99,7 +99,7 @@ private fun FeaturedDiscoveryCardEyebrow(
 ) {
     Column(modifier = modifier) {
         Text(
-            text = stringResource(R.string.label_latest_discovery).uppercase(LocalLocale.current.platformLocale),
+            text = stringResource(DesignSystemR.string.label_latest_discovery).uppercase(LocalLocale.current.platformLocale),
             style = DiscoveryTypography.featuredBadge,
             color = featurePalette().actionContainer,
             fontWeight = FontWeight.SemiBold,
@@ -182,7 +182,7 @@ fun FeatureDiscoveryMetaData(
     val metadataColor = featurePalette().secondaryText
     Text(
         text = pluralStringResource(
-            id = R.plurals.browse_post_count,
+            id = DesignSystemR.plurals.browse_post_count,
             count = postCount,
             postCount
         ),
@@ -206,7 +206,7 @@ fun FeatureDiscoveryMetaData(
     }
 
     Text(
-        text = dateLabel ?: stringResource(R.string.label_activity_date_unavailable),
+        text = dateLabel ?: stringResource(DesignSystemR.string.label_activity_date_unavailable),
         maxLines = 1,
         style = DiscoveryTypography.metadata,
         color = metadataColor

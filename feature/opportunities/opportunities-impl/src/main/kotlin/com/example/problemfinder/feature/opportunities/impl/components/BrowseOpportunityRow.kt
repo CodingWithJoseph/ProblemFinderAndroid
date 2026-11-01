@@ -26,6 +26,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.problemfinder.core.designsystem.R as DesignSystemR
 import com.example.problemfinder.core.designsystem.theme.DiscoveryTypography
 import com.example.problemfinder.core.designsystem.theme.appearance
 import com.example.problemfinder.core.designsystem.theme.opportunityPalette
@@ -112,12 +113,12 @@ internal fun BrowseOpportunityRow(
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(
                         text = pluralStringResource(
-                            R.plurals.browse_post_count, cluster.postCount, cluster.postCount,
+                            DesignSystemR.plurals.browse_post_count, cluster.postCount, cluster.postCount,
                         ),
                         style = DiscoveryTypography.metadata,
                     )
                     Text(
-                        text = dateLabel ?: stringResource(R.string.label_activity_date_unavailable),
+                        text = dateLabel ?: stringResource(DesignSystemR.string.label_activity_date_unavailable),
                         style = DiscoveryTypography.activityDate,
                         color = palette.secondaryText,
                     )
