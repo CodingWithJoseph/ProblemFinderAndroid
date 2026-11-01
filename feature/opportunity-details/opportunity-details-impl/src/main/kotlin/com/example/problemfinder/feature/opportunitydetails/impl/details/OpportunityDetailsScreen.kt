@@ -1,9 +1,11 @@
-package com.example.problemfinder.feature.opportunitydetails.impl
+package com.example.problemfinder.feature.opportunitydetails.impl.details
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -21,6 +23,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.problemfinder.core.designsystem.theme.ImmensityTheme
+import com.example.problemfinder.feature.opportunitydetails.impl.R
+import com.example.problemfinder.feature.opportunitydetails.impl.components.FeaturedDiscoveryCard
+import com.example.problemfinder.feature.opportunitydetails.impl.components.OpportunityCardPreviewCase
 import com.example.problemfinder.core.designsystem.R as DesignR
 
 /** State and intent wiring are supplied; the full text/evidence layout belongs to DETAILS-6. */
@@ -55,7 +60,11 @@ internal fun OpportunityDetailsScreen(
         },
     ) { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(24.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+                .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             // TODO [DETAILS-6] Replace this shell with branches for initial loading, cached content,
@@ -68,13 +77,17 @@ internal fun OpportunityDetailsScreen(
                 Text(detail.summary)
                 Text(detail.problemStatement)
             }
-            // TODO [DETAILS-6] Use ONE LazyColumn for full text, top evidence and paged evidence.
-            // Full descriptions belong here: do not inherit the card's two-line limit. Preserve
-            // separate top/page roles with stable keys, including role when an ID appears in both.
-            // Add source/date/author/link metadata, a paging footer, independent watch pending/error,
-            // headings and accessible actions. Reuse/extract common action UI without depending on
-            // feature:opportunities:opportunities-impl; sibling features share API/design-system code.
-            // Check: long text + 2x font + landscape scrolls to every action without nested scrolling.
+
+            val cluster = state.cachedOpportunity
+
+            cluster?.let {
+                FeaturedDiscoveryCard(
+                    cluster = it,
+                    onIntent = onIntent,
+                    isActionPending = false,
+                    modifier = Modifier.padding(horizontal = 18.dp),
+                )
+            }
         }
     }
 }
@@ -83,7 +96,13 @@ internal fun OpportunityDetailsScreen(
 @Preview(name = "Details scaffold large text", widthDp = 320, heightDp = 640, fontScale = 2f)
 @Composable
 private fun OpportunityDetailsPreview() = ImmensityTheme {
-    OpportunityDetailsScreen(OpportunityDetailsState(clusterId = 42), {})
+    OpportunityDetailsScreen(
+        OpportunityDetailsState(
+            clusterId = 42
+        ), {
+
+        }
+    )
     // TODO [DETAILS-6] Add preview fixtures for full content, no evidence, missing post URLs,
     // loading, offline refresh failure and append failure. Fixtures stay in previews/tests only.
 }

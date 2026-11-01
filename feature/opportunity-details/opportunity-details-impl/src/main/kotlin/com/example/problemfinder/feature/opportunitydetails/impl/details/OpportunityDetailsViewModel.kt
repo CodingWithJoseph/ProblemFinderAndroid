@@ -1,4 +1,4 @@
-package com.example.problemfinder.feature.opportunitydetails.impl
+package com.example.problemfinder.feature.opportunitydetails.impl.details
 
 import com.example.problemfinder.core.model.opportunity.OpportunityFailure
 import com.example.problemfinder.core.model.opportunity.OpportunityOperationException
@@ -8,6 +8,7 @@ import com.example.problemfinder.domain.opportunities.api.actions.SetOpportunity
 import com.example.problemfinder.domain.opportunities.api.details.LoadNextOpportunityEvidenceUseCase
 import com.example.problemfinder.domain.opportunities.api.details.ObserveOpportunityDetailsUseCase
 import com.example.problemfinder.domain.opportunities.api.details.RefreshOpportunityDetailsUseCase
+import com.example.problemfinder.feature.opportunitydetails.impl.util.OpportunityDetailsUIError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -30,6 +31,12 @@ class OpportunityDetailsViewModel @Inject constructor(
 
     private var refreshJob: Job? = null
     private var refreshVersion = 0L
+
+    private var loadNextJob: Job? = null
+    private var loadVersion = 0L
+
+    private var watchJobs: MutableMap<Int, Job> = mutableMapOf()
+    private var watchVersion = 0L
 
     override fun onIntent(intent: OpportunityDetailsIntent) {
         when (intent) {
@@ -136,60 +143,153 @@ class OpportunityDetailsViewModel @Inject constructor(
                     )
                 )
 
-                if(version == refreshVersion){
+                if (version == refreshVersion) {
                     reduce { copy(refreshRequest = RequestState.Success(Unit)) }
                 }
             } catch (cancelled: CancellationException) {
-                if(version == refreshVersion) {
+                if (version == refreshVersion) {
                     reduce { copy(refreshRequest = RequestState.Idle) }
                 }
                 throw cancelled
-            } catch (error: Exception ) {
-                val failure = (error as? OpportunityOperationException)?.failure ?: OpportunityFailure.UNKNOWN
+            } catch (error: Exception) {
+                val failure =
+                    (error as? OpportunityOperationException)?.failure ?: OpportunityFailure.UNKNOWN
 
-                if(version == refreshVersion) {
-                    reduce { copy(refreshRequest = RequestState.Idle) }
+                if (version == refreshVersion) {
+                    reduce { copy(refreshRequest = RequestState.Error(OpportunityDetailsUIError(failure))) }
                 }
             }
         }
     }
 
     private fun loadMore() {
-        // TODO [DETAILS-5C] Keep evidence append independent from page-1 refresh.
-        // Require a synced selected ID/account, canLoadMore and no active page or replacement refresh job.
-        // Capture ID/account/generation; set pageRequest Loading; call loadNextEvidence(id). Finish only that
-        // matching request with Success/Error. Leave existing text/posts in state during append/failure.
-        // The repository chooses the page number. Do not infer it from rendered rows/topEvidence counts.
-        // RetryEvidencePage uses this same method and the unchanged saved progress after failure.
-        // Finish check: tapping twice starts one append; page failure shows a footer retry, not a blank screen.
+        val current = state.value
+        val clusterId = current.clusterId
+
+        if (clusterId == null || clusterId <= 0) return onError(
+            OpportunityOperationException(
+                OpportunityFailure.CLUSTER_NOT_FOUND,
+                Exception()
+            )
+        )
+
+        if (
+            current.userId.isNullOrEmpty() ||
+            current.canLoadMore.not() ||
+            current.cacheReady.not() ||
+            refreshJob?.isActive == true
+        ) return
+
+        loadVersion += 1L
+        val version = loadVersion
+
+        try {
+            loadNextJob = safeLaunch {
+                loadNextEvidence(LoadNextOpportunityEvidenceUseCase.Params(clusterId))
+            }
+
+            if (loadVersion == version) {
+                reduce {
+                    copy(
+                        pageRequest = RequestState.Success(Unit)
+                    )
+                }
+            }
+        } catch (cancelled: CancellationException) {
+            if (loadVersion == version) {
+                reduce {
+                    copy(
+                        pageRequest = RequestState.Idle
+                    )
+                }
+            }
+            throw cancelled
+        } catch (exception: Exception) {
+            val failure = (exception as? OpportunityOperationException)?.failure ?: OpportunityFailure.UNKNOWN
+            if (loadVersion == version) {
+                reduce {
+                    copy(
+                        pageRequest = RequestState.Error(OpportunityDetailsUIError(failure)),
+                    )
+                }
+            }
+        }
     }
 
     private fun watch() {
-        // TODO [DETAILS-5D] Reuse the EXISTING membership flow, after details observation includes the card.
-        // Require userId, cachedOpportunity and no active watch job. Capture current account/ID and the
-        // desired value (!cachedOpportunity.isWatched), set isWatchPending, then call setWatched with those
-        // explicit values. Keep the displayed watch value until Room emits the server-confirmed change.
-        // Clear pending only for the same account/ID/generation; emit ActionFailed for an ordinary error.
-        // Cancel/suppress old jobs on account/ID changes. Unknown membership on a cold link stays disabled.
-        // Reference DiscoveryViewModel.watchCluster/cancelWatchActions for these race/error protections.
-        // Finish check: Add here updates Discovery/Browse, and removing there appears here on return.
+        val current = state.value
+        val opportunity = current.cachedOpportunity
+        if (
+            current.userId == null ||
+            current.clusterId == null ||
+            opportunity == null ||
+            opportunity.isWatched.not() ||
+            current.cacheReady.not() ||
+            refreshJob?.isActive == true ||
+            loadNextJob?.isActive == true
+        ) return
+
+        reduce { copy(isWatchPending = true) }
+
+        watchVersion = 1L
+        val version = watchVersion
+
+        val job = safeLaunch {
+            try {
+                setWatched(
+                    SetOpportunityWatchedUseCase.Params(
+                        userId = current.userId,
+                        clusterId = current.clusterId,
+                        watched = opportunity.isWatched
+                    )
+                )
+
+                if (watchVersion == version) {
+
+                }
+            } catch (cancelled: CancellationException) {
+                if (loadVersion == version) {
+                    reduce {
+                        copy(
+                            pageRequest = RequestState.Idle
+                        )
+                    }
+                }
+                throw cancelled
+            } catch (exception: Exception) {
+                val failure = (exception as? OpportunityOperationException)?.failure
+                    ?: OpportunityFailure.UNKNOWN
+                if (loadVersion == version) {
+                    reduce {
+                        copy(
+                            pageRequest = RequestState.Error(OpportunityDetailsUIError(failure)),
+                        )
+                    }
+                }
+            }
+        }
+        watchJobs[opportunity.id] = job
+        job.invokeOnCompletion {
+            if(watchJobs[current.clusterId] == job)
+                watchJobs.remove(current.clusterId)
+        }
     }
 
-    private fun openEvidence(evidenceId: Int) {
-        // TODO [DETAILS-6] Resolve the clicked evidence ID against LOADED state, not an arbitrary caller URL.
-        // Find the evidence in topEvidence/posts. If it has a usable source URL, emit OpenEvidenceLink(url).
-        // For an absent/invalid URL, keep the row readable but its external-link action unavailable.
-        // Navigation.kt owns opening the browser and reporting launch failure. The ViewModel owns neither
-        // an Activity nor Android URL-launch APIs. Check: opening a post never changes the detail data state.
-    }
+    private fun openEvidence(evidenceId: Int) = sendEffect(
+        OpportunityDetailsEffect.NavigateToEvidence(evidenceId)
+    )
 
     override fun onError(error: Throwable) {
-        // TODO [DETAILS-5E] This fallback receives exceptions that escaped a safeLaunch block.
-        // Handle refresh/page/watch errors inside those operations so they cannot masquerade as failed
-        // cache observation. Reserve this path for observation/unexpected failures: stop dependent jobs,
-        // map the stable failure category, end relevant Loading/pending states and keep useful content.
-        // Retry must be able to restart the observer. Preserve cancellation instead of displaying it.
-        // Finish check: losing the observer is visible/recoverable; one failed Add never blanks the details.
+        cancelRefresh()
+
+        val failure = (error as? OpportunityOperationException)?.failure ?: OpportunityFailure.UNKNOWN
+
+        reduce {
+            copy(
+                observationRequest = RequestState.Error(OpportunityDetailsUIError(failure)),
+                refreshRequest = RequestState.Idle,
+            )
+        }
     }
 
     private fun cancelJobs() {
@@ -205,10 +305,14 @@ class OpportunityDetailsViewModel @Inject constructor(
     }
 
     private fun cancelWatch() {
-        // ill implement this when i implement watch logic
+        watchVersion += 1L
+        watchJobs.values.toList().forEach { it.cancel() }
+        watchJobs.clear()
     }
 
     private fun cancelRefresh() {
-        // ill implement this when i implement refresh logic
+        refreshVersion += 1L
+        refreshJob?.cancel()
+        refreshJob = null
     }
 }

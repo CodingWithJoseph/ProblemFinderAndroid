@@ -247,6 +247,7 @@ fun AppNavigation(
                 opportunityDetails(
                     onBack = { navController.popBackStack() },
                     onMessage = { message -> messageScope.launch { snackbarHostState.showSnackbar(message) } },
+                    onOpenEvidence = {  }
                 )
                 search(
                     onOpenCluster = { clusterId ->

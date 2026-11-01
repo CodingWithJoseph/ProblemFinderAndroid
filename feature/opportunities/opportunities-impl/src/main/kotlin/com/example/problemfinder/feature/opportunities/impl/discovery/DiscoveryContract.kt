@@ -4,7 +4,7 @@ import com.example.problemfinder.core.model.opportunity.OpportunityCategory
 import com.example.problemfinder.core.model.opportunity.Opportunity
 import com.example.problemfinder.core.model.discovery.DiscoveryCollection
 import com.example.problemfinder.core.mvi.RequestState
-import com.example.problemfinder.feature.opportunities.impl.util.OpportunityUiError
+import com.example.problemfinder.feature.opportunities.impl.util.OpportunityUIError
 
 /**
  * Dashboard content and request status for the current account.
@@ -17,8 +17,8 @@ data class DiscoveryState(
     val collections: List<DiscoveryCollection> = emptyList(),
     val hasSynced: Boolean = false,
     val cacheReady: Boolean = false,
-    val observationRequest: RequestState<Unit, OpportunityUiError> = RequestState.Loading,
-    val refreshRequestState: RequestState<Unit, OpportunityUiError> = RequestState.Idle,
+    val observationRequest: RequestState<Unit, OpportunityUIError> = RequestState.Loading,
+    val refreshRequestState: RequestState<Unit, OpportunityUIError> = RequestState.Idle,
     val pendingClusterIds: Set<Int> = emptySet(),
 ) {
     /** Empty collection headers alone do not count as opportunity content. */
@@ -29,7 +29,7 @@ data class DiscoveryState(
     val isRefreshing: Boolean
         get() = refreshRequestState == RequestState.Loading
 
-    val contentError: OpportunityUiError?
+    val contentError: OpportunityUIError?
         get() {
             val observation = observationRequest
             if (observation is RequestState.Error) {
@@ -69,5 +69,5 @@ sealed interface DiscoveryIntent {
 sealed interface DiscoveryEffect {
     data class NavigateToCluster(val clusterId: Int): DiscoveryEffect
     data class NavigateToBrowse(val clusterCategory: OpportunityCategory): DiscoveryEffect
-    data class ShowError(val error: OpportunityUiError): DiscoveryEffect
+    data class ShowError(val error: OpportunityUIError): DiscoveryEffect
 }

@@ -39,9 +39,10 @@ import com.example.problemfinder.core.designsystem.theme.DiscoveryTypography
 import com.example.problemfinder.core.designsystem.theme.opportunityPalette
 import com.example.problemfinder.core.model.opportunity.OpportunityCategory
 import com.example.problemfinder.core.model.opportunity.Opportunity
-import com.example.problemfinder.feature.opportunities.impl.R
+import com.example.problemfinder.core.designsystem.R as DesignSystemR
 import com.example.problemfinder.feature.opportunities.impl.util.toOpportunityDateLabel
 import java.time.ZoneId
+
 
 
 /** Fixed-size collection card with separate open/watch callbacks and no local watch-state ownership. */
@@ -205,7 +206,7 @@ private fun OpportunityCardFooter(
         ) {
             Text(
                 text = pluralStringResource(
-                    R.plurals.browse_post_count,
+                    DesignSystemR.plurals.browse_post_count,
                     cluster.postCount,
                     cluster.postCount
                 ),
@@ -216,7 +217,7 @@ private fun OpportunityCardFooter(
             )
 
             Text(
-                text = dateLabel ?: stringResource(R.string.label_activity_date_unavailable),
+                text = dateLabel ?: stringResource(DesignSystemR.string.label_activity_date_unavailable),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 style = DiscoveryTypography.activityDate,

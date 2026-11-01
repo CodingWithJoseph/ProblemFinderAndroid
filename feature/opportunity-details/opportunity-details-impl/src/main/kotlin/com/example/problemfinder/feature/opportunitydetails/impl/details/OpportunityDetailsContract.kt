@@ -1,10 +1,11 @@
-package com.example.problemfinder.feature.opportunitydetails.impl
+package com.example.problemfinder.feature.opportunitydetails.impl.details
 
 import com.example.problemfinder.core.model.details.OpportunityDetails
 import com.example.problemfinder.core.model.details.OpportunityEvidence
 import com.example.problemfinder.core.model.opportunity.Opportunity
 import com.example.problemfinder.core.model.opportunity.OpportunityFailure
 import com.example.problemfinder.core.mvi.RequestState
+import com.example.problemfinder.feature.opportunitydetails.impl.util.OpportunityDetailsUIError
 
 /**
  * Fourth milestone: usable screen (DETAILS-5/6/7).
@@ -31,9 +32,9 @@ data class OpportunityDetailsState(
     val canLoadMore: Boolean = false,
     val cacheReady: Boolean = false,
     val hasSynced: Boolean = false,
-    val observationRequest: RequestState<Unit, OpportunityFailure> = RequestState.Idle,
-    val refreshRequest: RequestState<Unit, OpportunityFailure> = RequestState.Idle,
-    val pageRequest: RequestState<Unit, OpportunityFailure> = RequestState.Idle,
+    val observationRequest: RequestState<Unit, OpportunityDetailsUIError> = RequestState.Idle,
+    val refreshRequest: RequestState<Unit, OpportunityDetailsUIError> = RequestState.Idle,
+    val pageRequest: RequestState<Unit, OpportunityDetailsUIError> = RequestState.Idle,
     val isWatchPending: Boolean = false,
     val implementationPending: Boolean = true,
 )
@@ -50,6 +51,6 @@ sealed interface OpportunityDetailsIntent {
 
 sealed interface OpportunityDetailsEffect {
     data object NavigateBack : OpportunityDetailsEffect
-    data class OpenEvidenceLink(val url: String) : OpportunityDetailsEffect
-    data class ActionFailed(val failure: OpportunityFailure) : OpportunityDetailsEffect
+    data class NavigateToEvidence(val evidence: Int) : OpportunityDetailsEffect
+    data class ActionFailed(val failure: OpportunityDetailsUIError) : OpportunityDetailsEffect
 }

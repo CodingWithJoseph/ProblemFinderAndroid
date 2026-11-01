@@ -6,18 +6,7 @@
     <string name="message_no_data_loading">Loading the latest opportunities</string>
     <string name="title_no_data_succeeded">Nothing to browse yet</string>
     <string name="message_no_data_succeeded">New opportunities will appear here when they are available.</string>
-    <string name="title_failure">Unable to load opportunities</string>
-    <string name="message_failure">Something went wrong. Please try again.</string>
-    <string name="title_cluster_not_found">Opportunity not found</string>
-    <string name="message_cluster_not_found">This opportunity may no longer be available. Go back to explore other opportunities.</string>
-    <string name="title_error_network">Network Connection</string>
-    <string name="message_error_network">Check your connection and try again.</string>
-    <plurals name="browse_post_count">
-        <item quantity="one">%1$d post</item>
-        <item quantity="other">%1$d posts</item>
-    </plurals>
     <string name="label_latest_activity">Latest activity: %1$s</string>
-    <string name="label_activity_date_unavailable">No Date</string>
     <string name="label_watching">Watching</string>
     <string name="message_refreshing">Refreshing opportunities</string>
     <string name="title_retry_refresh_button">Retry refresh</string>
@@ -33,13 +22,7 @@
     <string name="label_sort_newest">Newest</string>
     <string name="title_not_synced">Opportunities have not loaded yet</string>
     <string name="message_not_synced">Refresh to load opportunities.</string>
-    <string name="message_end_of_results">You have reached the end.</string>
-    <string name="message_error_session">Your session is unavailable. Please try again.</string>
-    <string name="message_error_request">The request could not be completed. Refresh the list and try again.</string>
-    <string name="message_error_server">The service is temporarily unavailable. Please try again.</string>
-    <string name="message_error_response">Received an unexpected response. Please try again.</string>
     <string name="label_see_all">See all</string>
-    <string name="label_latest_discovery">Featured</string>
     <string name="label_see_all_category">See all %1$s</string>
     <string name="message_adding_opportunity">Adding opportunity</string>
     <string name="message_removing_opportunity">Removing opportunity</string>

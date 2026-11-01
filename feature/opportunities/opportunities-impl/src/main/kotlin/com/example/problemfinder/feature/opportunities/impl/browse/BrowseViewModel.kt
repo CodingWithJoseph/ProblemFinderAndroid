@@ -13,7 +13,7 @@ import com.example.problemfinder.domain.opportunities.api.browse.LoadNextBrowseP
 import com.example.problemfinder.domain.opportunities.api.browse.ObserveBrowseUseCase
 import com.example.problemfinder.domain.opportunities.api.browse.RefreshBrowseUseCase
 import com.example.problemfinder.feature.opportunities.api.OpportunitiesDestinations
-import com.example.problemfinder.feature.opportunities.impl.util.OpportunityUiError
+import com.example.problemfinder.feature.opportunities.impl.util.OpportunityUIError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Job
@@ -247,7 +247,7 @@ class BrowseViewModel @Inject constructor(
             } catch (error: Exception) {
                 if (version == watchVersion && state.value.userId == userId) {
                     val failure = (error as? OpportunityOperationException)?.failure ?: OpportunityFailure.UNKNOWN
-                    sendEffect(BrowseEffect.ShowError(OpportunityUiError(failure)))
+                    sendEffect(BrowseEffect.ShowError(OpportunityUIError(failure)))
                 }
             } finally {
                 if (version == watchVersion && state.value.userId == userId) {
@@ -288,7 +288,7 @@ class BrowseViewModel @Inject constructor(
         }
     }
 
-    private fun Throwable.toUiError() = OpportunityUiError(
+    private fun Throwable.toUiError() = OpportunityUIError(
         (this as? OpportunityOperationException)?.failure ?: OpportunityFailure.UNKNOWN,
     )
 }
