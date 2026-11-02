@@ -20,6 +20,16 @@ class SearchViewModel @Inject constructor(
 ) : BaseMVIViewModel<SearchIntent, SearchState, SearchEffect>(SearchState()) {
     override fun onIntent(intent: SearchIntent) {
         when (intent) {
+            SearchIntent.OpenFilters -> sendEffect(SearchEffect.NavigateToFilters)
+            SearchIntent.OpenAssistant -> sendEffect(SearchEffect.NavigateToAssistant)
+            SearchIntent.ClosePanel -> sendEffect(SearchEffect.NavigateBack)
+            is SearchIntent.SourceToggled, is SearchIntent.CommunityToggled,
+            is SearchIntent.MinimumPostsChanged, is SearchIntent.ObservedAfterChanged,
+            is SearchIntent.SortSelected, SearchIntent.ApplyFilters, SearchIntent.ResetFilters -> {
+                // TODO [SEARCH-UI-LOGIC] Own draft edits, parsing, validation and apply/reset behavior here.
+                // Populate sourceOptions/communityOptions from the options contract, never UI fixtures.
+                // Apply only valid edits, then emit NavigateBack. Do not execute a search merely on edit.
+            }
             SearchIntent.Entered -> onEntered()
             is SearchIntent.QueryChanged -> reduce { copy(draftQuery = draftQuery.copy(query = intent.value)) }
             is SearchIntent.FiltersChanged -> reduce { copy(draftQuery = intent.value) }

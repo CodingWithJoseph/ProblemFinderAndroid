@@ -1,88 +1,200 @@
 package com.example.problemfinder.feature.search.impl
 
-import android.content.res.Configuration
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.example.problemfinder.core.designsystem.theme.ImmensityTheme
+import com.example.problemfinder.core.designsystem.components.*
+import com.example.problemfinder.core.model.search.OpportunitySearchSort
+import com.example.problemfinder.core.mvi.RequestState
+import com.example.problemfinder.core.designsystem.R as DesignR
 
-/** Editing and intent callbacks are wired. Complete result states and visual design at SEARCH-6. */
 @Composable
-fun SearchScreen(
-    state: SearchState,
-    onIntent: (SearchIntent) -> Unit,
-    modifier: Modifier = Modifier,
-) = Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        item(key = "search-input") {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(stringResource(R.string.title_search), style = MaterialTheme.typography.headlineSmall)
-                OutlinedTextField(
-                    value = state.draftQuery.query,
-                    onValueChange = { onIntent(SearchIntent.QueryChanged(it)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text(stringResource(R.string.label_search_query)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                    keyboardActions = KeyboardActions(onSearch = {
-                        if (!state.implementationPending) onIntent(SearchIntent.Submit)
-                    }),
-                )
-                Button(enabled = !state.implementationPending, onClick = { onIntent(SearchIntent.Submit) }) {
-                    Text(stringResource(R.string.action_search))
+fun SearchScreen(state: SearchState, onIntent: (SearchIntent) -> Unit, modifier: Modifier = Modifier) {
+    FeatureScaffold(
+        stringResource(R.string.title_search), modifier,
+        onRefresh = { onIntent(SearchIntent.Reload) },
+        refreshing = state.refreshRequest is RequestState.Loading,
+        actions = {
+            IconButton({ onIntent(SearchIntent.OpenFilters) }) {
+                FeatureIcon(DesignR.drawable.icon_filter, description = stringResource(R.string.search_filters))
+            }
+        },
+    ) { padding ->
+        LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(24.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)) {
+            item("intro") {
+                FeaturePageHeader(stringResource(R.string.search_eyebrow), stringResource(R.string.search_headline),
+                    stringResource(R.string.search_subtitle))
+            }
+            item("query") {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OutlinedTextField(
+                        state.draftQuery.query, { onIntent(SearchIntent.QueryChanged(it)) },
+                        Modifier.fillMaxWidth(), label = { Text(stringResource(R.string.label_search_query)) },
+                        leadingIcon = { FeatureIcon(DesignR.drawable.icon_search) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        keyboardActions = KeyboardActions(onSearch = {
+                            if (!state.implementationPending) onIntent(SearchIntent.Submit)
+                        }),
+                    )
+                    state.validationMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    FeatureAction(stringResource(R.string.action_search), { onIntent(SearchIntent.Submit) },
+                        Modifier.fillMaxWidth(), DesignR.drawable.icon_search,
+                        enabled = !state.implementationPending, pending = state.refreshRequest is RequestState.Loading)
+                    OutlinedButton({ onIntent(SearchIntent.OpenAssistant) }, Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+                        FeatureIcon(DesignR.drawable.icon_sparkles)
+                        Spacer(Modifier.width(8.dp))
+                        Text(stringResource(R.string.search_assistant))
+                    }
                 }
-                if (state.implementationPending) Text(stringResource(R.string.message_search_scaffold))
-                // TODO [SEARCH-6] Add source/community/min-post/date/sort controls that edit draftQuery.
-                // /clusters/search/options supplies valid source/community choices; add its DTO,
-                // remote call and use case before exposing dynamic options. Industry/category needs
-                // a backend change. Keep filters in a menu/sheet and show applied filters distinctly.
+            }
+            if (state.submittedQuery != null) item("result-heading") {
+                FeatureSection(stringResource(R.string.search_results),
+                    pluralStringResource(R.plurals.search_result_count, state.total, state.total))
+            }
+            if ((state.refreshRequest is RequestState.Error || state.observationRequest is RequestState.Error) &&
+                state.items.isNotEmpty()) item("saved-error") {
+                FeatureNotice(stringResource(R.string.search_saved_title), stringResource(R.string.search_saved_message),
+                    { onIntent(SearchIntent.Reload) }, DesignR.drawable.icon_wifi_off)
+            }
+            if (state.items.isEmpty()) item("status") {
+                when {
+                    state.refreshRequest is RequestState.Loading || state.observationRequest is RequestState.Loading ->
+                        FeatureLoading(stringResource(R.string.search_loading))
+                    state.refreshRequest is RequestState.Error || state.observationRequest is RequestState.Error ->
+                        FeatureNotice(stringResource(R.string.search_error), stringResource(R.string.search_error_message),
+                            { onIntent(SearchIntent.Reload) })
+                    state.hasSynced -> FeatureEmpty(stringResource(R.string.search_empty),
+                        stringResource(R.string.search_empty_message), DesignR.drawable.icon_search,
+                        stringResource(R.string.search_filters), { onIntent(SearchIntent.OpenFilters) })
+                    else -> FeatureEmpty(stringResource(R.string.search_initial),
+                        stringResource(R.string.search_initial_message), DesignR.drawable.icon_search)
+                }
+            }
+            items(state.items, key = { it.id }) { opportunity ->
+                OpportunityListItem(opportunity, { onIntent(SearchIntent.OpenCluster(opportunity.id)) },
+                    { onIntent(SearchIntent.WatchCluster(opportunity.id)) },
+                    pending = opportunity.id in state.pendingClusterIds, actionsEnabled = !state.implementationPending)
+            }
+            item("paging") {
+                when (state.pageRequest) {
+                    is RequestState.Loading -> FeatureLoading(stringResource(R.string.search_loading_more))
+                    is RequestState.Error -> FeatureNotice(stringResource(R.string.search_page_error),
+                        stringResource(R.string.search_page_error_message), { onIntent(SearchIntent.RetryNextPage) })
+                    else -> if (state.canLoadMore) FeatureAction(stringResource(R.string.search_more),
+                        { onIntent(SearchIntent.LoadNextPage) }, Modifier.fillMaxWidth(), DesignR.drawable.icon_add)
+                }
             }
         }
-        // TODO [SEARCH-6] Render initial/validation/loading/empty/content/error states separately.
-        // Zero results is valid only after a successful sync. Cached content stays during refresh.
-        // Add icon refresh, paging footer/retry and shared watch controls with per-ID pending state.
-        // Use result cards shared through a suitable common UI module, not a sibling impl dependency.
-        items(state.items, key = { it.id }) { opportunity ->
-            TextButton(onClick = { onIntent(SearchIntent.OpenCluster(opportunity.id)) }) {
-                Text(opportunity.name)
-            }
-        }
-        // TODO [SEARCH-8] Add a separate assistant action and a confirmation/clarification section.
-        // Render interpretation.confirmation, assumptions, unsupported and fallback status. Only
-        // ConfirmDraft executes results; a clarification must remain an editable draft. Keep the
-        // current manual results visible while interpretation runs or fails.
     }
 }
 
-@Preview(name = "Search scaffold", widthDp = 393, heightDp = 850)
-@Preview(name = "Search scaffold dark", widthDp = 393, heightDp = 850, uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Preview(name = "Search scaffold large text", widthDp = 320, heightDp = 640, fontScale = 2f)
 @Composable
-private fun SearchPreview() = ImmensityTheme {
-    SearchScreen(SearchState(), {})
-    // TODO [SEARCH-6] Add preview-only fixtures for initial, invalid input, results, empty success,
-    // cached refresh failure, page retry, and assistant clarification. Do not seed runtime fake data.
+internal fun SearchFiltersScreen(state: SearchState, onIntent: (SearchIntent) -> Unit) {
+    FeatureScaffold(stringResource(R.string.search_filters), onBack = { onIntent(SearchIntent.ClosePanel) },
+        actions = { TextButton({ onIntent(SearchIntent.ResetFilters) }) { Text(stringResource(R.string.search_reset)) } },
+    ) { padding ->
+        LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(24.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)) {
+            item { FeaturePageHeader(stringResource(R.string.search_filter_eyebrow),
+                stringResource(R.string.search_filter_title), stringResource(R.string.search_filter_subtitle)) }
+            item {
+                FeatureSection(stringResource(R.string.search_sort))
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OpportunitySearchSort.entries.forEach { sort ->
+                        FilterChip(state.draftQuery.sort == sort, { onIntent(SearchIntent.SortSelected(sort)) },
+                            label = { Text(stringResource(when (sort) {
+                                OpportunitySearchSort.RELEVANCE -> R.string.search_relevance
+                                OpportunitySearchSort.NEWEST -> R.string.search_newest
+                                OpportunitySearchSort.LARGEST -> R.string.search_largest
+                            })) })
+                    }
+                }
+            }
+            item { FeatureSection(stringResource(R.string.search_sources)) }
+            if (state.sourceOptions.isEmpty()) item {
+                Text(stringResource(R.string.search_no_source_options), style = MaterialTheme.typography.bodySmall)
+            }
+            items(state.sourceOptions, key = { "source-" + it }) { source ->
+                FeatureBullet(source, source in state.draftQuery.sources, { onIntent(SearchIntent.SourceToggled(source)) })
+            }
+            item { FeatureSection(stringResource(R.string.search_communities)) }
+            if (state.communityOptions.isEmpty()) item {
+                Text(stringResource(R.string.search_no_community_options), style = MaterialTheme.typography.bodySmall)
+            }
+            items(state.communityOptions, key = { "community-" + it }) { community ->
+                FeatureBullet(community, community in state.draftQuery.communities,
+                    { onIntent(SearchIntent.CommunityToggled(community)) })
+            }
+            item {
+                OutlinedTextField(state.minPostsInput, { onIntent(SearchIntent.MinimumPostsChanged(it)) },
+                    Modifier.fillMaxWidth(), label = { Text(stringResource(R.string.search_minimum_posts)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true)
+            }
+            item {
+                OutlinedTextField(state.observedAfterInput, { onIntent(SearchIntent.ObservedAfterChanged(it)) },
+                    Modifier.fillMaxWidth(), label = { Text(stringResource(R.string.search_after_date)) },
+                    placeholder = { Text(stringResource(R.string.search_date_hint)) }, singleLine = true)
+            }
+            state.validationMessage?.let { message -> item { Text(message, color = MaterialTheme.colorScheme.error) } }
+            item {
+                FeatureAction(stringResource(R.string.search_apply), { onIntent(SearchIntent.ApplyFilters) },
+                    Modifier.fillMaxWidth(), DesignR.drawable.icon_check)
+            }
+        }
+    }
+}
+
+@Composable
+internal fun SearchAssistantScreen(state: SearchState, onIntent: (SearchIntent) -> Unit) {
+    FeatureScaffold(stringResource(R.string.search_assistant), onBack = { onIntent(SearchIntent.ClosePanel) }) { padding ->
+        LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(24.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)) {
+            item { FeatureHero(stringResource(R.string.search_assistant_eyebrow),
+                stringResource(R.string.search_assistant_title), stringResource(R.string.search_assistant_subtitle),
+                icon = DesignR.drawable.icon_sparkles) }
+            item {
+                OutlinedTextField(state.draftQuery.query, { onIntent(SearchIntent.QueryChanged(it)) },
+                    Modifier.fillMaxWidth(), label = { Text(stringResource(R.string.search_describe)) }, minLines = 4)
+            }
+            item {
+                FeatureAction(stringResource(R.string.search_prepare), { onIntent(SearchIntent.InterpretQuery) },
+                    Modifier.fillMaxWidth(), DesignR.drawable.icon_sparkles,
+                    pending = state.interpretationRequest is RequestState.Loading)
+            }
+            if (state.interpretationRequest is RequestState.Error) item {
+                FeatureNotice(stringResource(R.string.search_assistant_error), stringResource(R.string.search_assistant_error_message),
+                    { onIntent(SearchIntent.InterpretQuery) })
+            }
+            state.interpretation?.let { draft ->
+                item { FeaturePanel {
+                    FeatureSection(stringResource(R.string.search_review))
+                    Text(draft.confirmation)
+                    if (draft.fallbackUsed) Text(stringResource(R.string.search_fallback),
+                        style = MaterialTheme.typography.bodySmall)
+                } }
+                draft.clarificationQuestion?.let { question -> item { FeatureNotice(
+                    stringResource(R.string.search_clarification), question, icon = DesignR.drawable.icon_message) } }
+                if (draft.assumptions.isNotEmpty()) item { FeatureSection(stringResource(R.string.search_assumptions)) }
+                items(draft.assumptions, key = { "assumption-" + it }) { FeatureBullet(it) }
+                if (draft.unsupported.isNotEmpty()) item { FeatureSection(stringResource(R.string.search_unsupported)) }
+                items(draft.unsupported, key = { "unsupported-" + it }) { FeatureBullet(it) }
+                item {
+                    FeatureAction(stringResource(R.string.search_confirm), { onIntent(SearchIntent.ConfirmDraft) },
+                        Modifier.fillMaxWidth(), DesignR.drawable.icon_search, enabled = !draft.needsClarification)
+                }
+            }
+        }
+    }
 }

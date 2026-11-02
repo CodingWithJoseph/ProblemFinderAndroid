@@ -59,10 +59,25 @@ data class SearchState(
     val interpretationRequest: RequestState<Unit, OpportunityFailure> = RequestState.Idle,
     val pendingClusterIds: Set<Int> = emptySet(),
     val implementationPending: Boolean = true,
+    val sourceOptions: List<String> = emptyList(),
+    val communityOptions: List<String> = emptyList(),
+    val minPostsInput: String = "1",
+    val observedAfterInput: String = "",
+    val validationMessage: String? = null,
 )
 
 sealed interface SearchIntent {
     data object Entered : SearchIntent
+    data object OpenFilters : SearchIntent
+    data object OpenAssistant : SearchIntent
+    data object ClosePanel : SearchIntent
+    data class SourceToggled(val value: String) : SearchIntent
+    data class CommunityToggled(val value: String) : SearchIntent
+    data class MinimumPostsChanged(val value: String) : SearchIntent
+    data class ObservedAfterChanged(val value: String) : SearchIntent
+    data class SortSelected(val value: com.example.problemfinder.core.model.search.OpportunitySearchSort) : SearchIntent
+    data object ApplyFilters : SearchIntent
+    data object ResetFilters : SearchIntent
     data class QueryChanged(val value: String) : SearchIntent
     data class FiltersChanged(val value: OpportunitySearchQuery) : SearchIntent
     data object Submit : SearchIntent
@@ -76,6 +91,9 @@ sealed interface SearchIntent {
 }
 
 sealed interface SearchEffect {
+    data object NavigateToFilters : SearchEffect
+    data object NavigateToAssistant : SearchEffect
+    data object NavigateBack : SearchEffect
     data class NavigateToCluster(val clusterId: Int) : SearchEffect
     data class ActionFailed(val failure: OpportunityFailure) : SearchEffect
 }

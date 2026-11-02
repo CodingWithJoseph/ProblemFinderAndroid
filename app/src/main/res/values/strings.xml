@@ -8,7 +8,7 @@
 
     <string name="tab_label_browse">Browse</string>
     <string name="tab_label_search">Search</string>
-    <string name="tab_label_projects">Projects</string>
+    <string name="tab_label_projects">Analyze</string>
     <string name="tab_label_builds">Build</string>
     <string name="session_restore_failed">Unable to restore your account. Please try again.</string>
     <string name="sign_out_failed">Couldnâ€™t sign out. Please try again.</string>
