@@ -1,0 +1,18 @@
+<resources>
+    <string name="ui_back">Back</string>
+    <string name="ui_refresh">Refresh</string>
+    <string name="ui_retry">Try again</string>
+    <string name="ui_open">Open</string>
+    <string name="ui_add">Add</string>
+    <string name="ui_remove">Remove</string>
+    <string name="ui_read_post">Read post</string>
+    <string name="ui_score">Score: %1$d</string>
+    <plurals name="ui_posts">
+        <item quantity="one">%d supporting post</item>
+        <item quantity="other">%d supporting posts</item>
+    </plurals>
+    <plurals name="ui_comments">
+        <item quantity="one">%d comment</item>
+        <item quantity="other">%d comments</item>
+    </plurals>
+</resources>
