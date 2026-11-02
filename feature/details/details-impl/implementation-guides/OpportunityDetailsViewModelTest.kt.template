@@ -1,0 +1,20 @@
+package com.example.problemfinder.feature.details.impl
+
+/**
+ * TODO [DETAILS-7] Copy this template into src/test/kotlin under the matching package, then write tests.
+ * The template intentionally contains NO fake
+ * passing tests or @Ignore placeholders. Use existing BrowseViewModelTest/DiscoveryViewModelTest
+ * for Main dispatcher setup, runTest, fake use cases and controllable flows/deferred responses.
+ * - Enter with a cached cluster: show its full text before the refresh finishes.
+ * - Re-enter the same ID: one observer and one initial refresh, not duplicate requests.
+ * - Enter a different ID/account while the old GET waits: no stale content, success or error.
+ * - Refresh fails: cached details remain; the spinner ends; retry is available.
+ * - Empty evidence is a successful state; page 2 failure leaves page 1 visible and retryable.
+ * - Top evidence overlaps page evidence: each role preserves order without duplicate page entries.
+ * - Add/Remove updates shared membership; failure preserves state and clears pending.
+ * - Back/OpenEvidence produce effects, not navigation state or Activity calls.
+ * Also add data-layer MockEngine tests for exact paths/headers/JSON and malformed DTO mapping,
+ * plus Room instrumentation tests for transaction rollback, account isolation and migration.
+ * Verify the real screen at 2x font/dark/landscape, including Back and every independent action.
+ * Completion means the assertions describe app behavior, not just that a fake method was called.
+ */

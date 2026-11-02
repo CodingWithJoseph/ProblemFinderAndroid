@@ -3,6 +3,7 @@ package com.example.problemfinder.core.designsystem.components
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -364,10 +365,13 @@ fun EvidenceListItem(evidence: OpportunityEvidence, onOpen: () -> Unit, highligh
 }
 
 @Composable
-fun FeatureBullet(text: String, checked: Boolean = false, onCheckedChange: ((Boolean) -> Unit)? = null) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top,
+fun FeatureBullet(text: String, checked: Boolean = false, onCheckedChange: ((Boolean) -> Unit)? = null, enabled: Boolean = true) {
+    val interaction = if (onCheckedChange == null) Modifier else Modifier
+        .heightIn(min = 48.dp).toggleable(checked, enabled = enabled,
+            role = androidx.compose.ui.semantics.Role.Checkbox, onValueChange = onCheckedChange)
+    Row(Modifier.fillMaxWidth().then(interaction), verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        if (onCheckedChange != null) Checkbox(checked, onCheckedChange)
+        if (onCheckedChange != null) Checkbox(checked, null, enabled = enabled)
         else FeatureIcon(if (checked) R.drawable.icon_check_circle else R.drawable.icon_circle,
             modifier = Modifier.padding(top = 3.dp))
         Text(text, Modifier.weight(1f).padding(vertical = if (onCheckedChange != null) 12.dp else 0.dp),

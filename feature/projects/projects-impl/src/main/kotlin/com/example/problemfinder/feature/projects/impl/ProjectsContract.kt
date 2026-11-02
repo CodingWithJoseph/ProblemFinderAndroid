@@ -3,20 +3,27 @@ package com.example.problemfinder.feature.projects.impl
 
 import com.example.problemfinder.core.designsystem.components.FeatureContentStatus
 import com.example.problemfinder.core.model.details.OpportunityEvidence
+import com.example.problemfinder.core.model.workspace.*
 
-/** Presentation contracts only. Map pipeline/analysis data into these in your future logic. */
+/** Presentation contracts derived from account-scoped project and analysis snapshots. */
 enum class AnalysisStage { WATCHING, IN_REVIEW, READY }
 enum class AnalysisPanel { OVERVIEW, PROBLEM, AUDIENCE, ASSUMPTIONS, CONVERSATION }
-data class AnalysisProjectCard(val id: String, val title: String, val summary: String, val stageLabel: String)
+data class AnalysisProjectCard(val id: String, val title: String, val summary: String, val stageLabel: String,
+    val workflowStatus: WorkspaceStatus? = null)
 data class ProjectsState(
     val projects: List<AnalysisProjectCard> = emptyList(),
     val stage: AnalysisStage = AnalysisStage.WATCHING,
     val status: FeatureContentStatus = FeatureContentStatus.EMPTY,
+    val userId: String? = null,
+    val cacheReady: Boolean = false,
+    val isRefreshing: Boolean = false,
+    val failure: WorkspaceFailure? = null,
 )
 data class AnalysisProblem(
     val id: String, val title: String, val description: String,
     val kindLabel: String = "", val affectedUsers: List<String> = emptyList(),
     val situation: String = "", val evidence: List<OpportunityEvidence> = emptyList(),
+    val pinned: Boolean = false, val rejected: Boolean = false,
 )
 data class AnalysisAudience(
     val id: String, val name: String, val description: String,
@@ -27,14 +34,17 @@ data class AnalysisAssumption(
     val id: String, val question: String, val whyItMatters: String,
     val resolutionEvidence: String, val resolved: Boolean = false,
 )
-data class AnalysisTurn(val id: String, val text: String, val isUser: Boolean)
+data class AnalysisTurn(val id: String, val text: String, val isUser: Boolean,
+    val citations: List<AnalysisCitation> = emptyList(), val proposal: AnalysisProposal? = null,
+    val insufficientEvidence: Boolean = false)
 data class AnalysisWorkspace(
-    val id: String, val clusterId: Int, val title: String, val summary: String,
+    val id: String, val clusterId: Int?, val title: String, val summary: String,
     val versionLabel: String = "", val thesis: String = "",
     val consequence: String = "", val workaround: String = "",
     val problems: List<AnalysisProblem> = emptyList(),
     val audiences: List<AnalysisAudience> = emptyList(),
     val assumptions: List<AnalysisAssumption> = emptyList(),
+    val thesisConfirmed: Boolean = false,
 )
 data class AnalysisWorkspaceState(
     val projectId: String? = null,
@@ -46,6 +56,19 @@ data class AnalysisWorkspaceState(
     val turns: List<AnalysisTurn> = emptyList(),
     val draftMessage: String = "",
     val isSending: Boolean = false,
+    val userId: String? = null,
+    val cacheReady: Boolean = false,
+    val caseStatus: WorkspaceStatus? = null,
+    val version: Int = 0,
+    val isRefreshing: Boolean = false,
+    val isMutating: Boolean = false,
+    val failure: WorkspaceFailure? = null,
+    val safeError: String? = null,
+    val claims: List<AnalysisClaim> = emptyList(),
+    val conversations: List<ConversationSummary> = emptyList(),
+    val conversationId: String? = null,
+    val isLoadingConversation: Boolean = false,
+    val conversationFailure: WorkspaceFailure? = null,
 )
 sealed interface ProjectsIntent {
     data object Entered : ProjectsIntent
@@ -59,6 +82,11 @@ sealed interface ProjectsEffect {
     data object Discover : ProjectsEffect
 }
 sealed interface AnalysisIntent {
+    data class VisibilityChanged(val owner: String, val visible: Boolean) : AnalysisIntent
+    data class ConversationSelected(val id: String) : AnalysisIntent
+    data object NewConversation : AnalysisIntent
+    data object RetryConversation : AnalysisIntent
+    data class DecideProposal(val id: String, val accept: Boolean) : AnalysisIntent
     data class Entered(val itemId: String? = null, val panel: AnalysisPanel = AnalysisPanel.OVERVIEW) : AnalysisIntent
     data object Back : AnalysisIntent
     data object Reload : AnalysisIntent

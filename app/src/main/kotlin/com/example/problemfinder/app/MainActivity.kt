@@ -8,12 +8,17 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.SystemBarStyle
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.example.problemfinder.app.navigation.AppNavigation
 import com.example.problemfinder.app.navigation.LinkDestination
 import com.example.problemfinder.core.designsystem.theme.ImmensityTheme
+import com.example.problemfinder.core.preferences.AppearanceMode
+import com.example.problemfinder.core.preferences.AppearancePreferences
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.handleDeeplinks
@@ -24,6 +29,7 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
 
     @Inject lateinit var supabaseClient: SupabaseClient
+    @Inject lateinit var appearance: AppearancePreferences
     private var pendingLinkDestination by mutableStateOf<LinkDestination?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,8 +39,18 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val sessionStatus by supabaseClient.auth.sessionStatus.collectAsStateWithLifecycle()
+            val mode by appearance.mode.collectAsStateWithLifecycle()
+            val darkTheme = when (mode) {
+                AppearanceMode.SYSTEM -> isSystemInDarkTheme()
+                AppearanceMode.LIGHT -> false
+                AppearanceMode.DARK -> true
+            }
+            SideEffect {
+                val bars = SystemBarStyle.auto(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT) { darkTheme }
+                enableEdgeToEdge(statusBarStyle = bars, navigationBarStyle = bars)
+            }
 
-            ImmensityTheme {
+            ImmensityTheme(darkTheme = darkTheme) {
                 AppNavigation(
                     sessionStatus = sessionStatus,
                     linkDestination = pendingLinkDestination,

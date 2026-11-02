@@ -6,6 +6,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalConfiguration
+import android.content.res.Configuration
 import androidx.compose.ui.graphics.Color
 
 
@@ -117,12 +121,19 @@ private fun ColorScheme.withImmensityFixedRoles(): ColorScheme = copy(
 
 /** Applies the app's light/dark Material colors and shared Inter typography to all feature content. */
 @Composable
-fun ImmensityTheme(content: @Composable () -> Unit) {
+fun ImmensityTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
 
-    val immensityScheme = if (isSystemInDarkTheme()) DarkScheme else LightScheme
-    MaterialTheme(
-        colorScheme = immensityScheme,
-        typography = ImmensityTypography,
-        content = content,
-    )
+    val immensityScheme = if (darkTheme) DarkScheme else LightScheme
+    val configuration = LocalConfiguration.current
+    // Existing category palettes also read night mode. Override only that local bit so every
+    // descendant follows the saved choice while size, locale and font scale remain untouched.
+    val themedConfiguration = remember(configuration, darkTheme) {
+        Configuration(configuration).apply {
+            uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or
+                if (darkTheme) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO
+        }
+    }
+    CompositionLocalProvider(LocalConfiguration provides themedConfiguration) {
+        MaterialTheme(colorScheme = immensityScheme, typography = ImmensityTypography, content = content)
+    }
 }

@@ -1,0 +1,201 @@
+{
+  "version": 1,
+  "status": "ready",
+  "progress": null,
+  "safeError": null,
+  "project": {
+    "pipelineId": "project-1",
+    "projectName": "Invoice helper",
+    "deliveryTargets": [
+      "web"
+    ],
+    "generatedAt": "2026-08-05T10:00:00+00:00"
+  },
+  "problemCaseVersion": 2,
+  "approvalStatus": "draft",
+  "approvedVersion": null,
+  "approvedAt": null,
+  "primaryUsers": [
+    "Freelancer"
+  ],
+  "mvpGoal": "Let a freelancer send and track an invoice reminder.",
+  "mvpCapability": null,
+  "mvpOutcome": null,
+  "constraints": [
+    "Ship within 72 hours"
+  ],
+  "nonGoals": [
+    "Payment processing",
+    "Market-fit scoring"
+  ],
+  "primaryFlow": {
+    "actor": "Freelancer",
+    "trigger": "An invoice becomes overdue",
+    "steps": [
+      "Open invoice",
+      "Send reminder",
+      "See reminder status"
+    ],
+    "successOutcome": "The reminder is recorded and delivered."
+  },
+  "features": [
+    {
+      "id": "feature-1",
+      "title": "Send invoice reminder",
+      "summary": "Send a templated reminder and retain its status.",
+      "problemUnitIds": [
+        "unit-1"
+      ],
+      "evidenceIds": [
+        "evidence-1"
+      ],
+      "acceptanceCriteria": [
+        "A reminder can be sent from an overdue invoice"
+      ]
+    }
+  ],
+  "architecture": {
+    "stack": [
+      "Next.js",
+      "FastAPI",
+      "PostgreSQL"
+    ],
+    "components": [
+      {
+        "id": "component-1",
+        "name": "Reminder API",
+        "responsibility": "Create reminders and track their state.",
+        "featureIds": [
+          "feature-1"
+        ]
+      }
+    ],
+    "dataModel": [
+      {
+        "name": "Reminder",
+        "purpose": "Tracks one reminder attempt.",
+        "fields": [
+          "invoice_id",
+          "status",
+          "sent_at"
+        ]
+      }
+    ],
+    "apiContracts": [
+      {
+        "method": "POST",
+        "path": "/reminders",
+        "purpose": "Send a reminder.",
+        "featureIds": [
+          "feature-1"
+        ]
+      }
+    ],
+    "integrations": [
+      "Email provider"
+    ],
+    "securityAndPrivacy": [
+      "Users can only access their own invoices"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "task-1",
+      "title": "Create reminder endpoint",
+      "description": "Implement the authenticated reminder API.",
+      "featureIds": [
+        "feature-1"
+      ],
+      "dependsOn": [],
+      "acceptanceChecks": [
+        "Endpoint test passes"
+      ],
+      "status": "todo"
+    }
+  ],
+  "testPlan": {
+    "unit": [
+      "Reminder validation"
+    ],
+    "integration": [
+      "Reminder persistence"
+    ],
+    "endToEnd": [
+      "Send a reminder from an overdue invoice"
+    ]
+  },
+  "deliveryChecklist": [
+    {
+      "id": "delivery-1",
+      "label": "Production health check passes",
+      "kind": "deployment",
+      "required": true,
+      "status": "not_started"
+    }
+  ],
+  "documents": [
+    {
+      "key": "build_contract",
+      "title": "Build Contract",
+      "filename": "docs/BUILD_CONTRACT.md",
+      "content": "# Build Contract: Invoice helper\n\n## Objective\n\nLet a freelancer send and track an invoice reminder.\n\n## Source\n\n- Problem Case version: 2\n- Delivery targets: web\n\n## Constraints\n\n- Ship within 72 hours\n\n## Non-goals\n\n- Payment processing\n- Market-fit scoring\n\n## Primary workflow\n\n- Actor: Freelancer\n- Trigger: An invoice becomes overdue\n\n1. Open invoice\n2. Send reminder\n3. See reminder status\n\nSuccess: The reminder is recorded and delivered.\n\n## Build shape\n\n- Stack: Next.js, FastAPI, PostgreSQL\n- Components: Reminder API\n- Integrations: Email provider\n\n## Completion boundary\n\nThe build is complete only when every required feature meets its acceptance criteria and the relevant checks in `TEST_PLAN.md` have been run and recorded. Anything outside this contract requires an explicit decision before implementation.\n",
+      "editable": true
+    },
+    {
+      "key": "features",
+      "title": "Features",
+      "filename": "docs/FEATURES.md",
+      "content": "# Features\n\nFeatures describe product behavior. Tasks in `TASKS.md` describe the engineering work needed to deliver it.\n\n## feature-1: Send invoice reminder\n\nSend a templated reminder and retain its status.\n\nProblem units: unit-1\nEvidence: evidence-1\n\nAcceptance criteria:\n- A reminder can be sent from an overdue invoice\n",
+      "editable": true
+    },
+    {
+      "key": "requirements",
+      "title": "Requirements",
+      "filename": "docs/REQUIREMENTS.md",
+      "content": "# Requirements\n\nThese testable requirements are derived from the approved feature acceptance criteria.\n\n| ID | Feature | Requirement |\n| --- | --- | --- |\n| REQ-feature-1-1 | feature-1 | A reminder can be sent from an overdue invoice |\n",
+      "editable": true
+    },
+    {
+      "key": "tasks",
+      "title": "Tasks",
+      "filename": "docs/TASKS.md",
+      "content": "# Tasks\n\nComplete tasks in dependency order. Use the stable task IDs when reporting progress through MCP.\n\n## task-1: Create reminder endpoint\n\nImplement the authenticated reminder API.\n\nFeatures: feature-1\nDepends on: None\n\nCompletion checks:\n- Endpoint test passes\n",
+      "editable": true
+    },
+    {
+      "key": "test_plan",
+      "title": "Test Plan",
+      "filename": "docs/TEST_PLAN.md",
+      "content": "# Test Plan\n\nOnly report checks that were actually run. Record failures and blockers rather than weakening an acceptance criterion.\n\n## Unit\n\n- Reminder validation\n\n## Integration\n\n- Reminder persistence\n\n## End-to-end\n\n- Send a reminder from an overdue invoice",
+      "editable": true
+    },
+    {
+      "key": "decisions",
+      "title": "Decisions",
+      "filename": "docs/DECISIONS.md",
+      "content": "# Decisions\n\nRecord only implementation decisions that affect the approved Build Contract. Do not use this file to add product scope.\n\n| Date | Decision | Reason | Affected feature/task |\n| --- | --- | --- | --- |\n| _Add when needed_ | | | |\n",
+      "editable": true
+    },
+    {
+      "key": "agents",
+      "title": "AGENTS.md",
+      "filename": "AGENTS.md",
+      "content": "# Coding agent instructions\n\nThis repository is being built from the approved Immensity Build Contract.\n\n## Source of truth\n\nRead these files before changing code:\n\n1. `docs/BUILD_CONTRACT.md`\n2. `docs/FEATURES.md`\n3. `docs/REQUIREMENTS.md`\n4. `docs/TASKS.md`\n5. `docs/TEST_PLAN.md`\n6. `docs/DECISIONS.md`\n\n## Working rules\n\n- Implement only the approved Build scope. Do not invent pricing, growth, positioning, or unrelated product behavior.\n- Keep every change traceable to a feature ID and task ID.\n- Respect task dependencies and complete one dependency-ready task at a time.\n- Record a blocker instead of silently changing scope or architecture.\n- Run the relevant checks from `docs/TEST_PLAN.md`; never claim a check passed without running it.\n- Record material implementation choices in `docs/DECISIONS.md`.\n",
+      "editable": false
+    },
+    {
+      "key": "claude",
+      "title": "CLAUDE.md",
+      "filename": "CLAUDE.md",
+      "content": "# Claude Code instructions\n\nThis repository is being built from the approved Immensity Build Contract.\n\n## Source of truth\n\nRead these files before changing code:\n\n1. `docs/BUILD_CONTRACT.md`\n2. `docs/FEATURES.md`\n3. `docs/REQUIREMENTS.md`\n4. `docs/TASKS.md`\n5. `docs/TEST_PLAN.md`\n6. `docs/DECISIONS.md`\n\n## Working rules\n\n- Implement only the approved Build scope. Do not invent pricing, growth, positioning, or unrelated product behavior.\n- Keep every change traceable to a feature ID and task ID.\n- Respect task dependencies and complete one dependency-ready task at a time.\n- Record a blocker instead of silently changing scope or architecture.\n- Run the relevant checks from `docs/TEST_PLAN.md`; never claim a check passed without running it.\n- Record material implementation choices in `docs/DECISIONS.md`.\n",
+      "editable": false
+    },
+    {
+      "key": "copilot_instructions",
+      "title": "Copilot instructions",
+      "filename": ".github/copilot-instructions.md",
+      "content": "---\napplyTo: \"**\"\n---\n\n# GitHub Copilot instructions\n\nThis repository is being built from the approved Immensity Build Contract.\n\n## Source of truth\n\nRead these files before changing code:\n\n1. `docs/BUILD_CONTRACT.md`\n2. `docs/FEATURES.md`\n3. `docs/REQUIREMENTS.md`\n4. `docs/TASKS.md`\n5. `docs/TEST_PLAN.md`\n6. `docs/DECISIONS.md`\n\n## Working rules\n\n- Implement only the approved Build scope. Do not invent pricing, growth, positioning, or unrelated product behavior.\n- Keep every change traceable to a feature ID and task ID.\n- Respect task dependencies and complete one dependency-ready task at a time.\n- Record a blocker instead of silently changing scope or architecture.\n- Run the relevant checks from `docs/TEST_PLAN.md`; never claim a check passed without running it.\n- Record material implementation choices in `docs/DECISIONS.md`.\n",
+      "editable": false
+    }
+  ]
+}

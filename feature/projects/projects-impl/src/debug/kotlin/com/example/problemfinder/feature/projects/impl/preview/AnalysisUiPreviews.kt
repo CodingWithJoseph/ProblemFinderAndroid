@@ -8,6 +8,7 @@ import com.example.problemfinder.core.designsystem.components.*
 import com.example.problemfinder.core.designsystem.theme.ImmensityTheme
 import com.example.problemfinder.core.model.details.OpportunityEvidence
 import com.example.problemfinder.feature.projects.impl.*
+import com.example.problemfinder.core.model.workspace.*
 
 /** Debug-only data for Compose previews. */
 internal object AnalysisUiPreviewData {
@@ -33,7 +34,8 @@ internal object AnalysisUiPreviewData {
             "Interview teams about their last three build failures.")))
     val state = AnalysisWorkspaceState("project-1", workspace, problem, audience, FeatureContentStatus.CONTENT,
         turns = listOf(AnalysisTurn("1", "What does the evidence actually establish?", true),
-            AnalysisTurn("2", "The posts show repeated resolution failures. Their frequency within a single team remains an assumption.", false)))
+            AnalysisTurn("2", "The posts show repeated resolution failures. Their frequency within a single team remains an assumption.", false)),
+        userId = "preview-account", cacheReady = true, version = 2, caseStatus = WorkspaceStatus.READY)
     val home = ProjectsState(listOf(AnalysisProjectCard("project-1", workspace.title,
         workspace.summary, "Watching")), status = FeatureContentStatus.CONTENT)
 }

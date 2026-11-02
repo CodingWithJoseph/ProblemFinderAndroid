@@ -14,7 +14,7 @@ PowerShell build commands, run from the repository root after setup:
 
 ```powershell
 .\gradlew.bat :app:assembleDebug
-.\gradlew.bat :app:testDebugUnitTest :feature:opportunities:opportunities-impl:testDebugUnitTest :data:opportunities:opportunities-impl:testDebugUnitTest :feature:opportunity-details:opportunity-details-api:test
+.\gradlew.bat :app:testDebugUnitTest :feature:opportunities:opportunities-impl:testDebugUnitTest :data:opportunities:opportunities-impl:testDebugUnitTest :feature:details:details-api:test
 ```
 
 On macOS/Linux, use `sh ./gradlew` for the same tasks (the wrapper is not tracked as executable). Build/test-only runs can use placeholder auth values; interactive sign-in requires a configured Supabase project. A successful APK build does not establish that the live services are reachable.
@@ -41,7 +41,7 @@ The [remote sources](../data/opportunities/opportunities-impl/src/main/kotlin/co
 | [App unit tests](../app/src/test/kotlin/com/example/problemfinder/app) | Identity restoration/retry, sign-out, auth root policy |
 | [Opportunity feature unit tests](../feature/opportunities/opportunities-impl/src/test/kotlin/com/example/problemfinder/feature/opportunities/impl) | Cache/request state, cancellation, stale results, pagination, watch actions, date labels |
 | [Opportunity data unit tests](../data/opportunities/opportunities-impl/src/test/kotlin/com/example/problemfinder/data/opportunities/impl) | Ktor request contracts with mock engines; response/cache mapping |
-| [Detail API unit tests](../feature/opportunity-details/opportunity-details-api/src/test) | Positive-ID route construction |
+| [Detail API unit tests](../feature/details/details-api/src/test) | Positive-ID route construction |
 | [Data instrumented tests](../data/opportunities/opportunities-impl/src/androidTest) | Real Room behavior: transactions, ordering, account isolation, paging, shared watch updates |
 | [Compose instrumented tests](../feature/opportunities/opportunities-impl/src/androidTest) | Independent card actions, filters, refresh, semantics, large text and dark theme |
 
@@ -54,6 +54,12 @@ With a device/emulator connected:
 The comments-layer validation ran 110 tests from the four unit-test locations above and assembled debug successfully, using cached Gradle and placeholder auth configuration. Instrumented tests and live auth/backend journeys were not run in that pass. The `core:model` and `core:common` test files are scaffold placeholders; dedicated auth form/repository tests and a checked-in CI workflow are absent.
 
 ## Where to make a change
+
+The workspace implementation adds domain/data workspaces API/implementation modules and core:preferences. Analyze remains in the projects feature modules. Shared Details is now feature:details:{details-api,details-impl}; the feature package is feature.details. Details/Search operation work remains intentionally unfinished.
+
+Useful checks for the completed workspace flows are :data:workspaces:workspaces-impl:testDebugUnitTest, :feature:projects:projects-impl:testDebugUnitTest, :feature:builds:builds-impl:testDebugUnitTest and :feature:settings:settings-impl:testDebugUnitTest. Device suites cover workspace persistence, actual appearance persistence, labeled assumption interaction, conversation submit, and large-text task/document forms. They use test doubles or isolated local storage and do not run live AI generation. The two JSON fixtures in workspace data tests were exported from the backend Pydantic contracts.
+
+Screen previews use the debug variant. Details, Search, Analyze, Build and the newer full Discovery/Browse/startup/shell/confirmation examples live under their module's src/debug/kotlin directories. Existing auth previews and the Settings default preview sit beside the production composables. Operation previews cover generation inputs, task verification, document conflicts, unsaved changes, analysis proposals and saved appearance overrides. Preview samples never enter production repository flows.
 
 | Desired change | Start here |
 |---|---|

@@ -11,6 +11,7 @@ android {
 
     defaultConfig {
         minSdk = 26
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     compileOptions {
@@ -24,6 +25,17 @@ android {
 }
 
 dependencies {
+    implementation(project(":domain:workspaces:workspaces-api"))
+    testImplementation(libs.junit4)
+    testImplementation(libs.coroutines.test)
+    testImplementation(testFixtures(project(":domain:workspaces:workspaces-api")))
+    androidTestImplementation(testFixtures(project(":domain:workspaces:workspaces-api")))
+    androidTestImplementation(platform(libs.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(libs.androidx.test.junit)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.espresso.core)
+    debugImplementation(libs.androidx.ui.test.manifest)
     api(project(":feature:projects:projects-api"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:mvi"))

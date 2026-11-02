@@ -4,19 +4,20 @@ The app separates screen behavior, use-case contracts, and data access. Its most
 
 ## Module map
 
-[settings.gradle.kts](../settings.gradle.kts) includes **27 modules**. In the table, each brace expands into separate module paths.
+[settings.gradle.kts](../settings.gradle.kts) includes **32 modules**. In the table, each brace expands into separate module paths.
 
 | Modules | Count | Responsibility |
 |---|---:|---|
 | `:app` | 1 | Application/activity, navigation shell, account UI, dependency assembly |
-| `:core:{common,designsystem,model,mvi}` | 4 | Use-case/filter utilities; Compose components/theme; shared models; state/effect infrastructure |
+| `:core:{common,designsystem,model,mvi,preferences}` | 5 | Shared utilities, UI, models, MVI infrastructure, and saved device appearance |
 | `:{data,domain,feature}:authentication:{auth-api,auth-impl}` | 6 | Repository/session contracts and Supabase adapter; use cases; authentication routes/screens |
 | `:{data,domain,feature}:opportunities:{opportunities-api,opportunities-impl}` | 6 | Repository/cache/network; use cases; Discovery/Browse routes/screens |
-| `:feature:search:{search-api,search-impl}` | 2 | Search destination and placeholder screen |
-| `:feature:builds:{builds-api,builds-impl}` | 2 | Builds destination and placeholder screen |
-| `:feature:projects:{projects-api,projects-impl}` | 2 | Projects destination and placeholder screen |
-| `:feature:settings:{settings-api,settings-impl}` | 2 | Settings destination and placeholder screen |
-| `:feature:opportunity-details:{opportunity-details-api,opportunity-details-impl}` | 2 | ID-bearing destination and placeholder details screen |
+| `:{data,domain}:workspaces:{workspaces-api,workspaces-impl}` | 4 | Pipeline, Signal analysis, Solution/build contracts, authenticated I/O and document cache |
+| `:feature:search:{search-api,search-impl}` | 2 | Search screens/navigation; operation implementation remains scaffolded |
+| `:feature:builds:{builds-api,builds-impl}` | 2 | Build generation, approval, tasks, plan, documents and export |
+| `:feature:projects:{projects-api,projects-impl}` | 2 | Analyze project list, analysis panels, overrides and conversations |
+| `:feature:settings:{settings-api,settings-impl}` | 2 | Saved appearance, version and app-owned sign-out |
+| `:feature:details:{details-api,details-impl}` | 2 | Shared details/evidence/post screens; remaining operation logic is unfinished |
 
 These are selected **Gradle dependency edges**, grouped across authentication/opportunities; they are not runtime call arrows. Core dependencies and repeated app-to-API declarations are omitted.
 
@@ -50,6 +51,10 @@ Navigation and transient messages use a buffered `Channel`, exposed through `rec
 `safeLaunch` runs in `viewModelScope`, rethrows cancellation, and sends other exceptions to `onError`. It does not serialize intents. [BrowseViewModel](../feature/opportunities/opportunities-impl/src/main/kotlin/com/example/problemfinder/feature/opportunities/impl/browse/BrowseViewModel.kt) separately manages observation, refresh, page, and watch jobs. Cancellation plus version counters prevents obsolete completions from updating current UI after query/account changes.
 
 ## Cache consistency and failure boundaries
+
+Analyze/Build use a separate version-1 workspace database. Each account/project/versioned document is one validated JSON cache record, preserving atomic document versions rather than joining fields from different generations. Query observation needs account identity, not credentials. Repeated identical cache rows are filtered before decoding; decode work and network/write processing run away from the UI thread. A corrupt derived cache reports a completed failed read so refresh can repair it. It does not become a successful empty workspace.
+
+WorkspaceWorkflows is the domain action boundary for the related analysis/build operations. Its implementation validates intent values and delegates I/O to WorkspaceRepository. Requests serialize per account/project, validate response ownership/identity before cache writes, and cancel stale-account work. UI generations separately reject late request completions. Document drafts retain their original edit version; successful document save and matching draft removal share one Room transaction. Task progress preserves the plan version and requires current approval, while document edits create a new draft version.
 
 [OpportunitiesDatabase](../data/opportunities/opportunities-impl/src/main/kotlin/com/example/problemfinder/data/opportunities/impl/db/OpportunitiesDatabase.kt) stores shared card content keyed by `(userId, clusterId)`. Browse membership/order is keyed by account, category, and sort; Discovery has dashboard metadata and collection memberships. Both join the same cards, so one watch update reaches every cached occurrence. `cacheReady` means the local read finished; `hasSynced` records successful remote data, including an empty result.
 

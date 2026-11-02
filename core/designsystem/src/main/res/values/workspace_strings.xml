@@ -1,0 +1,17 @@
+<resources>
+    <string name="workspace_not_started">Not started</string>
+    <string name="workspace_queued">Queued</string>
+    <string name="workspace_generating">Generating</string>
+    <string name="workspace_ready">Ready</string>
+    <string name="workspace_stale">Evidence updated</string>
+    <string name="workspace_insufficient">More evidence needed</string>
+    <string name="workspace_failed">Generation failed</string>
+    <string name="workspace_session_error">Your session is unavailable. Sign in again to continue.</string>
+    <string name="workspace_network_error">Could not connect. Please try again.</string>
+    <string name="workspace_not_found">This project is no longer available.</string>
+    <string name="workspace_conflict">The workspace changed. Reload and review the latest version before saving. Your edits have been kept.</string>
+    <string name="workspace_rejected">That change could not be accepted. Review your input and try again.</string>
+    <string name="workspace_server_error">The service is unavailable. Please try again shortly.</string>
+    <string name="workspace_invalid_response">The workspace response could not be read. Your saved work has been kept.</string>
+    <string name="workspace_unknown_error">Could not complete that action. Please try again.</string>
+</resources>

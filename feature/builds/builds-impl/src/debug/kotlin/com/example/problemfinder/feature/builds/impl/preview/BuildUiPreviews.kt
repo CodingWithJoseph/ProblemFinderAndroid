@@ -7,6 +7,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.example.problemfinder.core.designsystem.components.*
 import com.example.problemfinder.core.designsystem.theme.ImmensityTheme
 import com.example.problemfinder.feature.builds.impl.*
+import com.example.problemfinder.core.model.workspace.*
 
 /** Debug-only data for Compose previews. */
 internal object BuildUiPreviewData {
@@ -36,9 +37,9 @@ internal object BuildUiPreviewData {
                 listOf("Malformed input remains actionable.", "A missing dependency produces an explanation.")),
             BuildPlanSection("delivery", "Delivery checklist", "Prepare a small, reviewable first release.",
                 listOf("Confirm the reproducible example.", "Review source attribution.", "Verify accessibility."))),
-        documents = listOf(document, document.copy(id = "requirements", title = "Requirements", filename = "REQUIREMENTS.md")))
+        documents = listOf(document, document.copy(id = "requirements", title = "Requirements", filename = "REQUIREMENTS.md")), version = 1)
     val state = BuildWorkspaceState("project-1", workspace, feature, task, document, document.content,
-        FeatureContentStatus.CONTENT)
+        FeatureContentStatus.CONTENT, userId = "preview-account", cacheReady = true, caseStatus = WorkspaceStatus.READY)
     val home = BuildsState(listOf(BuildProjectCard("project-1", workspace.title, workspace.goal, "Draft")),
         FeatureContentStatus.CONTENT)
 }
@@ -53,7 +54,7 @@ internal object BuildUiPreviewData {
 }
 @FeaturePreviews
 @Composable private fun BuildTaskPreview() = ImmensityTheme {
-    BuildWorkspaceScreen(BuildUiPreviewData.state, {}, BuildPanel.TASK)
+    BuildWorkspaceScreen(BuildUiPreviewData.state.copy(workspace = BuildUiPreviewData.workspace.copy(approved = true)), {}, BuildPanel.TASK)
 }
 @FeaturePreviews
 @Composable private fun BuildPlanPreview() = ImmensityTheme {
