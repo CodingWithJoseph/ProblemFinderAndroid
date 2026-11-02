@@ -66,6 +66,27 @@ internal val signedInRoutes = setOf(
     BuildsDestination.ROUTE,
     SettingsDestination.ROUTE,
     OpportunityDetailsDestination.ROUTE,
+    OpportunityDetailsDestination.EVIDENCE_ROUTE,
+    OpportunityDetailsDestination.POST_ROUTE,
+    SearchDestination.FILTERS,
+    SearchDestination.ASSISTANT,
+    ProjectsDestination.WORKSPACE,
+    ProjectsDestination.PROBLEM,
+    ProjectsDestination.AUDIENCE,
+    ProjectsDestination.ASSUMPTIONS,
+    ProjectsDestination.CONVERSATION,
+    BuildsDestination.WORKSPACE,
+    BuildsDestination.FEATURE,
+    BuildsDestination.TASK,
+    BuildsDestination.PLAN,
+    BuildsDestination.DOCUMENTS,
+    BuildsDestination.DOCUMENT,
+)
+
+/** Child screens own their back toolbar; the global brand/tab shell stays on top-level features. */
+internal val supportingRoutes = signedInRoutes - setOf(
+    OpportunitiesDestinations.DISCOVERY, OpportunitiesDestinations.BROWSE_ROUTE,
+    SearchDestination.ROUTE, ProjectsDestination.ROUTE, BuildsDestination.ROUTE,
 )
 
 /** Destinations produced only after MainActivity has accepted an auth callback session. */
@@ -150,8 +171,7 @@ fun AppNavigation(
             it.route == currentRoute
         }
     }
-    val showChromeApp = currentRoute in signedInRoutes && currentRoute != SettingsDestination.ROUTE &&
-        currentRoute != OpportunityDetailsDestination.ROUTE
+    val showChromeApp = currentRoute in signedInRoutes && currentRoute !in supportingRoutes
 
     ImmensityScaffold(
         state = state,
@@ -245,11 +265,11 @@ fun AppNavigation(
                     }
                 )
                 opportunityDetails(
-                    onBack = { navController.popBackStack() },
+                    navController = navController,
                     onMessage = { message -> messageScope.launch { snackbarHostState.showSnackbar(message) } },
-                    onOpenEvidence = {  }
                 )
                 search(
+                    navController = navController,
                     onOpenCluster = { clusterId ->
                         navController.navigate(OpportunityDetailsDestination.route(clusterId)) {
                             launchSingleTop = true
@@ -257,8 +277,31 @@ fun AppNavigation(
                     },
                     onMessage = { message -> messageScope.launch { snackbarHostState.showSnackbar(message) } },
                 )
-                projects()
-                builds()
+                projects(
+                    navController = navController,
+                    onOpenCluster = { navController.navigate(OpportunityDetailsDestination.route(it)) },
+                    onOpenPost = { clusterId, postId ->
+                        navController.navigate(OpportunityDetailsDestination.postRoute(clusterId, postId))
+                    },
+                    onOpenBuild = { navController.navigate(BuildsDestination.workspace(it)) },
+                    onDiscover = {
+                        navController.navigate(OpportunitiesDestinations.DISCOVERY) {
+                            popUpTo(OpportunitiesDestinations.DISCOVERY)
+                            launchSingleTop = true
+                        }
+                    },
+                )
+                builds(
+                    navController = navController,
+                    onOpenAnalysis = { navController.navigate(ProjectsDestination.workspace(it)) },
+                    onOpenAnalyze = {
+                        navController.navigate(ProjectsDestination.ROUTE) {
+                            popUpTo(OpportunitiesDestinations.DISCOVERY)
+                            launchSingleTop = true
+                        }
+                    },
+                    onOpenCluster = { navController.navigate(OpportunityDetailsDestination.route(it)) },
+                )
 
             }
         }

@@ -42,6 +42,7 @@ class OpportunityDetailsViewModel @Inject constructor(
         when (intent) {
             is OpportunityDetailsIntent.Entered -> startObserving(intent.clusterId)
             is OpportunityDetailsIntent.OpenEvidence -> openEvidence(intent.evidenceId)
+            OpportunityDetailsIntent.OpenEvidenceList -> sendEffect(OpportunityDetailsEffect.NavigateToEvidenceList)
             OpportunityDetailsIntent.Reload -> reload()
             OpportunityDetailsIntent.LoadNextEvidencePage,
             OpportunityDetailsIntent.RetryEvidencePage -> loadMore()

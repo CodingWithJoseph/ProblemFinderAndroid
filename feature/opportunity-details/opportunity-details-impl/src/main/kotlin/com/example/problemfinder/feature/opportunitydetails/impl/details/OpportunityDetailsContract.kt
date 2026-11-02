@@ -46,11 +46,13 @@ sealed interface OpportunityDetailsIntent {
     data object RetryEvidencePage : OpportunityDetailsIntent
     data object WatchClicked : OpportunityDetailsIntent
     data class OpenEvidence(val evidenceId: Int) : OpportunityDetailsIntent
+    data object OpenEvidenceList : OpportunityDetailsIntent
     data object BackClicked : OpportunityDetailsIntent
 }
 
 sealed interface OpportunityDetailsEffect {
     data object NavigateBack : OpportunityDetailsEffect
     data class NavigateToEvidence(val evidence: Int) : OpportunityDetailsEffect
+    data object NavigateToEvidenceList : OpportunityDetailsEffect
     data class ActionFailed(val failure: OpportunityDetailsUIError) : OpportunityDetailsEffect
 }
