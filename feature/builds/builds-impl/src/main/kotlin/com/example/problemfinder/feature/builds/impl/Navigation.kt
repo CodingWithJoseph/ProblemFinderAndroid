@@ -2,6 +2,13 @@ package com.example.problemfinder.feature.builds.impl
 
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -9,6 +16,12 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.*
 import androidx.navigation.compose.composable
 import com.example.problemfinder.feature.builds.api.BuildsDestination as Routes
+import com.example.problemfinder.core.model.workspace.WorkspaceExport
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 fun NavGraphBuilder.builds(
     navController: NavHostController,
@@ -19,7 +32,12 @@ fun NavGraphBuilder.builds(
     composable(Routes.ROUTE) { entry ->
         val viewModel = hiltViewModel<BuildsViewModel>()
         val state = viewModel.state.collectAsStateWithLifecycle().value
-        LaunchedEffect(viewModel) { viewModel.onIntent(BuildsIntent.Entered) }
+        LaunchedEffect(viewModel, entry) {
+            entry.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.onIntent(BuildsIntent.Entered)
+                awaitCancellation()
+            }
+        }
         LaunchedEffect(viewModel, entry) {
             entry.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 viewModel.effects.collect { effect ->
@@ -49,13 +67,38 @@ fun NavGraphBuilder.builds(
             }
             val viewModel = hiltViewModel<BuildWorkspaceViewModel>(owner)
             val state = viewModel.state.collectAsStateWithLifecycle().value
+            val context = LocalContext.current
+            val exportScope = rememberCoroutineScope()
+            var pendingExport by remember(entry) { mutableStateOf<Pair<String, WorkspaceExport>?>(null) }
+            val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
+                val pending = pendingExport
+                pendingExport = null
+                if (uri != null && pending != null && viewModel.state.value.userId == pending.first) exportScope.launch {
+                    try {
+                        withContext(Dispatchers.IO) {
+                            requireNotNull(context.contentResolver.openOutputStream(uri)).use { it.write(pending.second.content) }
+                        }
+                    } catch (cancelled: CancellationException) { throw cancelled }
+                    catch (_: Exception) { viewModel.onIntent(BuildIntent.ExportFailed) }
+                }
+            }
             LaunchedEffect(viewModel, entry) {
-                viewModel.onIntent(BuildIntent.Entered(entry.arguments?.getString(Routes.ITEM_ID), panel))
+                entry.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                    viewModel.onIntent(BuildIntent.Entered(entry.arguments?.getString(Routes.ITEM_ID), panel))
+                    viewModel.onIntent(BuildIntent.VisibilityChanged(entry.id, true))
+                    try { awaitCancellation() }
+                    finally { viewModel.onIntent(BuildIntent.VisibilityChanged(entry.id, false)) }
+                }
             }
             LaunchedEffect(viewModel, entry) {
                 entry.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                     viewModel.effects.collect { effect ->
                         when (effect) {
+                            is BuildEffect.ExportReady -> if (effect.userId == viewModel.state.value.userId) {
+                                pendingExport = effect.userId to effect.export
+                                try { exportLauncher.launch(effect.export.filename) }
+                                catch (_: Exception) { pendingExport = null; viewModel.onIntent(BuildIntent.ExportFailed) }
+                            }
                             BuildEffect.Back -> navController.popBackStack()
                             is BuildEffect.OpenFeature -> navController.navigate(Routes.feature(id, effect.id))
                             is BuildEffect.OpenTask -> navController.navigate(Routes.task(id, effect.id))

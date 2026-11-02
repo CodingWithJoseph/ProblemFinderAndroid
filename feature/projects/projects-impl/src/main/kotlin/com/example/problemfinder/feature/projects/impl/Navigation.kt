@@ -9,6 +9,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.*
 import androidx.navigation.compose.composable
 import com.example.problemfinder.feature.projects.api.ProjectsDestination as Routes
+import kotlinx.coroutines.awaitCancellation
 
 fun NavGraphBuilder.projects(
     navController: NavHostController,
@@ -20,7 +21,12 @@ fun NavGraphBuilder.projects(
     composable(Routes.ROUTE) { entry ->
         val viewModel = hiltViewModel<ProjectsViewModel>()
         val state = viewModel.state.collectAsStateWithLifecycle().value
-        LaunchedEffect(viewModel) { viewModel.onIntent(ProjectsIntent.Entered) }
+        LaunchedEffect(viewModel, entry) {
+            entry.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.onIntent(ProjectsIntent.Entered)
+                awaitCancellation()
+            }
+        }
         LaunchedEffect(viewModel, entry) {
             entry.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 viewModel.effects.collect { effect ->
@@ -51,7 +57,12 @@ fun NavGraphBuilder.projects(
             val viewModel = hiltViewModel<AnalysisWorkspaceViewModel>(owner)
             val state = viewModel.state.collectAsStateWithLifecycle().value
             LaunchedEffect(viewModel, entry) {
-                viewModel.onIntent(AnalysisIntent.Entered(entry.arguments?.getString(Routes.ITEM_ID), panel))
+                entry.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                    viewModel.onIntent(AnalysisIntent.Entered(entry.arguments?.getString(Routes.ITEM_ID), panel))
+                    viewModel.onIntent(AnalysisIntent.VisibilityChanged(entry.id, true))
+                    try { awaitCancellation() }
+                    finally { viewModel.onIntent(AnalysisIntent.VisibilityChanged(entry.id, false)) }
+                }
             }
             LaunchedEffect(viewModel, entry) {
                 entry.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
