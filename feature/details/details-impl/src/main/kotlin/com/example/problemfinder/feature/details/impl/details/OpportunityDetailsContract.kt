@@ -36,6 +36,10 @@ data class OpportunityDetailsState(
     val refreshRequest: RequestState<Unit, OpportunityDetailsUIError> = RequestState.Idle,
     val pageRequest: RequestState<Unit, OpportunityDetailsUIError> = RequestState.Idle,
     val isWatchPending: Boolean = false,
+    // REVIEW [DETAILS-12] Runtime gate: search for production code that changes this flag, then
+    // compare with the populated preview. Why would corrected watch logic still have a disabled
+    // button? Keep the gate while the operation is unfinished, then make enabling it an explicit
+    // completion check after DETAILS-6 through DETAILS-11 work; changing this default is not the fix.
     val implementationPending: Boolean = true,
 )
 

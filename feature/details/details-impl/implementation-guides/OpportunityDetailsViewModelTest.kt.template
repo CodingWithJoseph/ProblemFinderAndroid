@@ -5,6 +5,14 @@ package com.example.problemfinder.feature.details.impl
  * The template intentionally contains NO fake
  * passing tests or @Ignore placeholders. Use existing BrowseViewModelTest/DiscoveryViewModelTest
  * for Main dispatcher setup, runTest, fake use cases and controllable flows/deferred responses.
+ *
+ * REVIEW [DETAILS-16] This .template file is not compiled as a test. Existing green app/data tests
+ * do not prove the request lifecycles in OpportunityDetailsViewModel. As you resolve each REVIEW,
+ * choose one scenario below, write its state timeline first, then turn that into a real assertion.
+ * Hold a fake request suspended so you can assert the intermediate state, not only the final value.
+ * Start with double-tap paging, delayed page failure, and failed-observer Retry. Do not implement
+ * the whole feature before verifying the first lifecycle you change.
+ *
  * - Enter with a cached cluster: show its full text before the refresh finishes.
  * - Re-enter the same ID: one observer and one initial refresh, not duplicate requests.
  * - Enter a different ID/account while the old GET waits: no stale content, success or error.
@@ -13,8 +21,10 @@ package com.example.problemfinder.feature.details.impl
  * - Top evidence overlaps page evidence: each role preserves order without duplicate page entries.
  * - Add/Remove updates shared membership; failure preserves state and clears pending.
  * - Back/OpenEvidence produce effects, not navigation state or Activity calls.
- * Also add data-layer MockEngine tests for exact paths/headers/JSON and malformed DTO mapping,
- * plus Room instrumentation tests for transaction rollback, account isolation and migration.
+ * Also add data-layer MockEngine coverage for exact paths/headers/JSON and malformed DTO mapping.
+ * Existing OpportunityDetailsLocalDataSourceTest already covers ordering, overlap, rollback,
+ * isolation, count/watch invalidation and reopening; read those before duplicating storage tests.
+ * No new migration is required for this review under the current development/reset policy.
  * Verify the real screen at 2x font/dark/landscape, including Back and every independent action.
  * Completion means the assertions describe app behavior, not just that a fake method was called.
  */

@@ -21,13 +21,25 @@ class PostDetailsViewModel @Inject constructor(
             PostDetailsIntent.Back -> sendEffect(PostDetailsEffect.NavigateBack)
             is PostDetailsIntent.OpenOriginal -> sendEffect(PostDetailsEffect.OpenExternal(intent.url))
             PostDetailsIntent.Entered, PostDetailsIntent.Retry -> {
-                // TODO [POST-LOGIC] Observe this account/cluster using the existing Details use case.
-                // Select postId from loaded evidence, publish post/status, and handle missing posts.
-                // Restore using route IDs after process recreation; no object is a nav argument.
+                // REVIEW [DETAILS-14] This branch currently never loads anything. Starting with
+                // the two route IDs already in state, sketch: observe -> select evidence -> publish.
+                // Which existing use case supplies account-scoped snapshots, and which two lists
+                // can contain this post? How will repeated Entered avoid a duplicate collector?
+                // Check: a tapped cached post displays its full body; an account change clears it;
+                // Retry can restart a failed collector, and route IDs still work after recreation.
+                //
+                // REVIEW [DETAILS-15] Missing versus not loaded: cold-open a post that originally
+                // came from page 3, with no saved evidence. Refreshing page 1 may succeed without it.
+                // What does that absence actually prove? Trace cache-not-ready, a failed fetch,
+                // and a successfully loaded page that simply does not include the selected ID.
+                // Decide the recovery/lookup contract before displaying a definitive missing state;
+                // neither a preview fixture nor a second copy of the details object solves lookup.
             }
         }
     }
     override fun onError(error: Throwable) {
-        // TODO [POST-LOGIC] Map observation failure to presentation state and make Retry recoverable.
+        // REVIEW [DETAILS-14] What should a failure change when post is already present, versus
+        // before it has ever loaded? Trace PostDetailsScreen's two branches, and keep failures from
+        // exposing a previous account's post. Retry needs to restore the failed work, not just a label.
     }
 }

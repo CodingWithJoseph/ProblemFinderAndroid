@@ -61,6 +61,12 @@ class OpportunityDetailsViewModel @Inject constructor(
         )
 
         if (observationJob?.isActive == true && clusterId == state.value.clusterId) return
+        // REVIEW [DETAILS-1] Contract decision: Navigation currently gives each Details entry its
+        // own VM. Should this public Entered intent ALSO support selecting 43 after cached 42 in
+        // the SAME VM? If yes, trace the copy below and needsInitialRefresh on the same account:
+        // which content/request flags still belong to 42 when 43's priming snapshot arrives?
+        // Check the chosen contract explicitly: either support that transition without stale content
+        // or enforce one cluster per VM. Re-entering the same observed ID must not duplicate work.
         cancelJobs()
 
         observationJob = safeLaunch {
@@ -70,6 +76,8 @@ class OpportunityDetailsViewModel @Inject constructor(
 
             observeDetails(ObserveOpportunityDetailsUseCase.Params(clusterId)).collect { response ->
                 if (state.value.userId != response.userId) {
+                    // REVIEW [DETAILS-11] also applies here: which outstanding operation is absent
+                    // from this account-change cancellation? Its UI completion has its own lifetime.
                     cancelWatch()
                     cancelRefresh()
                     needsInitialRefresh = true
@@ -115,6 +123,11 @@ class OpportunityDetailsViewModel @Inject constructor(
     }
 
     private fun reload() {
+        // REVIEW [DETAILS-2] Retry: make the Room collector throw before its first completed read.
+        // The screen sends Reload, but cacheReady is still false. Trace the guard below.
+        // Now fail the collector AFTER a successful read: can a successful HTTP refresh restart it?
+        // Decide how Retry restores observation as well as networking, preserving usable cached
+        // content for the same account/cluster. Check both failure timings, not just HTTP failure.
         val current = state.value
 
         if ((current.clusterId == null) || (current.clusterId <= 0))
@@ -131,6 +144,10 @@ class OpportunityDetailsViewModel @Inject constructor(
             current.refreshRequest is RequestState.Loading
         ) return
 
+        // REVIEW [DETAILS-3] Overlap: Load more refuses to start during refresh, but what happens
+        // when Refresh is tapped during page 2? The repository mutex serializes writes, not UI state.
+        // Choose the refresh-versus-append policy and trace both completion orders, including failure.
+        // Check: the final posts, page indicator and refresh indicator describe the same context.
         refreshVersion += 1L
         val version = refreshVersion
 
@@ -174,6 +191,10 @@ class OpportunityDetailsViewModel @Inject constructor(
             )
         )
 
+        // REVIEW [DETAILS-4] Admission: send LoadNextEvidencePage twice before Room emits again.
+        // Which guard currently notices the first page job? Where does pageRequest become Loading?
+        // Also compare cacheReady with hasSynced: does finishing a local read prove page 1 is saved?
+        // Check: one in-flight append, and no append before a successfully synced parent exists.
         if (
             current.userId.isNullOrEmpty() ||
             current.canLoadMore.not() ||
@@ -184,6 +205,11 @@ class OpportunityDetailsViewModel @Inject constructor(
         loadVersion += 1L
         val version = loadVersion
 
+        // REVIEW [DETAILS-5] Timeline: mark when safeLaunch RETURNS a Job, when the suspended use
+        // case finishes, and when the Success below executes. Are those the same moment?
+        // If the use case throws later, which catch receives it: these catches or BaseMVIViewModel?
+        // Work out which coroutine should own the full page-request lifecycle before rearranging it.
+        // Check: a waiting page stays Loading; failure preserves posts and exposes the footer retry.
         try {
             loadNextJob = safeLaunch {
                 loadNextEvidence(LoadNextOpportunityEvidenceUseCase.Params(clusterId))
@@ -220,6 +246,10 @@ class OpportunityDetailsViewModel @Inject constructor(
     private fun watch() {
         val current = state.value
         val opportunity = current.cachedOpportunity
+        // REVIEW [DETAILS-6] Boolean trace: try an unwatched opportunity, then a watched one.
+        // For each, follow this guard AND the watched argument passed to the use case below.
+        // Can the first become watched and the second become unwatched? Write the two desired
+        // before/after pairs before changing either expression; unknown membership is a third case.
         if (
             current.userId == null ||
             current.clusterId == null ||
@@ -230,8 +260,14 @@ class OpportunityDetailsViewModel @Inject constructor(
             loadNextJob?.isActive == true
         ) return
 
+        // REVIEW [DETAILS-7] Repeated intent: the button disables after state is rendered, but does
+        // this function itself reject a second WatchClicked while its first job is suspended?
+        // Check one server mutation per opportunity while pending, including direct ViewModel intents.
         reduce { copy(isWatchPending = true) }
 
+        // REVIEW [DETAILS-8] Ownership: what distinguishes two requests if each assigns version 1?
+        // Trace cancelWatch(), a new request, and a delayed completion from the old request.
+        // Decide what must stay unique and what must still match before that completion changes UI.
         watchVersion = 1L
         val version = watchVersion
 
@@ -246,9 +282,16 @@ class OpportunityDetailsViewModel @Inject constructor(
                 )
 
                 if (watchVersion == version) {
-
+                    // REVIEW [DETAILS-9] Terminal states: who clears isWatchPending on success?
+                    // Removing a Job from watchJobs does not change screen state. Audit failure and
+                    // cancellation too. Check: pending ends for this request without an older job
+                    // clearing a newer request's spinner; confirmed membership still comes from Room.
                 }
             } catch (cancelled: CancellationException) {
+                // REVIEW [DETAILS-10] Follow the owner of this operation through BOTH catch blocks.
+                // Why are they comparing loadVersion and changing pageRequest inside a watch job?
+                // Check: failed Remove leaves evidence paging alone and gives action feedback.
+                // Hint: inspect the existing ActionFailed effect and its navigation consumer.
                 if (loadVersion == version) {
                     reduce {
                         copy(
@@ -281,6 +324,9 @@ class OpportunityDetailsViewModel @Inject constructor(
     )
 
     override fun onError(error: Throwable) {
+        // REVIEW [DETAILS-2/5/11] Once operation-specific errors are handled by their owners, trace
+        // a genuine observation failure here. What happens to active page/watch jobs, and how can
+        // the Retry button recover the stopped stream rather than only clearing an HTTP indicator?
         cancelRefresh()
 
         val failure = (error as? OpportunityOperationException)?.failure ?: OpportunityFailure.UNKNOWN
@@ -294,6 +340,11 @@ class OpportunityDetailsViewModel @Inject constructor(
     }
 
     private fun cancelJobs() {
+        // REVIEW [DETAILS-11] Cancellation inventory: observation, refresh, page, watch.
+        // Which Job/version pair is not represented here? Trace an old page request failing after
+        // Entered selects another cluster or the observed account changes. Repository account checks
+        // protect cache writes; they do not own this ViewModel's request indicators.
+        // Check every context-change/error path and the Loading/pending state left behind afterward.
         cancelObserve()
         cancelWatch()
         cancelRefresh()

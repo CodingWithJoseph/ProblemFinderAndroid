@@ -77,6 +77,12 @@ internal fun OpportunityDetailsScreen(
                             icon = if (state.cachedOpportunity?.isWatched == true) DesignR.drawable.icon_remove else DesignR.drawable.icon_add,
                             prominent = true, destructive = state.cachedOpportunity?.isWatched == true,
                             pending = state.isWatchPending,
+                            // REVIEW [DETAILS-13] Integration: on a fresh install, open an existing
+                            // Analyze project's Details before visiting Discovery/Browse. The details
+                            // GET saves detail/evidence rows, not the shared Opportunity row joined
+                            // for watch state. Even with the feature gate lifted, what enables this?
+                            // Decide where authoritative membership can be obtained for this entry
+                            // path. A missing row must stay unknown, not silently mean unwatched.
                             enabled = state.cachedOpportunity != null && !state.implementationPending,
                         )
                         if (state.cachedOpportunity == null) Text(stringResource(R.string.details_watch_unknown),
