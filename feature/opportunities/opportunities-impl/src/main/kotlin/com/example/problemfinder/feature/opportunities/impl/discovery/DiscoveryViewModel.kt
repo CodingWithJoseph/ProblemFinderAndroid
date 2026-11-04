@@ -7,7 +7,7 @@ import com.example.problemfinder.core.mvi.BaseMVIViewModel
 import com.example.problemfinder.core.mvi.RequestState
 import com.example.problemfinder.domain.opportunities.api.discovery.ObserveDiscoveryUseCase
 import com.example.problemfinder.domain.opportunities.api.discovery.RefreshDiscoveryUseCase
-import com.example.problemfinder.feature.opportunities.impl.util.OpportunityUiError
+import com.example.problemfinder.feature.opportunities.impl.util.OpportunityUIError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -52,7 +52,6 @@ class DiscoveryViewModel @Inject constructor(
         }
     }
 
-    /** Starts on entry and retries a failed observer; repeated entry reuses an active subscription. */
     private fun startObserving() {
         if (observationJob?.isActive == true) return
 
@@ -66,7 +65,6 @@ class DiscoveryViewModel @Inject constructor(
             observeDiscoveryUseCase(Unit).collect { snapshot ->
 
                 if (state.value.userId != snapshot.userId) {
-                    // Invalidate old work before replacing state, including when the user signs out.
                     cancelWatchActions()
                     cancelRefresh()
                     needsInitialRefresh = true
@@ -96,7 +94,6 @@ class DiscoveryViewModel @Inject constructor(
                 }
 
                 if (snapshot.cacheReady && snapshot.userId != null && needsInitialRefresh){
-                    // Let the screen display the first cache read before refreshing it once.
                     needsInitialRefresh = false
                     reloadDashboard()
                 }
@@ -147,7 +144,7 @@ class DiscoveryViewModel @Inject constructor(
                 val failure = (error as? OpportunityOperationException)?.failure ?: OpportunityFailure.UNKNOWN
                 if (version == refreshVersion) {
                     reduce {
-                        copy(refreshRequestState = RequestState.Error(OpportunityUiError(failure)))
+                        copy(refreshRequestState = RequestState.Error(OpportunityUIError(failure)))
                     }
                 }
             }
@@ -172,7 +169,7 @@ class DiscoveryViewModel @Inject constructor(
             } catch (error: Exception) {
                 if (version == watchVersion && state.value.userId == userId) {
                     val failure = (error as? OpportunityOperationException)?.failure ?: OpportunityFailure.UNKNOWN
-                    sendEffect(DiscoveryEffect.ShowError(OpportunityUiError(failure)))
+                    sendEffect(DiscoveryEffect.ShowError(OpportunityUIError(failure)))
                 }
             } finally {
                 if (version == watchVersion && state.value.userId == userId) {
@@ -207,7 +204,7 @@ class DiscoveryViewModel @Inject constructor(
         reduce {
             copy(
                 observationRequest = RequestState.Error(
-                    OpportunityUiError(failure)
+                    OpportunityUIError(failure)
                 ),
                 refreshRequestState = RequestState.Idle,
             )

@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "status": "ready",
+  "progress": null,
+  "safeError": null,
+  "project": {
+    "pipelineId": "project-1",
+    "projectName": "Build blocker",
+    "clusterName": null,
+    "sourceFingerprint": null,
+    "analyzedAt": null,
+    "sourceUpdatedAt": null
+  },
+  "metrics": {
+    "freshnessDays": null,
+    "evidenceCount": 1,
+    "authorCount": 1,
+    "sourceDiversity": 1
+  },
+  "thesis": {
+    "statement": "A supported thesis",
+    "audience": null,
+    "context": null,
+    "coreProblem": "Build failures",
+    "consequence": null,
+    "workaround": null,
+    "claimIds": [
+      "claim-1"
+    ],
+    "confirmed": false
+  },
+  "claims": [
+    {
+      "id": "claim-1",
+      "text": "Build failures interrupt delivery",
+      "kind": "observed",
+      "confidence": "high",
+      "evidenceIds": [
+        "101"
+      ],
+      "confirmed": false,
+      "rejected": false
+    }
+  ],
+  "problemUnits": [
+    {
+      "id": "problem-1",
+      "parentId": null,
+      "title": "Package resolution fails",
+      "description": null,
+      "kind": "core_problem",
+      "audienceIds": [],
+      "claimIds": [
+        "claim-1"
+      ],
+      "evidenceIds": [
+        "101"
+      ],
+      "evidenceCount": 1,
+      "sourceDiversity": null,
+      "frequency": null,
+      "intensity": null,
+      "momentum30d": null,
+      "confidence": "high",
+      "affectedUsers": [],
+      "situation": null,
+      "relatedProblemIds": [],
+      "pinned": false,
+      "rejected": false
+    }
+  ],
+  "audiences": [],
+  "alternatives": [],
+  "assumptions": [],
+  "evidence": [
+    {
+      "id": "101",
+      "title": "A source post",
+      "excerpt": "The package could not be resolved.",
+      "body": null,
+      "platform": null,
+      "community": null,
+      "author": null,
+      "observedAt": "2026-08-29T12:00:00Z",
+      "score": null,
+      "commentCount": null,
+      "sourceUrl": null,
+      "stance": "supporting",
+      "claimIds": [
+        "claim-1"
+      ],
+      "problemUnitIds": [
+        "problem-1"
+      ],
+      "relevanceReason": null,
+      "pinned": false,
+      "userNote": null
+    }
+  ],
+  "recommendedFocus": null
+}

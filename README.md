@@ -12,7 +12,7 @@ Problem Finder, branded **Immensity** in the app, is an Android client for disco
 - Browse filters, sorting, cursor pagination, refresh, and account-scoped cached content.
 - Server-confirmed add/remove watch actions reflected across Discovery and Browse.
 
-Search, Projects, Builds, Settings, and opportunity detail content are placeholders. Cached content can remain readable without a usable network session; writes require a session and are not queued offline. See [feature behavior](docs/navigation-and-features.md) for exact scope.
+Analyze and Build include account-scoped project lists, saved workspaces, generation progress, analysis actions/conversations, build approval, task verification, document editing, and ZIP export. Settings saves System/Light/Dark appearance and uses the existing sign-out flow. Details and Search have full screen/previews/navigation scaffolds; their remaining operation logic is intentionally unfinished. Cached content can remain readable without a usable network session; server writes require a session and are not queued offline. See [feature behavior](docs/navigation-and-features.md) for scope and backend prerequisites.
 
 ## Start reading
 
@@ -32,4 +32,4 @@ KDoc and inline comments explain meaningful contracts and non-obvious behavior n
 
 Open in Android Studio with SDK 37 and the pinned Gradle 9.5.0 toolchain. Configure the local SDK path plus `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY`; read [setup and test commands](docs/development.md) for wrapper bootstrap and the distinct Java daemon/compilation requirements.
 
-The 27 modules are listed in [settings.gradle.kts](settings.gradle.kts) and grouped in the architecture guide. Follow [CONTRIBUTING](CONTRIBUTING.md). [Implementation status](docs/implementation-checklist.md) records remaining work without treating placeholder tests or screens as finished features.
+The 32 modules are listed in [settings.gradle.kts](settings.gradle.kts) and grouped in the architecture guide. Follow [CONTRIBUTING](CONTRIBUTING.md). Feature status is recorded in [navigation and features](docs/navigation-and-features.md); populated previews do not establish working business operations.

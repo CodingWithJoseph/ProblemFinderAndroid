@@ -15,7 +15,7 @@ import com.example.problemfinder.core.model.opportunity.Opportunity
 import com.example.problemfinder.data.authentication.api.AuthSession
 import com.example.problemfinder.data.authentication.api.AuthSessionProvider
 import com.example.problemfinder.data.opportunities.impl.util.OpportunitySyncCoordinator
-import com.example.problemfinder.data.opportunities.impl.db.BrowseDao
+import com.example.problemfinder.data.opportunities.impl.db.dao.BrowseDao
 import com.example.problemfinder.data.opportunities.impl.db.OpportunitiesDatabase
 import com.example.problemfinder.data.opportunities.impl.local.BrowseLocalDataSource
 import com.example.problemfinder.data.opportunities.impl.model.OpportunitiesApiConfig

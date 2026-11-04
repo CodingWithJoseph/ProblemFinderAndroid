@@ -45,6 +45,7 @@ internal suspend fun <T> opportunityCall(block: suspend () -> T): T =
         val failure = when (error) {
             is ResponseException -> when (error.response.status.value) {
                 401 -> OpportunityFailure.SESSION_UNAVAILABLE
+                404 -> OpportunityFailure.CLUSTER_NOT_FOUND
                 in 400..499 -> OpportunityFailure.REQUEST_REJECTED
                 in 500..599 -> OpportunityFailure.SERVER
                 else -> OpportunityFailure.UNKNOWN

@@ -27,8 +27,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.example.problemfinder.core.designsystem.theme.DiscoveryTypography
 import com.example.problemfinder.core.designsystem.theme.opportunityPalette
-import com.example.problemfinder.core.model.opportunity.OpportunityCategory
-import com.example.problemfinder.core.model.opportunity.Opportunity
+import com.example.problemfinder.core.designsystem.R as DesignSystemR
 import com.example.problemfinder.core.mvi.RequestState
 import com.example.problemfinder.feature.opportunities.impl.R
 import com.example.problemfinder.feature.opportunities.impl.components.OpportunityRefreshAction
@@ -109,7 +108,7 @@ private fun DiscoveryStatus(state: DiscoveryState) {
         } else {
             R.string.message_no_data_loading
         }
-        state.userId == null -> R.string.message_error_session
+        state.userId == null -> DesignSystemR.string.message_error_session
         !state.hasContent && state.hasSynced ->
             R.string.message_no_data_succeeded
         !state.hasContent -> R.string.message_not_synced

@@ -1,6 +1,6 @@
 package com.example.problemfinder.data.opportunities.impl.local
 
-import com.example.problemfinder.data.opportunities.impl.db.OpportunityDao
+import com.example.problemfinder.data.opportunities.impl.db.dao.OpportunityDao
 import androidx.room3.withWriteTransaction
 import com.example.problemfinder.core.common.shared.OpportunityCategoryFilter
 import com.example.problemfinder.core.common.shared.SortType
@@ -8,9 +8,8 @@ import com.example.problemfinder.core.model.browse.BrowsePage
 import com.example.problemfinder.core.model.browse.BrowseSnapshot
 import com.example.problemfinder.data.opportunities.impl.model.entity.BrowseQueryEntity
 import com.example.problemfinder.data.opportunities.impl.model.entity.BrowseQueryItemEntity
-import com.example.problemfinder.data.opportunities.impl.db.BrowseDao
+import com.example.problemfinder.data.opportunities.impl.db.dao.BrowseDao
 import com.example.problemfinder.data.opportunities.impl.db.OpportunitiesDatabase
-import com.example.problemfinder.data.opportunities.impl.util.toEntity
 import com.example.problemfinder.data.opportunities.impl.util.toModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -36,11 +35,10 @@ class BrowseLocalDataSource @Inject constructor(
     ) {
         val categoryKey = category.name
         val sortKey = sortType.name
-        // Keep the first occurrence and its server order when a page repeats an opportunity ID.
         val clusters = page.clusters.distinctBy { it.id }
 
         val clusterEntities = clusters.map {
-            it.toEntity(userId)
+            it.toModel(userId)
         }
 
         val query = BrowseQueryEntity(
@@ -105,7 +103,7 @@ class BrowseLocalDataSource @Inject constructor(
         val categoryKey = category.name
         val sortKey = sortType.name
         val clusters = page.clusters.distinctBy { it.id }
-        val clusterEntities = clusters.map { it.toEntity(userId) }
+        val clusterEntities = clusters.map { it.toModel(userId) }
 
         return database.withWriteTransaction {
             val query = dao.getQuery(userId, categoryKey, sortKey)

@@ -1,6 +1,0 @@
-<resources>
-    <string name="title_opportunity_details">Opportunity details</string>
-    <string name="action_back">Back</string>
-    <string name="message_details_placeholder">Opportunity details are coming soon.</string>
-    <string name="label_opportunity_id">Opportunity #%1$d</string>
-</resources>

@@ -21,9 +21,16 @@ android {
     }
 }
 
+androidComponents {
+    onVariants { variant ->
+        variant.androidTest?.sources?.assets?.addStaticSourceDirectory("schemas")
+    }
+}
+
 dependencies {
     api(project(":data:opportunities:opportunities-api"))
     implementation(project(":data:authentication:auth-api"))
+    implementation(project(":core:model"))
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 

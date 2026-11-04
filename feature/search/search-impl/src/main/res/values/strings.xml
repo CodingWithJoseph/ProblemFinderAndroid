@@ -1,0 +1,7 @@
+<resources>
+    <string name="title_search">Search</string>
+    <string name="label_search_query">Find opportunities</string>
+    <string name="action_search">Search</string>
+    <string name="message_search_scaffold">Search is not ready yet.</string>
+    <string name="message_search_action_failed">Could not update this opportunity. Try again.</string>
+</resources>

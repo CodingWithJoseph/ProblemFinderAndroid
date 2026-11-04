@@ -96,7 +96,7 @@ class BrowseViewModelTest {
         assertTrue(model.state.value.pendingClusterIds.isEmpty())
         assertFalse(model.state.value.data.single().isWatched)
         assertEquals(RequestState.Success(Unit), model.state.value.refreshRequest)
-        assertEquals(BrowseEffect.ShowError(com.example.problemfinder.feature.opportunities.impl.util.OpportunityUiError(OpportunityFailure.NETWORK)), model.effects.first())
+        assertEquals(BrowseEffect.ShowError(com.example.problemfinder.feature.opportunities.impl.util.OpportunityUIError(OpportunityFailure.NETWORK)), model.effects.first())
     }
 
     @Test

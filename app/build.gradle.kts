@@ -62,7 +62,10 @@ android {
 // The app is the composition root: including implementation modules makes their Hilt bindings
 // available while feature code can continue depending on API contracts.
 dependencies {
-    implementation(project(":feature:opportunity-details:opportunity-details-impl"))
+    implementation(project(":core:preferences"))
+    implementation(project(":data:workspaces:workspaces-impl"))
+    implementation(project(":domain:workspaces:workspaces-impl"))
+    implementation(project(":feature:details:details-impl"))
     implementation(project(":core:mvi"))
     implementation(project(":core:designsystem"))
 

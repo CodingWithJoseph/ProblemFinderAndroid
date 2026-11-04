@@ -1,8 +1,14 @@
 package com.example.problemfinder.feature.settings.impl
 
-data class SettingsState(
-    val id: String = "Settings"
-)
+import com.example.problemfinder.core.preferences.AppearanceMode
 
-sealed interface SettingsIntent
-sealed interface SettingsEffect
+data class SettingsState(
+    val appearance: AppearanceMode = AppearanceMode.SYSTEM,
+    val isSaving: Boolean = false,
+    val saveFailed: Boolean = false,
+)
+sealed interface SettingsIntent {
+    data class AppearanceSelected(val value: AppearanceMode) : SettingsIntent
+    data object SignOut : SettingsIntent
+}
+sealed interface SettingsEffect { data object SignOut : SettingsEffect }

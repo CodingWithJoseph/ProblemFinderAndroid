@@ -24,6 +24,9 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:preferences"))
+    testImplementation(libs.junit4)
+    testImplementation(libs.coroutines.test)
     api(project(":feature:settings:settings-api"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:mvi"))

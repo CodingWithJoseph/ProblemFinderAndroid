@@ -42,6 +42,20 @@ ICONS = {
     "icon_database": "database",
     "icon_workflow": "workflow",
     "icon_uncategorized": "shapes",
+    "icon_clock": "clock-3",
+    "icon_calendar": "calendar-days",
+    "icon_message": "message-square",
+    "icon_users": "users",
+    "icon_document": "file-text",
+    "icon_sparkles": "sparkles",
+    "icon_warning": "triangle-alert",
+    "icon_circle": "circle",
+    "icon_check_circle": "circle-check",
+    "icon_chevron_down": "chevron-down",
+    "icon_chevron_right": "chevron-right",
+    "icon_target": "target",
+    "icon_lightbulb": "lightbulb",
+    "icon_wifi_off": "wifi-off",
 }
 
 

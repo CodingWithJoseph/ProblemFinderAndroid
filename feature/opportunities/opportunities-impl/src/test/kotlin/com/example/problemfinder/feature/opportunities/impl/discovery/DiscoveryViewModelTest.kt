@@ -88,7 +88,7 @@ class DiscoveryViewModelTest {
         assertTrue(model.state.value.pendingClusterIds.isEmpty())
         assertFalse(model.state.value.collections.single().clusters.single().isWatched)
         assertEquals(RequestState.Success(Unit), model.state.value.refreshRequestState)
-        assertEquals(DiscoveryEffect.ShowError(com.example.problemfinder.feature.opportunities.impl.util.OpportunityUiError(OpportunityFailure.NETWORK)), model.effects.first())
+        assertEquals(DiscoveryEffect.ShowError(com.example.problemfinder.feature.opportunities.impl.util.OpportunityUIError(OpportunityFailure.NETWORK)), model.effects.first())
     }
 
     @Test

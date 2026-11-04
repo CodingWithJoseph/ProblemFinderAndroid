@@ -16,9 +16,9 @@ import androidx.compose.ui.unit.dp
 import com.example.problemfinder.feature.opportunities.impl.R
 import com.example.problemfinder.core.designsystem.R as DesignR
 
-/** Shared refresh affordance; request eligibility comes from screen state, with duplicate taps disabled. */
+
 @Composable
-internal fun OpportunityRefreshAction(
+fun OpportunityRefreshAction(
     enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,

@@ -1,0 +1,31 @@
+<resources>
+    <string name="analyze_version">Version %1$d</string>
+    <string name="analyze_generation_issue">Analysis needs attention</string>
+    <string name="analyze_stale">New evidence is available</string>
+    <string name="analyze_stale_message">This analysis uses earlier evidence. Regenerate it when you are ready to review the changes.</string>
+    <string name="analyze_regenerate">Regenerate analysis</string>
+    <string name="analyze_thesis_confirmed">Thesis confirmed</string>
+    <string name="analyze_in_focus">In focus</string>
+    <string name="analyze_set_aside">Set aside</string>
+    <string name="analyze_unpin">Remove from focus</string>
+    <string name="analyze_restore">Restore problem</string>
+    <string name="analyze_observed">Observed in the evidence</string>
+    <string name="analyze_inferred">Inferred — needs validation</string>
+    <string name="analyze_user_confirmed">Confirmed by you</string>
+    <string name="analyze_kind_cause">Cause</string>
+    <string name="analyze_kind_core">Core problem</string>
+    <string name="analyze_kind_symptom">Symptom</string>
+    <string name="analyze_kind_consequence">Consequence</string>
+    <string name="analyze_kind_workaround">Workaround</string>
+    <string name="analyze_new_conversation">New conversation</string>
+    <string name="analyze_loading_conversation">Loading conversation…</string>
+    <string name="analyze_conversation_error">Could not update this conversation</string>
+    <string name="analyze_conversation_requires_case">Generate an analysis before starting a conversation.</string>
+    <string name="analyze_conversation_insufficient">The available evidence does not establish an answer.</string>
+    <string name="analyze_you">You</string>
+    <string name="analyze_assistant">Analysis assistant</string>
+    <string name="analyze_accept_proposal">Accept proposal</string>
+    <string name="analyze_dismiss_proposal">Dismiss</string>
+    <string name="analyze_proposal_accepted">Proposal accepted</string>
+    <string name="analyze_proposal_dismissed">Proposal dismissed</string>
+</resources>

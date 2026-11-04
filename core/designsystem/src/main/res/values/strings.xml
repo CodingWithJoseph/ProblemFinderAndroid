@@ -1,18 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <plurals name="browse_post_count">
+        <item quantity="one">%1$d post</item>
+        <item quantity="other">%1$d posts</item>
+    </plurals>
     <string name="logo_immensity">Immensity Logo</string>
     <string name="wordmark_immensity">immensity</string>
     <string name="icon_close">Close</string>
     <string name="icon_desc_add">Add</string>
     <string name="icon_desc_remove">Remove</string>
-
+    <string name="label_latest_discovery">Featured</string>
     <string name="label_build_tooling">Build &amp; Tooling</string>
     <string name="label_data_apis">Data &amp; APIs</string>
     <string name="label_workflow_automation">Workflow</string>
     <string name="label_uncategorized">Uncategorized</string>
-
+    <string name="label_activity_date_unavailable">No Date</string>
     <string name="description_build_tooling">Friction in the developer experience</string>
     <string name="description_data_apis">Where connections break down</string>
     <string name="description_workflow_automation">The work around the work</string>
     <string name="description_uncategorized">Uncategorized</string>
+    <string name="title_error_network">Network Connection</string>
+    <string name="message_error_network">Check your connection and try again.</string>
+    <string name="title_failure">Unable to load opportunities</string>
+    <string name="message_failure">Something went wrong. Please try again.</string>
+    <string name="title_cluster_not_found">Opportunity not found</string>
+    <string name="message_cluster_not_found">This opportunity may no longer be available. Go back to explore other opportunities.</string>
+    <string name="message_error_request">The request could not be completed. Refresh the list and try again.</string>
+    <string name="message_end_of_results">You have reached the end.</string>
+    <string name="message_error_session">Your session is unavailable. Please try again.</string>
+    <string name="message_error_server">The service is temporarily unavailable. Please try again.</string>
+    <string name="message_error_response">Received an unexpected response. Please try again.</string>
+    <string name="action_add_opportunity">Add %1$s</string>
+    <string name="action_remove_opportunity">Remove %1$s</string>
+    <string name="message_watch_action_failed">Couldn’t update this opportunity. %1$s</string>
+    <string name="message_adding_opportunity">Adding opportunity</string>
+    <string name="message_removing_opportunity">Removing opportunity</string>
 </resources>

@@ -1,12 +1,14 @@
 package com.example.problemfinder.data.opportunities.impl.di
 
 import android.content.Context
-import com.example.problemfinder.data.opportunities.impl.db.OpportunityDao
+import com.example.problemfinder.data.opportunities.impl.db.dao.OpportunityDao
 import androidx.room3.Room
 import androidx.sqlite.driver.AndroidSQLiteDriver
-import com.example.problemfinder.data.opportunities.impl.db.BrowseDao
-import com.example.problemfinder.data.opportunities.impl.db.DiscoveryDao
+import com.example.problemfinder.data.opportunities.impl.db.dao.BrowseDao
+import com.example.problemfinder.data.opportunities.impl.db.dao.DiscoveryDao
 import com.example.problemfinder.data.opportunities.impl.db.OpportunitiesDatabase
+import com.example.problemfinder.data.opportunities.impl.db.opportunitiesMigration1To2
+import com.example.problemfinder.data.opportunities.impl.db.dao.OpportunityDetailsDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -14,7 +16,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-/** Gives all opportunity data sources the same persistent database and its three DAO views. */
 @Module
 @InstallIn(SingletonComponent::class)
 object OpportunitiesDatabaseModule {
@@ -28,10 +29,13 @@ object OpportunitiesDatabaseModule {
             "opportunities.db"
         )
             .setDriver(AndroidSQLiteDriver())
+            .addMigrations(opportunitiesMigration1To2)
             .build()
 
     @Provides
-    fun provideOpportunityDao(database: OpportunitiesDatabase): OpportunityDao = database.opportunityDao()
+    fun provideOpportunityDao(
+        database: OpportunitiesDatabase
+    ): OpportunityDao = database.opportunityDao()
 
     @Provides
     fun provideBrowseDao(
@@ -42,4 +46,9 @@ object OpportunitiesDatabaseModule {
     fun provideDiscoveryDao(
         database: OpportunitiesDatabase
     ): DiscoveryDao = database.discoveryDao()
+
+    @Provides
+    fun provideDiscoveryDetailsDao(
+        database: OpportunitiesDatabase
+    ): OpportunityDetailsDao = database.discoveryDetailsDao()
 }

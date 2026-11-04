@@ -17,10 +17,10 @@ flowchart TD
     SignIn -->|success| Discovery
     Reset -->|updated| Discovery
     Discovery -->|See all: category| Browse
-    Discovery --> Details[Opportunity details placeholder]
+    Discovery --> Details[Opportunity details / evidence / post]
     Browse --> Details
-    Discovery <-->|tabs| Tabs[Search / Projects / Builds placeholders]
-    Discovery -->|menu| Settings[Settings shell]
+    Discovery <-->|tabs| Tabs[Search / Analyze / Build]
+    Discovery -->|menu| Settings[Appearance / version / sign out]
     Browse -->|menu| Settings
     Tabs -->|menu| Settings
 ```
@@ -67,7 +67,15 @@ Selecting a tab pops back to Discovery and navigates with `launchSingleTop`. The
 | Browse | Category/sort changes replace observation. Cached rows survive refresh errors; no-data screens distinguish unsynced/empty/error. Later composition entry requests refresh. |
 | Paging | Requires ready, synced cache and a cursor. Near-bottom scrolling requests pages; duplicate cursors are suppressed. Page errors stay in the footer and require explicit retry. Refresh and paging cannot overlap. |
 | Watch/unwatch | Independent card action; duplicate taps disabled by ID. Observed cache supplies the resulting watch value. Errors use snackbars; account changes clear old content/pending work and invalidate stale results. |
-| Search / Projects / Builds | Label-only screens with empty intent/effect handlers; no search, project management, or build workflow. |
-| Settings / details | Settings has a title/Close only. Details displays the selected ID and placeholder message; no detail fetch. |
+| Analyze | Account-scoped project stages, cached analysis, explicit generation with foreground polling, thesis confirmation, problem pin/reject, assumption resolution, grounded conversations and explicit proposal decisions. |
+| Build | Eligible project list, cached solution/plan, target/constraint inputs, generation, version-aware approval, verified task progress, document drafts/save/conflict handling and user-selected ZIP export. |
+| Settings | Persisted System/Light/Dark appearance, app version and existing app sign-out. The theme also controls category palettes and system-bar contrast. |
+| Details / Search | All screens and supporting routes have previews/navigation. Details operation completion and Search mapping/cache/repository/ViewModel work remain intentionally unfinished. |
+
+Analyze workspace children share the parent workspace ViewModel; Build children use the same ownership pattern. Routes carry project/item IDs. Each visible entry owns a polling lease, so generation requests stop polling when all its screens leave the foreground. Navigating into Details or a post still depends on finishing those feature operations.
+
+Build document edits are saved locally by account/project/document while editing. Save creates an immutable draft version, resets approval/task progress, and uses the edit's original version for concurrency checks. A conflict preserves local text. Back offers Save, Keep editing, or Discard. Task progress is a separate mutation: the current plan must be approved; Blocked requires a reason and Done requires user-supplied successful verification checks. Export fetches the ZIP and uses Android's document picker; it needs no broad storage permission.
+
+The deployed backend must provide Pipeline, Signal and Solution APIs and running generation workers. Android task updates additionally require PATCH /pipeline/{id}/solution/case/tasks/{taskId}; the older IDE route accepts a different OAuth credential and is not used by Android. No live AI generation or production mutation is implied by preview/device tests.
 
 For state transitions, start with [DiscoveryViewModel](../feature/opportunities/opportunities-impl/src/main/kotlin/com/example/problemfinder/feature/opportunities/impl/discovery/DiscoveryViewModel.kt) and [BrowseViewModel](../feature/opportunities/opportunities-impl/src/main/kotlin/com/example/problemfinder/feature/opportunities/impl/browse/BrowseViewModel.kt). [Root-policy tests](../app/src/test/kotlin/com/example/problemfinder/app/navigation/AuthNavigationPolicyTest.kt) document session decisions; they do not establish end-to-end delivery of email links or device Back behavior.

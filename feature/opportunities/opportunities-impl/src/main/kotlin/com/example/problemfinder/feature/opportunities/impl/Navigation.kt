@@ -1,8 +1,7 @@
 package com.example.problemfinder.feature.opportunities.impl
 
-import androidx.compose.ui.platform.LocalContext
-import com.example.problemfinder.feature.opportunities.impl.util.messageRes
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalResources
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
@@ -20,11 +19,8 @@ import com.example.problemfinder.feature.opportunities.impl.discovery.DiscoveryE
 import com.example.problemfinder.feature.opportunities.impl.discovery.DiscoveryIntent
 import com.example.problemfinder.feature.opportunities.impl.discovery.DiscoveryScreen
 import com.example.problemfinder.feature.opportunities.impl.discovery.DiscoveryViewModel
+import com.example.problemfinder.feature.opportunities.impl.util.messageRes
 
-/**
- * Connects feature screens to their back-stack-scoped ViewModels. The app host owns destination
- * changes and message display through callbacks, keeping NavController out of screen/UI logic.
- */
 fun NavGraphBuilder.opportunities(
     onOpenCluster: (Int) -> Unit,
     onOpenBrowse: (OpportunityCategory) -> Unit,
@@ -33,18 +29,21 @@ fun NavGraphBuilder.opportunities(
     composable(route = OpportunitiesDestinations.DISCOVERY) {
         val viewModel = hiltViewModel<DiscoveryViewModel>()
         val state = viewModel.state.collectAsStateWithLifecycle().value
-        val context = LocalContext.current
+        val context = LocalResources.current
 
-        // Entry/effect collection runs once per composition entry, not on every recomposition.
-        // State collection above follows lifecycle state; this effect is cancelled on composition exit.
         LaunchedEffect(viewModel) {
             viewModel.onIntent(DiscoveryIntent.Entered)
 
             viewModel.effects.collect {
-                when(it) {
+                when (it) {
                     is DiscoveryEffect.NavigateToCluster -> onOpenCluster(it.clusterId)
                     is DiscoveryEffect.NavigateToBrowse -> onOpenBrowse(it.clusterCategory)
-                    is DiscoveryEffect.ShowError -> onMessage(context.getString(R.string.message_watch_action_failed, context.getString(it.error.messageRes().second)))
+                    is DiscoveryEffect.ShowError -> onMessage(
+                        context.getString(
+                            R.string.message_watch_action_failed,
+                            context.getString(it.error.messageRes().second)
+                        )
+                    )
                 }
             }
         }
@@ -58,8 +57,7 @@ fun NavGraphBuilder.opportunities(
     composable(
         route = OpportunitiesDestinations.BROWSE_ROUTE,
         arguments = listOf(
-            // SavedStateHandle exposes this argument to BrowseViewModel as its initial category.
-            navArgument(OpportunitiesDestinations.CATEGORY_ARGUMENT){
+            navArgument(OpportunitiesDestinations.CATEGORY_ARGUMENT) {
                 type = NavType.StringType
                 defaultValue = OpportunityCategoryFilter.ALL.name
             }
@@ -67,13 +65,21 @@ fun NavGraphBuilder.opportunities(
     ) {
         val viewModel = hiltViewModel<BrowseViewModel>()
         val state = viewModel.state.collectAsStateWithLifecycle().value
-        val context = LocalContext.current
+        val context = LocalResources.current
 
         LaunchedEffect(viewModel) {
             viewModel.onIntent(BrowseIntent.Entered)
             viewModel.effects.collect { effect ->
                 when (effect) {
-                    is BrowseEffect.ShowError -> onMessage(context.getString(R.string.message_watch_action_failed, context.getString(effect.error.messageRes().second)))
+                    is BrowseEffect.ShowError -> onMessage(
+                        context.getString(
+                            R.string.message_watch_action_failed,
+                            context.getString(
+                                effect.error.messageRes().second
+                            )
+                        )
+                    )
+
                     is BrowseEffect.NavigateToCluster -> onOpenCluster(effect.clusterId)
                 }
             }
