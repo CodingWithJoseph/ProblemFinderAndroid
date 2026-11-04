@@ -7,8 +7,38 @@ import androidx.sqlite.execSQL
 /** Preserves existing cache rows and widens post identity to support server UUIDs. */
 internal val opportunitiesMigration1To2 = object : Migration(1, 2) {
     override suspend fun migrate(connection: SQLiteConnection) {
-        connection.execSQL("ALTER TABLE opportunity_evidence_membership RENAME TO old_evidence_membership")
-        connection.execSQL("ALTER TABLE opportunity_evidence RENAME TO old_evidence")
+        // The guided branch added Details tables before the database version was bumped.
+        val hasLegacyEvidence = connection.prepare(
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'opportunity_evidence'",
+        ).use { it.step() }
+        if (hasLegacyEvidence) {
+            connection.execSQL("ALTER TABLE opportunity_evidence_membership RENAME TO old_evidence_membership")
+            connection.execSQL("ALTER TABLE opportunity_evidence RENAME TO old_evidence")
+        }
+
+        connection.execSQL("""
+            CREATE TABLE IF NOT EXISTS opportunity_details (
+                userId TEXT NOT NULL, clusterId INTEGER NOT NULL, name TEXT NOT NULL,
+                summary TEXT NOT NULL, problemStatement TEXT NOT NULL, postCount INTEGER NOT NULL,
+                firstSeen TEXT, lastSeen TEXT, authorCount INTEGER NOT NULL, communityCount INTEGER NOT NULL,
+                hasSynced INTEGER NOT NULL, pageSize INTEGER NOT NULL, lastLoadedPage INTEGER NOT NULL,
+                PRIMARY KEY(userId, clusterId)
+            )
+        """.trimIndent())
+        connection.execSQL("""
+            CREATE TABLE IF NOT EXISTS evidence_source_count (
+                userId TEXT NOT NULL, clusterId INTEGER NOT NULL, source TEXT NOT NULL, count INTEGER NOT NULL,
+                PRIMARY KEY(userId, clusterId, source),
+                FOREIGN KEY(userId, clusterId) REFERENCES opportunity_details(userId, clusterId) ON DELETE CASCADE
+            )
+        """.trimIndent())
+        connection.execSQL("""
+            CREATE TABLE IF NOT EXISTS evidence_date_count (
+                userId TEXT NOT NULL, clusterId INTEGER NOT NULL, date TEXT NOT NULL, count INTEGER NOT NULL,
+                PRIMARY KEY(userId, clusterId, date),
+                FOREIGN KEY(userId, clusterId) REFERENCES opportunity_details(userId, clusterId) ON DELETE CASCADE
+            )
+        """.trimIndent())
         connection.execSQL("""
             CREATE TABLE opportunity_evidence (
                 userId TEXT NOT NULL, clusterId INTEGER NOT NULL, postId TEXT NOT NULL,
@@ -28,18 +58,20 @@ internal val opportunitiesMigration1To2 = object : Migration(1, 2) {
                     REFERENCES opportunity_evidence(userId, clusterId, postId) ON DELETE CASCADE
             )
         """.trimIndent())
-        connection.execSQL("""
-            INSERT INTO opportunity_evidence
-            SELECT userId, clusterId, CAST(postId AS TEXT), title, body, url, author, community,
-                source, score, commentCount, postedAt, problemStatement
-            FROM old_evidence
-        """.trimIndent())
-        connection.execSQL("""
-            INSERT INTO opportunity_evidence_membership
-            SELECT userId, clusterId, CAST(postId AS TEXT), section, page, position FROM old_evidence_membership
-        """.trimIndent())
-        connection.execSQL("DROP TABLE old_evidence_membership")
-        connection.execSQL("DROP TABLE old_evidence")
+        if (hasLegacyEvidence) {
+            connection.execSQL("""
+                INSERT INTO opportunity_evidence
+                SELECT userId, clusterId, CAST(postId AS TEXT), title, body, url, author, community,
+                    source, score, commentCount, postedAt, problemStatement
+                FROM old_evidence
+            """.trimIndent())
+            connection.execSQL("""
+                INSERT INTO opportunity_evidence_membership
+                SELECT userId, clusterId, CAST(postId AS TEXT), section, page, position FROM old_evidence_membership
+            """.trimIndent())
+            connection.execSQL("DROP TABLE old_evidence_membership")
+            connection.execSQL("DROP TABLE old_evidence")
+        }
         connection.execSQL("""
             CREATE INDEX index_opportunity_evidence_membership_userId_clusterId_section_page_position
             ON opportunity_evidence_membership(userId, clusterId, section, page, position)
