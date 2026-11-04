@@ -14,7 +14,7 @@ import kotlinx.coroutines.awaitCancellation
 fun NavGraphBuilder.projects(
     navController: NavHostController,
     onOpenCluster: (Int) -> Unit,
-    onOpenPost: (Int, Int) -> Unit,
+    onOpenPost: (Int, String) -> Unit,
     onOpenBuild: (String) -> Unit,
     onDiscover: () -> Unit,
 ) {

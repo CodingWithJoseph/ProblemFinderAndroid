@@ -51,4 +51,10 @@
     <string name="search_confirm">Confirm and search</string>
     <string name="search_assistant_error">The assistant could not finish</string>
     <string name="search_assistant_error_message">You can try again or return to manual search.</string>
+    <string name="search_invalid_query">Enter 2â€“500 characters or choose a filter.</string>
+    <string name="search_invalid_filters">Use 1â€“100,000 posts, a valid YYYY-MM-DD date, and at most 20 selections per filter.</string>
+    <string name="search_invalid_assistant">Enter a description of 2â€“2,000 characters.</string>
+    <string name="search_options_loading">Loading filter optionsâ€¦</string>
+    <string name="search_options_error">Filter options unavailable</string>
+    <string name="search_options_retry">Try loading sources and communities again.</string>
 </resources>

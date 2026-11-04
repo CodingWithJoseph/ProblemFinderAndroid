@@ -23,6 +23,7 @@ fun SearchScreen(state: SearchState, onIntent: (SearchIntent) -> Unit, modifier:
     FeatureScaffold(
         stringResource(R.string.title_search), modifier,
         onRefresh = { onIntent(SearchIntent.Reload) },
+        refreshEnabled = state.canRefresh,
         refreshing = state.refreshRequest is RequestState.Loading,
         actions = {
             IconButton({ onIntent(SearchIntent.OpenFilters) }) {
@@ -45,13 +46,12 @@ fun SearchScreen(state: SearchState, onIntent: (SearchIntent) -> Unit, modifier:
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         keyboardActions = KeyboardActions(onSearch = {
-                            if (!state.implementationPending) onIntent(SearchIntent.Submit)
+                            onIntent(SearchIntent.Submit)
                         }),
                     )
-                    state.validationMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    state.validationMessage?.let { Text(stringResource(it), color = MaterialTheme.colorScheme.error) }
                     FeatureAction(stringResource(R.string.action_search), { onIntent(SearchIntent.Submit) },
-                        Modifier.fillMaxWidth(), DesignR.drawable.icon_search,
-                        enabled = !state.implementationPending, pending = state.refreshRequest is RequestState.Loading)
+                        Modifier.fillMaxWidth(), DesignR.drawable.icon_search)
                     OutlinedButton({ onIntent(SearchIntent.OpenAssistant) }, Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
                         FeatureIcon(DesignR.drawable.icon_sparkles)
                         Spacer(Modifier.width(8.dp))
@@ -85,15 +85,18 @@ fun SearchScreen(state: SearchState, onIntent: (SearchIntent) -> Unit, modifier:
             items(state.items, key = { it.id }) { opportunity ->
                 OpportunityListItem(opportunity, { onIntent(SearchIntent.OpenCluster(opportunity.id)) },
                     { onIntent(SearchIntent.WatchCluster(opportunity.id)) },
-                    pending = opportunity.id in state.pendingClusterIds, actionsEnabled = !state.implementationPending)
+                    pending = opportunity.id in state.pendingClusterIds,
+                    actionsEnabled = state.observationRequest is RequestState.Success)
             }
             item("paging") {
                 when (state.pageRequest) {
                     is RequestState.Loading -> FeatureLoading(stringResource(R.string.search_loading_more))
                     is RequestState.Error -> FeatureNotice(stringResource(R.string.search_page_error),
-                        stringResource(R.string.search_page_error_message), { onIntent(SearchIntent.RetryNextPage) })
+                        stringResource(R.string.search_page_error_message),
+                        onRetry = if (state.canAppend) ({ onIntent(SearchIntent.RetryNextPage) }) else null)
                     else -> if (state.canLoadMore) FeatureAction(stringResource(R.string.search_more),
-                        { onIntent(SearchIntent.LoadNextPage) }, Modifier.fillMaxWidth(), DesignR.drawable.icon_add)
+                        { onIntent(SearchIntent.LoadNextPage) }, Modifier.fillMaxWidth(), DesignR.drawable.icon_add,
+                        enabled = state.canAppend)
                 }
             }
         }
@@ -102,6 +105,7 @@ fun SearchScreen(state: SearchState, onIntent: (SearchIntent) -> Unit, modifier:
 
 @Composable
 internal fun SearchFiltersScreen(state: SearchState, onIntent: (SearchIntent) -> Unit) {
+    val filters = state.filterDraft ?: state.draftQuery
     FeatureScaffold(stringResource(R.string.search_filters), onBack = { onIntent(SearchIntent.ClosePanel) },
         actions = { TextButton({ onIntent(SearchIntent.ResetFilters) }) { Text(stringResource(R.string.search_reset)) } },
     ) { padding ->
@@ -113,7 +117,7 @@ internal fun SearchFiltersScreen(state: SearchState, onIntent: (SearchIntent) ->
                 FeatureSection(stringResource(R.string.search_sort))
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     OpportunitySearchSort.entries.forEach { sort ->
-                        FilterChip(state.draftQuery.sort == sort, { onIntent(SearchIntent.SortSelected(sort)) },
+                        FilterChip(filters.sort == sort, { onIntent(SearchIntent.SortSelected(sort)) },
                             label = { Text(stringResource(when (sort) {
                                 OpportunitySearchSort.RELEVANCE -> R.string.search_relevance
                                 OpportunitySearchSort.NEWEST -> R.string.search_newest
@@ -122,19 +126,24 @@ internal fun SearchFiltersScreen(state: SearchState, onIntent: (SearchIntent) ->
                     }
                 }
             }
+            if (state.optionsRequest is RequestState.Loading) item { FeatureLoading(stringResource(R.string.search_options_loading)) }
+            if (state.optionsRequest is RequestState.Error) item {
+                FeatureNotice(stringResource(R.string.search_options_error), stringResource(R.string.search_options_retry),
+                    { onIntent(SearchIntent.RetryOptions) })
+            }
             item { FeatureSection(stringResource(R.string.search_sources)) }
             if (state.sourceOptions.isEmpty()) item {
                 Text(stringResource(R.string.search_no_source_options), style = MaterialTheme.typography.bodySmall)
             }
-            items(state.sourceOptions, key = { "source-" + it }) { source ->
-                FeatureBullet(source, source in state.draftQuery.sources, { onIntent(SearchIntent.SourceToggled(source)) })
+            items((state.sourceOptions.map { it.lowercase() } + filters.sources).distinct(), key = { "source-" + it }) { source ->
+                FeatureBullet(source, source in filters.sources, { onIntent(SearchIntent.SourceToggled(source)) })
             }
             item { FeatureSection(stringResource(R.string.search_communities)) }
             if (state.communityOptions.isEmpty()) item {
                 Text(stringResource(R.string.search_no_community_options), style = MaterialTheme.typography.bodySmall)
             }
-            items(state.communityOptions, key = { "community-" + it }) { community ->
-                FeatureBullet(community, community in state.draftQuery.communities,
+            items((state.communityOptions.map { it.lowercase() } + filters.communities).distinct(), key = { "community-" + it }) { community ->
+                FeatureBullet(community, community in filters.communities,
                     { onIntent(SearchIntent.CommunityToggled(community)) })
             }
             item {
@@ -147,7 +156,7 @@ internal fun SearchFiltersScreen(state: SearchState, onIntent: (SearchIntent) ->
                     Modifier.fillMaxWidth(), label = { Text(stringResource(R.string.search_after_date)) },
                     placeholder = { Text(stringResource(R.string.search_date_hint)) }, singleLine = true)
             }
-            state.validationMessage?.let { message -> item { Text(message, color = MaterialTheme.colorScheme.error) } }
+            state.validationMessage?.let { message -> item { Text(stringResource(message), color = MaterialTheme.colorScheme.error) } }
             item {
                 FeatureAction(stringResource(R.string.search_apply), { onIntent(SearchIntent.ApplyFilters) },
                     Modifier.fillMaxWidth(), DesignR.drawable.icon_check)
@@ -165,7 +174,7 @@ internal fun SearchAssistantScreen(state: SearchState, onIntent: (SearchIntent) 
                 stringResource(R.string.search_assistant_title), stringResource(R.string.search_assistant_subtitle),
                 icon = DesignR.drawable.icon_sparkles) }
             item {
-                OutlinedTextField(state.draftQuery.query, { onIntent(SearchIntent.QueryChanged(it)) },
+                OutlinedTextField(state.assistantInput, { onIntent(SearchIntent.AssistantChanged(it)) },
                     Modifier.fillMaxWidth(), label = { Text(stringResource(R.string.search_describe)) }, minLines = 4)
             }
             item {
@@ -173,6 +182,7 @@ internal fun SearchAssistantScreen(state: SearchState, onIntent: (SearchIntent) 
                     Modifier.fillMaxWidth(), DesignR.drawable.icon_sparkles,
                     pending = state.interpretationRequest is RequestState.Loading)
             }
+            state.validationMessage?.let { message -> item { Text(stringResource(message), color = MaterialTheme.colorScheme.error) } }
             if (state.interpretationRequest is RequestState.Error) item {
                 FeatureNotice(stringResource(R.string.search_assistant_error), stringResource(R.string.search_assistant_error_message),
                     { onIntent(SearchIntent.InterpretQuery) })
@@ -192,7 +202,8 @@ internal fun SearchAssistantScreen(state: SearchState, onIntent: (SearchIntent) 
                 items(draft.unsupported, key = { "unsupported-" + it }) { FeatureBullet(it) }
                 item {
                     FeatureAction(stringResource(R.string.search_confirm), { onIntent(SearchIntent.ConfirmDraft) },
-                        Modifier.fillMaxWidth(), DesignR.drawable.icon_search, enabled = !draft.needsClarification)
+                        Modifier.fillMaxWidth(), DesignR.drawable.icon_search, enabled = !draft.needsClarification && state.interpretationRequest !is RequestState.Loading &&
+                            state.interpretationRequest !is RequestState.Error)
                 }
             }
         }

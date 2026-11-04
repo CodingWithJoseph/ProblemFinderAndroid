@@ -23,6 +23,13 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class GuidedFeaturesDomainModule {
+    @Binds abstract fun bindLoadPost(
+        implementation: com.example.problemfinder.domain.opportunities.impl.details.LoadOpportunityPostUseCaseImpl,
+    ): com.example.problemfinder.domain.opportunities.api.details.LoadOpportunityPostUseCase
+
+    @Binds abstract fun bindSearchOptions(
+        implementation: com.example.problemfinder.domain.opportunities.impl.search.LoadOpportunitySearchOptionsUseCaseImpl,
+    ): com.example.problemfinder.domain.opportunities.api.search.LoadOpportunitySearchOptionsUseCase
     @Binds abstract fun bindObserveOpportunityDetails(implementation: ObserveOpportunityDetailsUseCaseImpl): ObserveOpportunityDetailsUseCase
     @Binds abstract fun bindRefreshOpportunityDetails(implementation: RefreshOpportunityDetailsUseCaseImpl): RefreshOpportunityDetailsUseCase
     @Binds abstract fun bindLoadNextOpportunityEvidence(implementation: LoadNextOpportunityEvidenceUseCaseImpl): LoadNextOpportunityEvidenceUseCase

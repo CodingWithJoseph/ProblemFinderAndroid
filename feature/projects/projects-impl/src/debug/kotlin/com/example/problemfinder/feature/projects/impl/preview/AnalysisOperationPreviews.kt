@@ -13,7 +13,7 @@ private fun AnalysisProposalPreview() = ImmensityTheme {
         conversations = listOf(ConversationSummary("conversation-1", "Build failure investigation", false)),
         conversationId = "conversation-1",
         turns = listOf(AnalysisTurn("turn-1", "Focus the thesis on the package-resolution failure.",
-            false, listOf(AnalysisCitation(101, "Source: package resolution failure")),
+            false, listOf(AnalysisCitation("101", "Source: package resolution failure")),
             AnalysisProposal("proposal-1", "Narrow the working thesis",
                 "Focus on actionable dependency errors before considering automatic recovery.", "pending"))),
     ), {}, AnalysisPanel.CONVERSATION)

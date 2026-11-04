@@ -41,7 +41,7 @@ data class OpportunityDetailsEntity(
 data class OpportunityEvidenceEntity(
     val userId: String,
     val clusterId: Int,
-    val postId: Int,
+    val postId: String,
     val title: String,
     val body: String?,
     val url: String?,
@@ -78,7 +78,7 @@ data class OpportunityEvidenceEntity(
 data class OpportunityEvidenceMembershipEntity(
     val userId: String,
     val clusterId: Int,
-    val postId: Int,
+    val postId: String,
     val section: EvidenceSection,
     val page: Int,
     val position: Int,

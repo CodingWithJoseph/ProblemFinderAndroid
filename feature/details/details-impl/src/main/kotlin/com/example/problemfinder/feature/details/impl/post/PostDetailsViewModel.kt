@@ -1,45 +1,77 @@
 package com.example.problemfinder.feature.details.impl.post
 
 import androidx.lifecycle.SavedStateHandle
+import com.example.problemfinder.core.designsystem.components.FeatureContentStatus
+import com.example.problemfinder.core.model.opportunity.OpportunityFailure
+import com.example.problemfinder.core.model.opportunity.OpportunityOperationException
 import com.example.problemfinder.core.mvi.BaseMVIViewModel
+import com.example.problemfinder.domain.opportunities.api.details.LoadOpportunityPostUseCase
+import com.example.problemfinder.domain.opportunities.api.details.ObserveOpportunityDetailsUseCase
 import com.example.problemfinder.feature.details.api.OpportunityDetailsDestination
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-/** Navigation plumbing only. Implement the selected post's data lifecycle yourself. */
 @HiltViewModel
 class PostDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
+    private val observeDetails: ObserveOpportunityDetailsUseCase,
+    private val loadPost: LoadOpportunityPostUseCase,
 ) : BaseMVIViewModel<PostDetailsIntent, PostDetailsState, PostDetailsEffect>(
     PostDetailsState(
         clusterId = savedStateHandle[OpportunityDetailsDestination.ID_ARGUMENT],
         postId = savedStateHandle[OpportunityDetailsDestination.POST_ARGUMENT],
+        status = FeatureContentStatus.LOADING,
     )
 ) {
+    private var observation: Job? = null
+
     override fun onIntent(intent: PostDetailsIntent) {
         when (intent) {
             PostDetailsIntent.Back -> sendEffect(PostDetailsEffect.NavigateBack)
             is PostDetailsIntent.OpenOriginal -> sendEffect(PostDetailsEffect.OpenExternal(intent.url))
-            PostDetailsIntent.Entered, PostDetailsIntent.Retry -> {
-                // REVIEW [DETAILS-14] This branch currently never loads anything. Starting with
-                // the two route IDs already in state, sketch: observe -> select evidence -> publish.
-                // Which existing use case supplies account-scoped snapshots, and which two lists
-                // can contain this post? How will repeated Entered avoid a duplicate collector?
-                // Check: a tapped cached post displays its full body; an account change clears it;
-                // Retry can restart a failed collector, and route IDs still work after recreation.
-                //
-                // REVIEW [DETAILS-15] Missing versus not loaded: cold-open a post that originally
-                // came from page 3, with no saved evidence. Refreshing page 1 may succeed without it.
-                // What does that absence actually prove? Trace cache-not-ready, a failed fetch,
-                // and a successfully loaded page that simply does not include the selected ID.
-                // Decide the recovery/lookup contract before displaying a definitive missing state;
-                // neither a preview fixture nor a second copy of the details object solves lookup.
-            }
+            PostDetailsIntent.Entered -> if (observation?.isActive != true) observe() else Unit
+            PostDetailsIntent.Retry -> observe()
         }
     }
+
+    private fun observe() {
+        val cluster = state.value.clusterId ?: return
+        val id = state.value.postId ?: return
+        observation?.cancel()
+        reduce { copy(status = FeatureContentStatus.LOADING) }
+        observation = safeLaunch {
+            observeDetails(ObserveOpportunityDetailsUseCase.Params(cluster))
+                .map { snapshot ->
+                    Triple(snapshot.userId, snapshot.cacheReady,
+                        snapshot.posts.firstOrNull { it.id == id } ?: snapshot.topEvidence.firstOrNull { it.id == id })
+                }
+                .distinctUntilChanged()
+                .collectLatest { (user, ready, cached) ->
+                    reduce { copy(post = cached, status = FeatureContentStatus.LOADING) }
+                    if (!ready) return@collectLatest
+                    if (user == null || cached != null) {
+                        reduce { copy(status = if (cached == null) FeatureContentStatus.EMPTY else FeatureContentStatus.CONTENT) }
+                        return@collectLatest
+                    }
+                    try {
+                        val post = loadPost(LoadOpportunityPostUseCase.Params(cluster, id, user))
+                        reduce { copy(post = post, status = if (post == null) FeatureContentStatus.EMPTY else FeatureContentStatus.CONTENT) }
+                    } catch (cancelled: CancellationException) {
+                        throw cancelled
+                    } catch (error: Exception) {
+                        val missing = (error as? OpportunityOperationException)?.failure == OpportunityFailure.CLUSTER_NOT_FOUND
+                        reduce { copy(status = if (missing) FeatureContentStatus.EMPTY else FeatureContentStatus.ERROR) }
+                    }
+                }
+        }
+    }
+
     override fun onError(error: Throwable) {
-        // REVIEW [DETAILS-14] What should a failure change when post is already present, versus
-        // before it has ever loaded? Trace PostDetailsScreen's two branches, and keep failures from
-        // exposing a previous account's post. Retry needs to restore the failed work, not just a label.
+        reduce { copy(status = FeatureContentStatus.ERROR) }
     }
 }

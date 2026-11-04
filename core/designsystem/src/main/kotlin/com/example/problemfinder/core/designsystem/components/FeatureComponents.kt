@@ -51,6 +51,7 @@ fun FeatureScaffold(
     onRefresh: (() -> Unit)? = null,
     refreshing: Boolean = false,
     actions: @Composable RowScope.() -> Unit = {},
+    refreshEnabled: Boolean = true,
     content: @Composable (PaddingValues) -> Unit,
 ) {
     Scaffold(
@@ -72,7 +73,7 @@ fun FeatureScaffold(
                 },
                 actions = {
                     onRefresh?.let { refresh ->
-                        IconButton(onClick = refresh, enabled = !refreshing) {
+                        IconButton(onClick = refresh, enabled = refreshEnabled && !refreshing) {
                             if (refreshing) CircularProgressIndicator(
                                 modifier = Modifier.size(20.dp), strokeWidth = 2.dp,
                                 color = opportunityPalette().foreground,

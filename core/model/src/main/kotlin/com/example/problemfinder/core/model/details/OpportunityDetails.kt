@@ -73,7 +73,7 @@ data class EvidenceDateCount(val date: String, val count: Int) {
 }
 
 data class OpportunityEvidence(
-    val id: Int,
+    val id: String,
     val title: String,
     val body: String?,
     val url: String?,
@@ -86,9 +86,7 @@ data class OpportunityEvidence(
     val problemStatement: String?,
 ) {
     init {
-        require(id > 0) {
-            "id must be greater than zero: $id"
-        }
+        require(id.isNotBlank()) { "Evidence ID must not be blank" }
 
         require(title.isNotBlank()) {
             "title must contain non-whitespace text: $title"

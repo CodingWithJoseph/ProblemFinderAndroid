@@ -21,6 +21,12 @@ android {
     }
 }
 
+androidComponents {
+    onVariants { variant ->
+        variant.androidTest?.sources?.assets?.addStaticSourceDirectory("schemas")
+    }
+}
+
 dependencies {
     api(project(":data:opportunities:opportunities-api"))
     implementation(project(":data:authentication:auth-api"))

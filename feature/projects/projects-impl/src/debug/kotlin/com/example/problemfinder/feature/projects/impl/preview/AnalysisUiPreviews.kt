@@ -12,7 +12,7 @@ import com.example.problemfinder.core.model.workspace.*
 
 /** Debug-only data for Compose previews. */
 internal object AnalysisUiPreviewData {
-    val evidence = OpportunityEvidence(101, "A workspace package cannot be resolved",
+    val evidence = OpportunityEvidence("101", "A workspace package cannot be resolved",
         "The project stops building after moving a shared package into the workspace.",
         null, "developer", "next.js", "GitHub", 18, 7, null, "Unclear package resolution failures block local development.")
     val problem = AnalysisProblem("problem-1", "Developers cannot identify the dependency that broke a build.",

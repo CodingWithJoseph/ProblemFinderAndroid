@@ -97,7 +97,7 @@ sealed interface AnalysisIntent {
     data object OpenAssumptions : AnalysisIntent
     data object OpenConversation : AnalysisIntent
     data class OpenOpportunity(val clusterId: Int) : AnalysisIntent
-    data class OpenPost(val clusterId: Int, val postId: Int) : AnalysisIntent
+    data class OpenPost(val clusterId: Int, val postId: String) : AnalysisIntent
     data object OpenBuild : AnalysisIntent
     data class PinProblem(val id: String) : AnalysisIntent
     data class RejectProblem(val id: String) : AnalysisIntent
@@ -112,6 +112,6 @@ sealed interface AnalysisEffect {
     data object OpenAssumptions : AnalysisEffect
     data object OpenConversation : AnalysisEffect
     data class OpenOpportunity(val clusterId: Int) : AnalysisEffect
-    data class OpenPost(val clusterId: Int, val postId: Int) : AnalysisEffect
+    data class OpenPost(val clusterId: Int, val postId: String) : AnalysisEffect
     data object OpenBuild : AnalysisEffect
 }

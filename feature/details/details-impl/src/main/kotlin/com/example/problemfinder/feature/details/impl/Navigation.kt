@@ -2,21 +2,29 @@ package com.example.problemfinder.feature.details.impl
 
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import android.net.Uri
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.*
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
-import com.example.problemfinder.feature.details.api.OpportunityDetailsDestination as Routes
-import com.example.problemfinder.feature.details.impl.details.*
-import com.example.problemfinder.feature.details.impl.post.*
+import androidx.navigation.navArgument
+import com.example.problemfinder.feature.details.impl.details.DetailsSection
+import com.example.problemfinder.feature.details.impl.details.OpportunityDetailsEffect
+import com.example.problemfinder.feature.details.impl.details.OpportunityDetailsScreen
+import com.example.problemfinder.feature.details.impl.details.OpportunityDetailsViewModel
+import com.example.problemfinder.feature.details.impl.post.PostDetailsEffect
+import com.example.problemfinder.feature.details.impl.post.PostDetailsIntent
+import com.example.problemfinder.feature.details.impl.post.PostDetailsScreen
+import com.example.problemfinder.feature.details.impl.post.PostDetailsViewModel
 import com.example.problemfinder.feature.details.impl.util.messageRes
+import com.example.problemfinder.feature.details.api.OpportunityDetailsDestination as Routes
 
-/** Evidence shares its parent Details VM; post loading is left to the post VM's logic TODO. */
 fun NavGraphBuilder.opportunityDetails(navController: NavHostController, onMessage: (String) -> Unit) {
     val arguments = listOf(navArgument(Routes.ID_ARGUMENT) { type = NavType.IntType })
     listOf(Routes.ROUTE, Routes.EVIDENCE_ROUTE).forEach { route ->
@@ -29,7 +37,6 @@ fun NavGraphBuilder.opportunityDetails(navController: NavHostController, onMessa
             val viewModel = hiltViewModel<OpportunityDetailsViewModel>(owner)
             val state = viewModel.state.collectAsStateWithLifecycle().value
             val resources = LocalResources.current
-            LaunchedEffect(viewModel, clusterId) { viewModel.onIntent(OpportunityDetailsIntent.Entered(clusterId)) }
             LaunchedEffect(viewModel, entry) {
                 entry.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                     viewModel.effects.collect { effect ->
@@ -50,8 +57,9 @@ fun NavGraphBuilder.opportunityDetails(navController: NavHostController, onMessa
                 onOverview = { if (evidence) navController.popBackStack() })
         }
     }
-    composable(Routes.POST_ROUTE,
-        arguments = arguments + navArgument(Routes.POST_ARGUMENT) { type = NavType.IntType },
+    composable(
+        Routes.POST_ROUTE,
+        arguments = arguments + navArgument(Routes.POST_ARGUMENT) { type = NavType.StringType },
     ) { entry ->
         val viewModel = hiltViewModel<PostDetailsViewModel>()
         val state = viewModel.state.collectAsStateWithLifecycle().value
@@ -64,8 +72,7 @@ fun NavGraphBuilder.opportunityDetails(navController: NavHostController, onMessa
                     when (effect) {
                         PostDetailsEffect.NavigateBack -> navController.popBackStack()
                         is PostDetailsEffect.OpenExternal -> try {
-                            // External platform navigation accepts web sources only.
-                            if (Uri.parse(effect.url).scheme?.lowercase() in setOf("http", "https"))
+                            if (effect.url.toUri().scheme?.lowercase() in setOf("http", "https"))
                                 uriHandler.openUri(effect.url)
                             else onMessage(resources.getString(R.string.post_link_failed))
                         } catch (_: Exception) { onMessage(resources.getString(R.string.post_link_failed)) }

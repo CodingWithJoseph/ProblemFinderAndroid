@@ -14,7 +14,7 @@ fun fixtureAnalysis(owner: String = "user-a", status: WorkspaceStatus = Workspac
         listOf(ProblemUnit("problem-1", "A recurring problem", "The problem", "core_problem",
             listOf("Small teams"), "During a build", listOf("101"), false, false)), emptyList(),
         listOf(Assumption("assumption-1", "Does it recur?", "Frequency matters", "Ask users", false)),
-        listOf(OpportunityEvidence(101, "A source post", "A useful report", null, null, null, "GitHub", null, null, null, null))))
+        listOf(OpportunityEvidence("101", "A source post", "A useful report", null, null, null, "GitHub", null, null, null, null))))
 fun fixtureBuild(owner: String = "user-a", version: Int = 1, content: String = "Saved document") = BuildWorkspaceData(
     fixtureProject(owner), SolutionCase(
         projectId = "project-1", version = version, status = WorkspaceStatus.READY, progress = null, safeError = null,

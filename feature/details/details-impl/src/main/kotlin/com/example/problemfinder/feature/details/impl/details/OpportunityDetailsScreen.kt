@@ -40,6 +40,7 @@ internal fun OpportunityDetailsScreen(
         onBack = { onIntent(OpportunityDetailsIntent.BackClicked) },
         onRefresh = { onIntent(OpportunityDetailsIntent.Reload) },
         refreshing = state.refreshRequest is RequestState.Loading,
+        refreshEnabled = state.canRefresh,
     ) { padding ->
         LazyColumn(
             Modifier.fillMaxSize().padding(padding),
@@ -77,13 +78,7 @@ internal fun OpportunityDetailsScreen(
                             icon = if (state.cachedOpportunity?.isWatched == true) DesignR.drawable.icon_remove else DesignR.drawable.icon_add,
                             prominent = true, destructive = state.cachedOpportunity?.isWatched == true,
                             pending = state.isWatchPending,
-                            // REVIEW [DETAILS-13] Integration: on a fresh install, open an existing
-                            // Analyze project's Details before visiting Discovery/Browse. The details
-                            // GET saves detail/evidence rows, not the shared Opportunity row joined
-                            // for watch state. Even with the feature gate lifted, what enables this?
-                            // Decide where authoritative membership can be obtained for this entry
-                            // path. A missing row must stay unknown, not silently mean unwatched.
-                            enabled = state.cachedOpportunity != null && !state.implementationPending,
+                            enabled = state.canWatch,
                         )
                         if (state.cachedOpportunity == null) Text(stringResource(R.string.details_watch_unknown),
                             style = MaterialTheme.typography.bodySmall)
@@ -163,10 +158,11 @@ internal fun OpportunityDetailsScreen(
                         when (val request = state.pageRequest) {
                             is RequestState.Loading -> FeatureLoading(stringResource(R.string.details_loading_posts))
                             is RequestState.Error -> FeatureNotice(stringResource(R.string.details_page_error),
-                                stringResource(request.error.messageRes().second), { onIntent(OpportunityDetailsIntent.RetryEvidencePage) })
+                                stringResource(request.error.messageRes().second),
+                                onRetry = if (state.canPage) ({ onIntent(OpportunityDetailsIntent.RetryEvidencePage) }) else null)
                             else -> if (state.canLoadMore) FeatureAction(stringResource(R.string.details_load_more),
                                 { onIntent(OpportunityDetailsIntent.LoadNextEvidencePage) },
-                                Modifier.fillMaxWidth(), DesignR.drawable.icon_add)
+                                Modifier.fillMaxWidth(), DesignR.drawable.icon_add, enabled = state.canPage)
                             else if (state.posts.isNotEmpty()) Text(stringResource(R.string.details_all_loaded),
                                 style = MaterialTheme.typography.bodySmall)
                         }

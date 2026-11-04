@@ -37,7 +37,7 @@ internal fun AnalysisCacheDto.toModel(owner: String): AnalysisWorkspaceData {
             document.audiences.map { Audience(it.id.text(), it.name.text(), it.description.text(), it.language, it.communities, it.reachChannels, it.unknowns) },
             document.assumptions.map { Assumption(it.id.text(), it.question.text(), it.whyItMatters.text(), it.resolutionEvidence.text(), it.resolved) },
             document.evidence.map { OpportunityEvidence(
-                requireNotNull(it.id.toIntOrNull()), it.title.text(), it.body ?: it.excerpt,
+                it.id.text(), it.title.text(), it.body ?: it.excerpt,
                 it.sourceUrl, it.author, it.community, it.platform, it.score, it.commentCount,
                 it.observedAt?.let(Instant::parse), null,
             ) })
@@ -49,7 +49,7 @@ internal fun ConversationDto.toModel(): AnalysisConversation {
     return AnalysisConversation(id.text(), title.text(), turns.map { turn ->
         require(turn.role == "user" || turn.role == "assistant")
         ConversationTurn(turn.id.text(), turn.text.text(), turn.role == "user",
-            turn.citations.map { AnalysisCitation(requireNotNull(it.evidenceId.toIntOrNull()).also { id -> require(id > 0) }, it.label.text()) },
+            turn.citations.map { AnalysisCitation(it.evidenceId.text(), it.label.text()) },
             turn.proposal?.let { AnalysisProposal(it.id.text(), it.title.text(), it.summary.text(), it.status) },
             turn.insufficientEvidence)
     })

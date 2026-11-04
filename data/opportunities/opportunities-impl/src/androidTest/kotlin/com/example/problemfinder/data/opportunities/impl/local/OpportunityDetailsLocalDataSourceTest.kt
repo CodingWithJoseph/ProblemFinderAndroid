@@ -76,8 +76,8 @@ class OpportunityDetailsLocalDataSourceTest {
         local.storePage(USER, incoming, replace = true)
 
         val result = snapshot()
-        assertEquals(listOf(10), result.topEvidence.map { it.id })
-        assertEquals(listOf(10, 20), result.posts.map { it.id })
+        assertEquals(listOf(10).map(Int::toString), result.topEvidence.map { it.id })
+        assertEquals(listOf(10, 20).map(Int::toString), result.posts.map { it.id })
         assertEquals(TIMESTAMP, result.details?.firstSeen)
         assertEquals(TIMESTAMP, result.posts.first().postedAt)
         assertEquals(listOf("github", "reddit"), result.details?.sourceBreakdown?.map { it.source })
@@ -88,7 +88,7 @@ class OpportunityDetailsLocalDataSourceTest {
         assertTrue(result.hasSynced)
         // One content row can appear in two legitimate placements.
         val rows = dao.getDetailsRows(USER, CLUSTER)
-        assertEquals(2, rows.count { it.evidence?.postId == 10 })
+        assertEquals(2, rows.count { it.evidence?.postId == "10" })
     }
 
     @Test
@@ -110,11 +110,11 @@ class OpportunityDetailsLocalDataSourceTest {
             revision = "updated"), replace = false)
 
         val result = snapshot()
-        assertEquals(listOf(10, 20, 30), result.posts.map { it.id })
-        assertEquals("Post 20 updated", result.posts.single { it.id == 20 }.title)
-        assertEquals(listOf(30), result.topEvidence.map { it.id })
+        assertEquals(listOf(10, 20, 30).map(Int::toString), result.posts.map { it.id })
+        assertEquals("Post 20 updated", result.posts.single { it.id == "20" }.title)
+        assertEquals(listOf(30).map(Int::toString), result.topEvidence.map { it.id })
         val repeated = dao.getDetailsRows(USER, CLUSTER).mapNotNull { it.membership }
-            .single { it.section == EvidenceSection.POSTS && it.postId == 20 }
+            .single { it.section == EvidenceSection.POSTS && it.postId == "20" }
         assertEquals(1, repeated.page)
         assertEquals(1, repeated.position)
         assertEquals(2, result.lastLoadedPage)
@@ -128,7 +128,7 @@ class OpportunityDetailsLocalDataSourceTest {
         local.storePage(USER, page(number = 2, postIds = listOf(30, 40), topIds = listOf(30),
             sources = newSources, dates = newDates), replace = false)
         val second = snapshot()
-        assertEquals(listOf(30), second.topEvidence.map { it.id })
+        assertEquals(listOf(30).map(Int::toString), second.topEvidence.map { it.id })
         assertEquals(newSources, second.details?.sourceBreakdown)
         assertEquals(newDates, second.details?.postVolumeByDate)
 
@@ -138,7 +138,7 @@ class OpportunityDetailsLocalDataSourceTest {
         assertTrue(third.topEvidence.isEmpty())
         assertTrue(requireNotNull(third.details).sourceBreakdown.isEmpty())
         assertTrue(requireNotNull(third.details).postVolumeByDate.isEmpty())
-        assertEquals(listOf(10, 20, 30, 40, 50, 60), third.posts.map { it.id })
+        assertEquals(listOf(10, 20, 30, 40, 50, 60).map(Int::toString), third.posts.map { it.id })
     }
 
     @Test
@@ -148,7 +148,7 @@ class OpportunityDetailsLocalDataSourceTest {
         local.storePage(USER, page(number = 2, postIds = listOf(30, 40)), replace = false)
         local.storePage(USER, page(postIds = listOf(50, 60), topIds = emptyList()), replace = true)
         val result = snapshot()
-        assertEquals(listOf(50, 60), result.posts.map { it.id })
+        assertEquals(listOf(50, 60).map(Int::toString), result.posts.map { it.id })
         assertEquals(1, result.lastLoadedPage)
         assertTrue(requireNotNull(result.cachedOpportunity).isWatched)
     }
@@ -303,7 +303,7 @@ class OpportunityDetailsLocalDataSourceTest {
                 assertEquals(before, reader.await())
             }
             val after = withTimeout(10_000) { diskLocal.observeDetails(USER, CLUSTER).first() }
-            assertEquals(listOf(30, 40), after.posts.map { it.id })
+            assertEquals(listOf(30, 40).map(Int::toString), after.posts.map { it.id })
             assertEquals(listOf(EvidenceSourceCount("new-source", 6)), after.details?.sourceBreakdown)
             assertEquals(listOf(EvidenceDateCount("2026-10-23", 6)), after.details?.postVolumeByDate)
         } finally {
@@ -324,7 +324,7 @@ class OpportunityDetailsLocalDataSourceTest {
             diskDatabase = openDiskDatabase(name)
             val reopened = OpportunityDetailsLocalDataSource(diskDatabase, diskDatabase.discoveryDetailsDao())
             val result = withTimeout(10_000) { reopened.observeDetails(USER, CLUSTER).first() }
-            assertEquals(listOf(10, 20, 30, 40), result.posts.map { it.id })
+            assertEquals(listOf(10, 20, 30, 40).map(Int::toString), result.posts.map { it.id })
             assertEquals(2, result.lastLoadedPage)
             assertEquals(2, result.pageSize)
             assertEquals(6, result.totalPosts)
@@ -374,7 +374,7 @@ class OpportunityDetailsLocalDataSourceTest {
     )
 
     private fun evidence(id: Int, revision: String) = OpportunityEvidence(
-        id = id, title = "Post $id $revision", body = "Body $revision", url = null,
+        id = id.toString(), title = "Post $id $revision", body = "Body $revision", url = null,
         author = "author-$id", community = "community", source = "reddit", score = id,
         commentCount = 0, postedAt = TIMESTAMP, problemStatement = "Problem $id",
     )

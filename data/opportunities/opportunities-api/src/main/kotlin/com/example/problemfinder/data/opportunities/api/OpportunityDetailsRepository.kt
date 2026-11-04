@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface OpportunityDetailsRepository {
     fun observeDetails(clusterId: Int): Flow<OpportunityDetailsSnapshot>
+    suspend fun loadPost(clusterId: Int, postId: String, userId: String): com.example.problemfinder.core.model.details.OpportunityEvidence?
     suspend fun refreshDetails(clusterId: Int)
     suspend fun loadNextEvidencePage(clusterId: Int)
 }

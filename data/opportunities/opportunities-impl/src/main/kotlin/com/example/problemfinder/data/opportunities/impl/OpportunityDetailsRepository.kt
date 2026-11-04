@@ -1,6 +1,11 @@
 package com.example.problemfinder.data.opportunities.impl
 
 import com.example.problemfinder.core.model.details.OpportunityDetailsPage
+import com.example.problemfinder.core.model.details.OpportunityEvidence
+import com.example.problemfinder.core.model.opportunity.Opportunity
+import com.example.problemfinder.core.model.opportunity.toOpportunityCategory
+import com.example.problemfinder.data.opportunities.impl.model.dto.OpportunityDetailsDto
+import com.example.problemfinder.data.opportunities.impl.util.toModel
 import com.example.problemfinder.core.model.details.OpportunityDetailsSnapshot
 import com.example.problemfinder.core.model.opportunity.OpportunityFailure
 import com.example.problemfinder.core.model.opportunity.OpportunityOperationException
@@ -48,6 +53,42 @@ class OpportunityDetailsRepositoryImpl @Inject constructor(
                 }
             }
 
+    override suspend fun loadPost(clusterId: Int, postId: String, userId: String): OpportunityEvidence? = opportunityCall {
+        require(clusterId > 0 && postId.isNotBlank())
+        val session = requireSession(sessions)
+        ensureSameAccount(userId, sessions)
+        if (session.userId != userId) throw kotlinx.coroutines.CancellationException("Opportunity account changed")
+        val pageSize = 200
+        val first = remote.fetchDetails(clusterId, session.accessToken, pageSize = pageSize)
+        ensureSameAccount(userId, sessions)
+        val post = (first.topEvidence + first.posts).firstOrNull { it.id == postId }
+        val dto = if (post != null) post else {
+            val index = first.postIds.indexOf(postId)
+            if (index < 0) return@opportunityCall null
+            val page = remote.fetchDetails(clusterId, session.accessToken, index / pageSize + 1, pageSize)
+            ensureSameAccount(userId, sessions)
+            page.posts.firstOrNull { it.id == postId } ?: throw OpportunityOperationException(
+                OpportunityFailure.INVALID_RESPONSE, IllegalStateException("Evidence order changed during lookup"),
+            )
+        }
+        try {
+            dto.toModel()
+        } catch (error: IllegalArgumentException) {
+            throw OpportunityOperationException(OpportunityFailure.INVALID_RESPONSE, error)
+        }
+    }
+
+    private fun OpportunityDetailsDto.sharedCard(page: OpportunityDetailsPage): Opportunity? {
+        val watched = isWatched ?: return null
+        val details = page.details
+        return try {
+            Opportunity(details.id, details.name, details.summary, details.problemStatement, details.postCount,
+                watched, details.lastSeen, (category ?: "uncategorized").toOpportunityCategory())
+        } catch (error: IllegalArgumentException) {
+            throw OpportunityOperationException(OpportunityFailure.INVALID_RESPONSE, error)
+        }
+    }
+
     override suspend fun refreshDetails(clusterId: Int): Unit = opportunityCall {
             require(clusterId > 0) { "clusterId must be nonnegative: $clusterId" }
             val session = requireSession(sessions)
@@ -93,7 +134,8 @@ class OpportunityDetailsRepositoryImpl @Inject constructor(
                 local.storePage(
                     userId = session.userId,
                     page = detailsPage,
-                    replace = true
+                    replace = true,
+                    card = details.sharedCard(detailsPage),
                 )
             }
 
@@ -155,7 +197,8 @@ class OpportunityDetailsRepositoryImpl @Inject constructor(
             local.storePage(
                 userId = session.userId,
                 page = detailsPage,
-                replace = false
+                replace = false,
+                card = response.sharedCard(detailsPage),
             )
         }
     }

@@ -21,6 +21,10 @@ import com.example.problemfinder.data.opportunities.impl.model.entity.Opportunit
 import com.example.problemfinder.data.opportunities.impl.model.entity.OpportunityEvidenceEntity
 import com.example.problemfinder.data.opportunities.impl.model.entity.OpportunityEvidenceMembershipEntity
 
+import com.example.problemfinder.data.opportunities.impl.db.dao.OpportunitySearchDao
+import com.example.problemfinder.data.opportunities.impl.model.entity.OpportunitySearchQueryEntity
+import com.example.problemfinder.data.opportunities.impl.model.entity.OpportunitySearchQueryItemEntity
+
 @Database(
     entities = [
         DiscoveryCollectionItemEntity::class,
@@ -34,8 +38,10 @@ import com.example.problemfinder.data.opportunities.impl.model.entity.Opportunit
         OpportunityEvidenceMembershipEntity::class,
         EvidenceSourceCountEntity::class,
         EvidenceDateCountEntity::class,
+        OpportunitySearchQueryEntity::class,
+        OpportunitySearchQueryItemEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 @ColumnTypeConverters(
@@ -49,5 +55,6 @@ abstract class OpportunitiesDatabase : RoomDatabase() {
     abstract fun browseDao(): BrowseDao
     abstract fun discoveryDao(): DiscoveryDao
 
+    abstract fun searchDao(): OpportunitySearchDao
     abstract fun discoveryDetailsDao(): OpportunityDetailsDao
 }

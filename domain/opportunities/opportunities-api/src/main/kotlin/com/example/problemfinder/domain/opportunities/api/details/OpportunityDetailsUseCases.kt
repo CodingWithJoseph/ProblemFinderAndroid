@@ -11,6 +11,11 @@ abstract class ObserveOpportunityDetailsUseCase :
         val clusterId: Int
     )
 }
+abstract class LoadOpportunityPostUseCase :
+    UseCase<LoadOpportunityPostUseCase.Params, com.example.problemfinder.core.model.details.OpportunityEvidence?>() {
+    data class Params(val clusterId: Int, val postId: String, val userId: String)
+}
+
 abstract class RefreshOpportunityDetailsUseCase : UseCase<RefreshOpportunityDetailsUseCase.Params, Unit>() {
     data class Params(
         val clusterId: Int

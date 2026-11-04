@@ -17,7 +17,7 @@ class WorkspaceContractTest {
         val model = requireNotNull(AnalysisCacheDto(project, dto).toModel("user-a").analysis)
         assertEquals(WorkspaceStatus.READY, model.status)
         assertEquals("A supported thesis", model.thesis?.statement)
-        assertEquals(101, model.evidence.single().id)
+        assertEquals("101", model.evidence.single().id)
         assertEquals(listOf("101"), model.problems.single().evidenceIds)
         assertEquals("observed", model.claims.single().kind)
     }

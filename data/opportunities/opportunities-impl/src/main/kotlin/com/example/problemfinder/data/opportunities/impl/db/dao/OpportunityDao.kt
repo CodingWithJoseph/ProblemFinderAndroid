@@ -8,6 +8,9 @@ import com.example.problemfinder.data.opportunities.impl.model.entity.Opportunit
 /** Shared card content: writes invalidate both Browse and Discovery queries that join these rows. */
 @Dao
 interface OpportunityDao {
+    @Query("SELECT * FROM opportunities WHERE userId = :userId AND clusterId = :clusterId")
+    suspend fun find(userId: String, clusterId: Int): OpportunityEntity?
+
     /** Updates an existing account-owned card; returns the affected row count (zero if uncached). */
     @Query("UPDATE opportunities SET isWatched = :watched WHERE userId = :userId AND clusterId = :clusterId")
     suspend fun setWatched(userId: String, clusterId: Int, watched: Boolean): Int

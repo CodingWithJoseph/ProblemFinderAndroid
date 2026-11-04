@@ -1,39 +1,61 @@
 package com.example.problemfinder.data.opportunities.impl.local
 
+import androidx.room3.withWriteTransaction
+import com.example.problemfinder.core.model.opportunity.OpportunityCategory
 import com.example.problemfinder.core.model.search.OpportunitySearchPage
 import com.example.problemfinder.core.model.search.OpportunitySearchQuery
 import com.example.problemfinder.core.model.search.OpportunitySearchSnapshot
-import kotlinx.coroutines.flow.Flow
+import com.example.problemfinder.data.opportunities.impl.db.OpportunitiesDatabase
+import com.example.problemfinder.data.opportunities.impl.model.entity.OpportunitySearchQueryEntity
+import com.example.problemfinder.data.opportunities.impl.model.entity.OpportunitySearchQueryItemEntity
+import com.example.problemfinder.data.opportunities.impl.util.cacheKey
+import com.example.problemfinder.data.opportunities.impl.util.toModel
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-class OpportunitySearchLocalDataSource @Inject constructor() {
-    fun observeSearch(userId: String, query: OpportunitySearchQuery): Flow<OpportunitySearchSnapshot> {
-        // TODO [SEARCH-2C] Turn this account/query's completed DAO reads into a snapshot.
-        // 1. Inject the registered DAO/database. Derive cacheKey from the normalized SUBMITTED query.
-        // 2. Observe its metadata/membership/shared-card join and map shared entities back to Opportunity.
-        // 3. Reassemble unique result IDs in stored position order; include stored total/nextOffset/hasSynced.
-        // 4. Set cacheReady=true after the first actual read. No metadata means never synced; saved metadata
-        //    with an empty membership set can mean successfully zero results. Do not merge those states.
-        // 5. Include the same query and userId on the snapshot so the ViewModel can reject stale emissions.
-        // No credentials, HTTP request or current editable text belong in this local read function.
-        // Finish check: a previously synced query reopens offline in the same order with the same next offset.
-        throw UnsupportedOperationException("Complete SEARCH-2c: observe cached search")
-    }
+class OpportunitySearchLocalDataSource @Inject constructor(private val database: OpportunitiesDatabase) {
+    private val dao = database.searchDao()
+
+    fun observeSearch(userId: String, query: OpportunitySearchQuery) =
+        dao.observe(userId, query.cacheKey()).map { rows ->
+            val metadata = rows.firstOrNull()
+            OpportunitySearchSnapshot(
+                query = query,
+                userId = userId,
+                items = rows.mapNotNull { it.card?.toModel() },
+                total = metadata?.total ?: 0,
+                nextOffset = metadata?.nextOffset,
+                cacheReady = true,
+                hasSynced = metadata != null,
+            )
+        }.distinctUntilChanged()
+
+    suspend fun nextOffset(userId: String, query: OpportunitySearchQuery): Int? =
+        dao.nextOffset(userId, query.cacheKey())
 
     suspend fun storePage(userId: String, query: OpportunitySearchQuery, page: OpportunitySearchPage, replace: Boolean) {
-        // TODO [SEARCH-2C] Write shared cards and this query's membership/progress in ONE transaction.
-        // 1. Derive the normalized query key; validate that the page applies to that submitted query.
-        // 2. Map/upsert shared Opportunity rows with userId first, then upsert query metadata before child
-        //    memberships. Every foreign key uses the same account; never share a user's isWatched with another.
-        // 3. For replace=true remove only this query's old memberships/progress and write the new first page.
-        //    For append preserve previous positions, append previously unseen IDs in response order, and
-        //    update existing cards without inserting duplicate memberships for IDs already present.
-        // 4. Save total/nextOffset/hasSynced in the same commit. Use the server's offset even when duplicates
-        //    reduced the number of newly visible cards. A failed transaction must not advance page progress.
-        // 5. Preserve all other queries, Discovery memberships and Browse memberships. The repository must
-        //    hold OpportunitySyncCoordinator over fetch + this transaction to serialize watch changes.
-        // Finish check: save A then B, refresh A and verify B/Discovery remain; fail an append mid-write and
-        // confirm its old results/progress survive. NEXT: SEARCH-3 real fetching and repository orchestration.
-        throw UnsupportedOperationException("Complete SEARCH-2c: persist search page atomically")
+        val key = query.cacheKey()
+        val cards = page.items.distinctBy { it.id }
+        database.withWriteTransaction {
+            val opportunityDao = database.opportunityDao()
+            val rows = cards.map { card ->
+                val entity = card.toModel(userId)
+                // Older search responses omit category. Retain the category of an existing card.
+                if (card.category == OpportunityCategory.UNCATEGORIZED) {
+                    opportunityDao.find(userId, card.id)?.let { entity.copy(category = it.category) } ?: entity
+                } else entity
+            }
+            opportunityDao.upsertOpportunities(rows)
+            val existing = if (replace) {
+                dao.clear(userId, key)
+                emptyList()
+            } else dao.ids(userId, key)
+            val seen = existing.toHashSet()
+            dao.upsert(OpportunitySearchQueryEntity(userId, key, page.total, page.nextOffset))
+            dao.insert(cards.filter { seen.add(it.id) }.mapIndexed { index, card ->
+                OpportunitySearchQueryItemEntity(userId, key, card.id, existing.size + index)
+            })
+        }
     }
 }

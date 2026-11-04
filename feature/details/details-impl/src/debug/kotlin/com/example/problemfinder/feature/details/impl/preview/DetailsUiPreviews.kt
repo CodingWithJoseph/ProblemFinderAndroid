@@ -20,7 +20,7 @@ import kotlin.time.Instant
 /** Debug-only preview fixtures; no runtime ViewModel or repository receives them. */
 internal object DetailsUiPreviewData {
     val post = OpportunityEvidence(
-        101, "Turbopack cannot find the Next.js package",
+        "101", "Turbopack cannot find the Next.js package",
         "The development server stops while resolving the package. Reinstalling dependencies helps temporarily, " +
             "but the same failure returns on the next build.\n\nThe team needs an explanation that identifies the " +
             "missing dependency and the workspace configuration responsible for the failure.",
@@ -39,13 +39,13 @@ internal object DetailsUiPreviewData {
         listOf(EvidenceDateCount("2026-08-03", 1), EvidenceDateCount("2026-08-11", 4), EvidenceDateCount("2026-08-29", 9)),
     )
     val state = OpportunityDetailsState(
-        clusterId = 42, userId = "preview-account", details = details,
+        userId = "preview-account", details = details,
         cachedOpportunity = Opportunity(42, details.name, details.summary, details.problemStatement,
             14, false, details.lastSeen, OpportunityCategory.BUILD_AND_TOOLING),
         topEvidence = listOf(post),
-        posts = listOf(post, post.copy(id = 102, title = "A workspace change breaks endpoint generation")),
+        posts = listOf(post, post.copy(id = "102", title = "A workspace change breaks endpoint generation")),
         canLoadMore = true, cacheReady = true, hasSynced = true,
-        observationRequest = RequestState.Success(Unit), implementationPending = false,
+        observationRequest = RequestState.Success(Unit),
     )
 }
 
@@ -64,14 +64,14 @@ private fun EvidenceListPreview() = ImmensityTheme {
 @FeaturePreviews
 @Composable
 private fun PostDetailsPreview() = ImmensityTheme {
-    PostDetailsScreen(PostDetailsState(42, 101, DetailsUiPreviewData.post, FeatureContentStatus.CONTENT), {})
+    PostDetailsScreen(PostDetailsState(42, "101", DetailsUiPreviewData.post, FeatureContentStatus.CONTENT), {})
 }
 
 internal class DetailsStatePreviews : PreviewParameterProvider<OpportunityDetailsState> {
     override val values = sequenceOf(
         OpportunityDetailsState(observationRequest = RequestState.Loading),
-        OpportunityDetailsState(clusterId = 42, cacheReady = true),
-        OpportunityDetailsState(clusterId = 42, cacheReady = true,
+        OpportunityDetailsState(cacheReady = true),
+        OpportunityDetailsState(cacheReady = true,
             refreshRequest = RequestState.Error(OpportunityDetailsUIError(OpportunityFailure.CLUSTER_NOT_FOUND))),
         DetailsUiPreviewData.state.copy(refreshRequest = RequestState.Error(OpportunityDetailsUIError(OpportunityFailure.NETWORK))),
         DetailsUiPreviewData.state.copy(isWatchPending = true),

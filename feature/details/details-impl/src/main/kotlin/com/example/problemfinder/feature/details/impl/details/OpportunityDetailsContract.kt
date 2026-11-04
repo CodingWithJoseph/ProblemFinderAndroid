@@ -3,27 +3,11 @@ package com.example.problemfinder.feature.details.impl.details
 import com.example.problemfinder.core.model.details.OpportunityDetails
 import com.example.problemfinder.core.model.details.OpportunityEvidence
 import com.example.problemfinder.core.model.opportunity.Opportunity
-import com.example.problemfinder.core.model.opportunity.OpportunityFailure
 import com.example.problemfinder.core.mvi.RequestState
 import com.example.problemfinder.feature.details.impl.util.OpportunityDetailsUIError
 
-/**
- * Fourth milestone: usable screen (DETAILS-5/6/7).
- * 5. OpportunityDetailsViewModel.kt: consume snapshots; coordinate refresh/page/watch jobs and errors.
- * 6. OpportunityDetailsScreen.kt + Navigation.kt: finish content/evidence/states and external links.
- * 7. implementation-guides/OpportunityDetailsViewModelTest.kt.template lists the behavior tests.
- *    Write tests during each milestone, not only after the full screen is finished.
- *
- * Runtime paths to keep separate:
- * Opening: route ID -> Entered -> observe use case -> repository -> Room -> snapshot -> state -> UI.
- * Refresh: Reload -> refresh use case -> HTTP DTO -> validated model -> entities -> Room transaction.
- * The Room update then travels through the FIRST path. Refresh does not return screen content.
- *
- * Enable/remove implementationPending only when the corresponding real operation is connected.
- * Passing builds alone do not complete a milestone: use each file's finish check before moving on.
- */
+/** Cached Details content and the independent lifecycles of observation, refresh, and paging. */
 data class OpportunityDetailsState(
-    val clusterId: Int? = null,
     val userId: String? = null,
     val details: OpportunityDetails? = null,
     val cachedOpportunity: Opportunity? = null,
@@ -36,27 +20,30 @@ data class OpportunityDetailsState(
     val refreshRequest: RequestState<Unit, OpportunityDetailsUIError> = RequestState.Idle,
     val pageRequest: RequestState<Unit, OpportunityDetailsUIError> = RequestState.Idle,
     val isWatchPending: Boolean = false,
-    // REVIEW [DETAILS-12] Runtime gate: search for production code that changes this flag, then
-    // compare with the populated preview. Why would corrected watch logic still have a disabled
-    // button? Keep the gate while the operation is unfinished, then make enabling it an explicit
-    // completion check after DETAILS-6 through DETAILS-11 work; changing this default is not the fix.
-    val implementationPending: Boolean = true,
-)
+) {
+    val canRefresh: Boolean get() = refreshRequest !is RequestState.Loading && pageRequest !is RequestState.Loading &&
+        (observationRequest is RequestState.Error || (cacheReady && userId != null && observationRequest is RequestState.Success))
+
+    val canPage: Boolean get() = cacheReady && hasSynced && canLoadMore && userId != null &&
+        observationRequest is RequestState.Success && refreshRequest !is RequestState.Loading && pageRequest !is RequestState.Loading
+
+    val canWatch: Boolean get() = cachedOpportunity != null && !isWatchPending &&
+        cacheReady && userId != null && observationRequest is RequestState.Success
+}
 
 sealed interface OpportunityDetailsIntent {
-    data class Entered(val clusterId: Int) : OpportunityDetailsIntent
     data object Reload : OpportunityDetailsIntent
     data object LoadNextEvidencePage : OpportunityDetailsIntent
     data object RetryEvidencePage : OpportunityDetailsIntent
     data object WatchClicked : OpportunityDetailsIntent
-    data class OpenEvidence(val evidenceId: Int) : OpportunityDetailsIntent
+    data class OpenEvidence(val evidenceId: String) : OpportunityDetailsIntent
     data object OpenEvidenceList : OpportunityDetailsIntent
     data object BackClicked : OpportunityDetailsIntent
 }
 
 sealed interface OpportunityDetailsEffect {
     data object NavigateBack : OpportunityDetailsEffect
-    data class NavigateToEvidence(val evidence: Int) : OpportunityDetailsEffect
+    data class NavigateToEvidence(val evidence: String) : OpportunityDetailsEffect
     data object NavigateToEvidenceList : OpportunityDetailsEffect
     data class ActionFailed(val failure: OpportunityDetailsUIError) : OpportunityDetailsEffect
 }

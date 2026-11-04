@@ -11,7 +11,6 @@ import com.example.problemfinder.data.opportunities.api.OpportunitySearchReposit
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-/** Supplied delegation for step 4; the repository contains the unfinished feature work. */
 class ObserveOpportunitySearchUseCaseImpl @Inject constructor(
     private val repository: OpportunitySearchRepository,
 ) : ObserveOpportunitySearchUseCase() {
@@ -28,6 +27,12 @@ class LoadNextOpportunitySearchPageUseCaseImpl @Inject constructor(
     private val repository: OpportunitySearchRepository,
 ) : LoadNextOpportunitySearchPageUseCase() {
     override suspend fun execute(params: OpportunitySearchQuery): Unit = repository.loadNextSearchPage(params)
+}
+
+class LoadOpportunitySearchOptionsUseCaseImpl @Inject constructor(
+    private val repository: OpportunitySearchRepository,
+) : com.example.problemfinder.domain.opportunities.api.search.LoadOpportunitySearchOptionsUseCase() {
+    override suspend fun execute(params: Unit) = repository.filterOptions()
 }
 
 class PrepareOpportunitySearchDraftUseCaseImpl @Inject constructor(

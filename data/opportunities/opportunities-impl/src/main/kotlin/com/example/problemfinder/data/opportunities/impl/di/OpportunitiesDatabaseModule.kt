@@ -7,6 +7,7 @@ import androidx.sqlite.driver.AndroidSQLiteDriver
 import com.example.problemfinder.data.opportunities.impl.db.dao.BrowseDao
 import com.example.problemfinder.data.opportunities.impl.db.dao.DiscoveryDao
 import com.example.problemfinder.data.opportunities.impl.db.OpportunitiesDatabase
+import com.example.problemfinder.data.opportunities.impl.db.opportunitiesMigration1To2
 import com.example.problemfinder.data.opportunities.impl.db.dao.OpportunityDetailsDao
 import dagger.Module
 import dagger.Provides
@@ -28,6 +29,7 @@ object OpportunitiesDatabaseModule {
             "opportunities.db"
         )
             .setDriver(AndroidSQLiteDriver())
+            .addMigrations(opportunitiesMigration1To2)
             .build()
 
     @Provides

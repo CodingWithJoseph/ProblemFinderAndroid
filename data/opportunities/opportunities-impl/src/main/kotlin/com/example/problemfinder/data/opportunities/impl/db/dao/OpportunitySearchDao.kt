@@ -1,23 +1,35 @@
 package com.example.problemfinder.data.opportunities.impl.db.dao
 
+import androidx.room3.Dao
+import androidx.room3.Insert
+import androidx.room3.Query
+import androidx.room3.Upsert
+import com.example.problemfinder.data.opportunities.impl.model.entity.OpportunitySearchCacheRow
 import com.example.problemfinder.data.opportunities.impl.model.entity.OpportunitySearchQueryEntity
+import com.example.problemfinder.data.opportunities.impl.model.entity.OpportunitySearchQueryItemEntity
 import kotlinx.coroutines.flow.Flow
 
-/**
- * TODO [SEARCH-2B] Complete the DAO after SEARCH-2A adds real annotated entities.
- * 1. Add @Dao, query-metadata/membership upserts, and a delete for only this account+query's old
- *    memberships. Shared opportunity upserts already belong to the common Opportunity DAO.
- * 2. Build a joined read model starting from query metadata, LEFT JOIN ordered query memberships,
- *    then LEFT JOIN opportunities on BOTH userId and clusterId. Preserve metadata for zero results.
- * 3. Select total/nextOffset/hasSynced even when the joined card is null. Order by stored position;
- *    sorting by ID/date locally would destroy server relevance ordering.
- * 4. Register the DAO on OpportunitiesDatabase, bind its instance in OpportunitiesDatabaseModule,
- *    then inject it/database into OpportunitySearchLocalDataSource.
- * Reference BrowseDao/BrowseCacheRow for account-scoped metadata -> membership -> card joins; adapt
- * cursor metadata to offset paging. Do not observe/filter the Discovery collection tables as Search.
- * Finish check: a saved zero-result query emits metadata, two queries retain independent order, and
- * a shared card's watch update invalidates Search without a repeat network query.
- */
-internal interface OpportunitySearchDao {
-    fun observeQuery(userId: String, queryKey: String): Flow<OpportunitySearchQueryEntity?>
+@Dao
+interface OpportunitySearchDao {
+    @Query("""
+        SELECT q.total, q.nextOffset, c.*
+        FROM search_queries q
+        LEFT JOIN search_query_items i ON i.userId = q.userId AND i.queryKey = q.queryKey
+        LEFT JOIN opportunities c ON c.userId = i.userId AND c.clusterId = i.clusterId
+        WHERE q.userId = :userId AND q.queryKey = :key
+        ORDER BY i.position
+    """)
+    fun observe(userId: String, key: String): Flow<List<OpportunitySearchCacheRow>>
+
+    @Query("SELECT nextOffset FROM search_queries WHERE userId = :userId AND queryKey = :key")
+    suspend fun nextOffset(userId: String, key: String): Int?
+
+    @Query("SELECT clusterId FROM search_query_items WHERE userId = :userId AND queryKey = :key ORDER BY position")
+    suspend fun ids(userId: String, key: String): List<Int>
+
+    @Query("DELETE FROM search_query_items WHERE userId = :userId AND queryKey = :key")
+    suspend fun clear(userId: String, key: String)
+
+    @Upsert suspend fun upsert(query: OpportunitySearchQueryEntity)
+    @Insert suspend fun insert(items: List<OpportunitySearchQueryItemEntity>)
 }

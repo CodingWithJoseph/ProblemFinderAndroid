@@ -105,7 +105,7 @@ interface OpportunityDetailsDao {
         AND section = 'posts'
     """
     )
-    suspend fun getStandardPostIds(userId: String, clusterId: Int): List<Int>
+    suspend fun getStandardPostIds(userId: String, clusterId: Int): List<String>
 
     @Query(
         """

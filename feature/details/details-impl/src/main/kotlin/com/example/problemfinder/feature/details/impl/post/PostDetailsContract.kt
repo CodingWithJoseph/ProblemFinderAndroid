@@ -5,10 +5,8 @@ import com.example.problemfinder.core.model.details.OpportunityEvidence
 
 data class PostDetailsState(
     val clusterId: Int? = null,
-    val postId: Int? = null,
+    val postId: String? = null,
     val post: OpportunityEvidence? = null,
-    // REVIEW [DETAILS-14/15] This default currently displays "not available" before any read starts.
-    // Which status represents an uncompleted read, and when have you learned enough to show EMPTY?
     val status: FeatureContentStatus = FeatureContentStatus.EMPTY,
 )
 

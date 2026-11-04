@@ -46,7 +46,7 @@ data class AnalysisCase(
 data class AnalysisWorkspaceData(val project: WorkflowProject, val analysis: AnalysisCase?)
 
 data class ConversationSummary(val id: String, val title: String, val archived: Boolean)
-data class AnalysisCitation(val evidenceId: Int, val label: String)
+data class AnalysisCitation(val evidenceId: String, val label: String)
 data class AnalysisProposal(val id: String, val title: String, val summary: String, val status: String)
 data class ConversationTurn(
     val id: String, val text: String, val isUser: Boolean, val citations: List<AnalysisCitation>,

@@ -1,6 +1,7 @@
 package com.example.problemfinder.data.opportunities.impl.local
 
 import androidx.room3.withReadTransaction
+import com.example.problemfinder.core.model.opportunity.Opportunity
 import androidx.room3.withWriteTransaction
 import com.example.problemfinder.core.model.details.OpportunityDetailsPage
 import com.example.problemfinder.core.model.details.OpportunityDetailsSnapshot
@@ -61,7 +62,12 @@ class OpportunityDetailsLocalDataSource @Inject constructor(
             )
         }
 
-    suspend fun storePage(userId: String, page: OpportunityDetailsPage, replace: Boolean) {
+    suspend fun storePage(
+        userId: String,
+        page: OpportunityDetailsPage,
+        replace: Boolean,
+        card: Opportunity? = null,
+    ) {
         val clusterId = page.details.id
         val details = page.details.toEntity(
             userId = userId,
@@ -77,6 +83,7 @@ class OpportunityDetailsLocalDataSource @Inject constructor(
         val dates = page.details.postVolumeByDate.map { it.toEntity(userId, clusterId) }
 
         database.withWriteTransaction {
+            if (card != null) database.opportunityDao().upsertOpportunities(listOf(card.toModel(userId)))
             val membershipsToSave = if (replace) {
                 require(page.page == 1) { "Replacement must start at page 1" }
                 detailsDao.deleteOpportunityDetails(userId, clusterId)

@@ -20,6 +20,9 @@ data class OpportunityDetailsDto(
     val page: Int,
     val pageSize: Int,
     val totalPosts: Int,
+    val postIds: List<String> = emptyList(),
+    val isWatched: Boolean? = null,
+    val category: String? = null,
 )
 
 @Serializable data class EvidenceSourceCountDto(val platform: String, val count: Int)
@@ -27,7 +30,7 @@ data class OpportunityDetailsDto(
 
 @Serializable
 data class OpportunityEvidenceDto(
-    val id: Int,
+    val id: String,
     val title: String,
     val body: String? = null,
     val url: String? = null,

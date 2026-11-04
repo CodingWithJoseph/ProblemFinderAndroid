@@ -23,7 +23,7 @@ internal object SearchUiPreviewData {
         items = listOf(opportunity, opportunity.copy(id = 43, name = "Signed in, still locked out",
             category = OpportunityCategory.DATA_AND_APIS, isWatched = true)),
         total = 24, canLoadMore = true, cacheReady = true, hasSynced = true,
-        observationRequest = RequestState.Success(Unit), implementationPending = false,
+        observationRequest = RequestState.Success(Unit),
         sourceOptions = listOf("GitHub", "Stack Overflow", "Reddit"),
         communityOptions = listOf("next.js", "supabase", "r/webdev"),
     )
@@ -45,19 +45,19 @@ private fun SearchFiltersPreview() = ImmensityTheme { SearchFiltersScreen(Search
 @FeaturePreviews
 @Composable
 private fun SearchAssistantPreview() = ImmensityTheme {
-    SearchAssistantScreen(SearchUiPreviewData.results.copy(interpretation = SearchUiPreviewData.draft), {})
+    SearchAssistantScreen(SearchUiPreviewData.results.copy(interpretation = SearchUiPreviewData.draft, interpretationRequest = RequestState.Success(Unit)), {})
 }
 
 internal class SearchStatePreviews : PreviewParameterProvider<SearchState> {
     override val values = sequenceOf(
-        SearchState(implementationPending = false),
+        SearchState(),
         SearchState(draftQuery = SearchUiPreviewData.query, refreshRequest = RequestState.Loading),
         SearchState(submittedQuery = SearchUiPreviewData.query, cacheReady = true, hasSynced = true),
         SearchState(refreshRequest = RequestState.Error(OpportunityFailure.NETWORK)),
         SearchUiPreviewData.results.copy(refreshRequest = RequestState.Error(OpportunityFailure.NETWORK)),
         SearchUiPreviewData.results.copy(pageRequest = RequestState.Error(OpportunityFailure.NETWORK)),
         SearchUiPreviewData.results.copy(pendingClusterIds = setOf(42)),
-        SearchState(validationMessage = "Enter a more specific phrase.", implementationPending = false),
+        SearchState(validationMessage = R.string.search_invalid_query),
     )
 }
 
